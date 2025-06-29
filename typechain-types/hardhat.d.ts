@@ -46,6 +46,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.DataPrivacyFrameworkMock__factory>;
     getContractFactory(
+      name: "ProxyTestMock",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ProxyTestMock__factory>;
+    getContractFactory(
       name: "PrivateERC20Mock",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.PrivateERC20Mock__factory>;
@@ -243,6 +247,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.DataPrivacyFrameworkMock>;
     getContractAt(
+      name: "ProxyTestMock",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ProxyTestMock>;
+    getContractAt(
       name: "PrivateERC20Mock",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -471,6 +480,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.DataPrivacyFrameworkMock>;
     deployContract(
+      name: "ProxyTestMock",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ProxyTestMock>;
+    deployContract(
       name: "PrivateERC20Mock",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.PrivateERC20Mock>;
@@ -667,6 +680,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.DataPrivacyFrameworkMock>;
+    deployContract(
+      name: "ProxyTestMock",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ProxyTestMock>;
     deployContract(
       name: "PrivateERC20Mock",
       args: any[],

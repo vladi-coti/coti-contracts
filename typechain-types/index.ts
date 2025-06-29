@@ -22,6 +22,8 @@ export type { DataPrivacyFrameworkMpc } from "./contracts/access/DataPrivacyFram
 export { DataPrivacyFrameworkMpc__factory } from "./factories/contracts/access/DataPrivacyFramework/extensions/DataPrivacyFrameworkMpc__factory";
 export type { DataPrivacyFrameworkMock } from "./contracts/mocks/access/DataPrivacyFramework/DataPrivacyFrameworkMock";
 export { DataPrivacyFrameworkMock__factory } from "./factories/contracts/mocks/access/DataPrivacyFramework/DataPrivacyFrameworkMock__factory";
+export type { ProxyTestMock } from "./contracts/mocks/proxy/ProxyTestMock";
+export { ProxyTestMock__factory } from "./factories/contracts/mocks/proxy/ProxyTestMock__factory";
 export type { PrivateERC20Mock } from "./contracts/mocks/token/PrivateERC20/PrivateERC20Mock";
 export { PrivateERC20Mock__factory } from "./factories/contracts/mocks/token/PrivateERC20/PrivateERC20Mock__factory";
 export type { PrivateERC721URIStorageMock } from "./contracts/mocks/token/PrivateERC721/PrivateERC721URIStorageMock";
