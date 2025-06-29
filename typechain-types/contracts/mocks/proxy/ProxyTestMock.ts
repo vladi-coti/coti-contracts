@@ -9,6 +9,7 @@ import type {
   Result,
   Interface,
   EventFragment,
+  AddressLike,
   ContractRunner,
   ContractMethod,
   Listener,
@@ -66,7 +67,9 @@ export type ItUint256StructOutput = [
 export interface ProxyTestMockInterface extends Interface {
   getFunction(nameOrSignature: "validateSingleParam"): FunctionFragment;
 
-  getEvent(nameOrSignatureOrTopic: "PrivateParamsTest"): EventFragment;
+  getEvent(
+    nameOrSignatureOrTopic: "MsgSender" | "PrivateParamsTest"
+  ): EventFragment;
 
   encodeFunctionData(
     functionFragment: "validateSingleParam",
@@ -77,6 +80,18 @@ export interface ProxyTestMockInterface extends Interface {
     functionFragment: "validateSingleParam",
     data: BytesLike
   ): Result;
+}
+
+export namespace MsgSenderEvent {
+  export type InputTuple = [sender: AddressLike];
+  export type OutputTuple = [sender: string];
+  export interface OutputObject {
+    sender: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
 }
 
 export namespace PrivateParamsTestEvent {
@@ -153,6 +168,13 @@ export interface ProxyTestMock extends BaseContract {
   >;
 
   getEvent(
+    key: "MsgSender"
+  ): TypedContractEvent<
+    MsgSenderEvent.InputTuple,
+    MsgSenderEvent.OutputTuple,
+    MsgSenderEvent.OutputObject
+  >;
+  getEvent(
     key: "PrivateParamsTest"
   ): TypedContractEvent<
     PrivateParamsTestEvent.InputTuple,
@@ -161,6 +183,17 @@ export interface ProxyTestMock extends BaseContract {
   >;
 
   filters: {
+    "MsgSender(address)": TypedContractEvent<
+      MsgSenderEvent.InputTuple,
+      MsgSenderEvent.OutputTuple,
+      MsgSenderEvent.OutputObject
+    >;
+    MsgSender: TypedContractEvent<
+      MsgSenderEvent.InputTuple,
+      MsgSenderEvent.OutputTuple,
+      MsgSenderEvent.OutputObject
+    >;
+
     "PrivateParamsTest(tuple)": TypedContractEvent<
       PrivateParamsTestEvent.InputTuple,
       PrivateParamsTestEvent.OutputTuple,

@@ -1,18 +1,16 @@
 import hre from "hardhat"
 import { expect } from "chai"
 import { setupAccounts } from "../utils/accounts"
-import { Wallet } from "@coti-io/coti-ethers"
+import { EventLog, Wallet } from "@coti-io/coti-ethers"
 
-const gasLimit = 12000000
+const gasOptions = {
+  gasLimit: 5000000,
+  gasPrice: 1000000000,
+}
 
 // Proxy deployment helper function
-async function deployProxy(ethers: any, deployer: any) {
+async function deployProxy(ethers: any, deployer: Wallet) {
   const Factory = await ethers.getContractFactory("ProxyTestMock")
-
-  const gasOptions = {
-    gasLimit: 5000000,
-    gasPrice: 1000000000,
-  }
 
   // 1. Deploy the implementation contract
   console.log("Deploying implementation...")
@@ -49,24 +47,20 @@ async function deployProxy(ethers: any, deployer: any) {
   console.log("TransparentUpgradeableProxy deployed to:", proxyAddress)
 
   // 4. Attach the implementation ABI to the proxy address
-  const proxyContract = Factory.attach(proxyAddress)
+  const proxyContract = Factory.attach(proxyAddress).connect(deployer)
 
   return { contract: proxyContract, implementationAddress, proxyAdminAddress, proxyAddress }
 }
 
 // Direct deployment
-async function deployDirect() {
-  const [owner, otherAccount] = await setupAccounts()
-
+async function deployDirect(deployer: Wallet) {
   const factory = await hre.ethers.getContractFactory("ProxyTestMock")
-  const contract = await factory.connect(owner).deploy({ gasLimit })
+  const contract = await factory.connect(deployer).deploy(gasOptions)
   await contract.waitForDeployment()
 
   return {
     contract,
     contractAddress: await contract.getAddress(),
-    owner,
-    otherAccount,
   }
 }
 
@@ -75,9 +69,11 @@ describe("ProxyTestMock - Direct Deployment", function () {
   let userWallet: Wallet
 
   before(async function () {
-    deployment = await deployDirect()
-    // Use the first account as userWallet
-    userWallet = deployment.owner
+    const accounts = await setupAccounts()
+    userWallet = accounts[1]
+    deployment = await deployDirect(userWallet)
+
+    console.log(`User wallet address: ${userWallet.address}`)
   })
 
   it("Should deploy the contract directly", async function () {
@@ -101,10 +97,22 @@ describe("ProxyTestMock - Direct Deployment", function () {
     const encryptedParam = await userWallet.encryptUint256(testValue, contractAddress, selector)
 
     // Call the function and expect it to emit the event
-    const tx = await contract.connect(userWallet).validateSingleParam(encryptedParam)
+    const tx = await contract.connect(userWallet).validateSingleParam(encryptedParam, gasOptions)
     const receipt = await tx.wait()
 
     expect(receipt).to.not.be.null
+
+    // Expect the MsgSender event to be emitted and be the userWallet address
+    await expect(tx).to.emit(contract, "MsgSender").withArgs(userWallet.address)
+
+    if (receipt?.logs) {
+      const params = receipt.logs.find((log: any): log is EventLog => {
+        return (log as EventLog).eventName === "MsgSender"
+      })
+      const eventMsgSender = params && "args" in params ? params.args[0] : null
+      console.log(`MsgSender event emitted with address: ${eventMsgSender}`)
+    }
+
     await expect(tx).to.emit(contract, "PrivateParamsTest")
   })
 })
@@ -118,10 +126,12 @@ describe("ProxyTestMock - Proxy Deployment", function () {
   before(async function () {
     // Setup accounts
     const accounts = await setupAccounts()
-    userWallet = accounts[0]
+    userWallet = accounts[1]
 
     // Deploy the contract using a transparent proxy
-    ;({ contract:proxy, implementationAddress, proxyAddress } = await deployProxy(hre.ethers, userWallet))
+    ;({ contract: proxy, implementationAddress, proxyAddress } = await deployProxy(hre.ethers, userWallet))
+
+    console.log(`User wallet address: ${userWallet.address}`)
   })
 
   it("Should deploy the contract through proxy", async function () {
@@ -140,10 +150,22 @@ describe("ProxyTestMock - Proxy Deployment", function () {
     const encryptedParam = await userWallet.encryptUint256(testValue, contractAddress, selector)
 
     // Call the function through proxy and expect it to emit the event
-    const tx = await proxy.connect(userWallet).validateSingleParam(encryptedParam)
+    const tx = await proxy.connect(userWallet).validateSingleParam(encryptedParam, gasOptions)
     const receipt = await tx.wait()
 
     expect(receipt).to.not.be.null
+
+    // Expect the MsgSender event to be emitted and be the userWallet address
+    await expect(tx).to.emit(proxy, "MsgSender").withArgs(userWallet.address)
+
+    if (receipt?.logs) {
+      const params = receipt.logs.find((log: any): log is EventLog => {
+        return (log as EventLog).eventName === "MsgSender"
+      })
+      const eventMsgSender = params && "args" in params ? params.args[0] : null
+      console.log(`MsgSender event emitted with address: ${eventMsgSender}`)
+    }
+
     await expect(tx).to.emit(proxy, "PrivateParamsTest")
   })
 
@@ -159,10 +181,22 @@ describe("ProxyTestMock - Proxy Deployment", function () {
     const encryptedParam = await userWallet.encryptUint256(testValue, contractAddress, selector)
 
     // Call the function through proxy and expect it to emit the event
-    const tx = await proxy.connect(userWallet).validateSingleParam(encryptedParam)
+    const tx = await proxy.connect(userWallet).validateSingleParam(encryptedParam, gasOptions)
     const receipt = await tx.wait()
 
     expect(receipt).to.not.be.null
+
+    // Expect the MsgSender event to be emitted and be the userWallet address
+    await expect(tx).to.emit(proxy, "MsgSender").withArgs(userWallet.address)
+
+    if (receipt?.logs) {
+      const params = receipt.logs.find((log: any): log is EventLog => {
+        return (log as EventLog).eventName === "MsgSender"
+      })
+      const eventMsgSender = params && "args" in params ? params.args[0] : null
+      console.log(`MsgSender event emitted with address: ${eventMsgSender}`)
+    }
+
     await expect(tx).to.emit(proxy, "PrivateParamsTest")
   })
 })
