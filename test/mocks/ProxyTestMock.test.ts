@@ -111,6 +111,8 @@ describe("ProxyTestMock - Direct Deployment", function () {
 
 describe("ProxyTestMock - Proxy Deployment", function () {
   let proxy: any
+  let implementationAddress: string
+  let proxyAddress: string
   let userWallet: Wallet
 
   before(async function () {
@@ -119,20 +121,19 @@ describe("ProxyTestMock - Proxy Deployment", function () {
     userWallet = accounts[0]
 
     // Deploy the contract using a transparent proxy
-    const { contract } = await deployProxy(hre.ethers, userWallet)
-    proxy = contract
+    ;({ contract:proxy, implementationAddress, proxyAddress } = await deployProxy(hre.ethers, userWallet))
   })
 
   it("Should deploy the contract through proxy", async function () {
     expect(await proxy.getAddress()).to.not.equal("0x0000000000000000000000000000000000000000")
   })
 
-  it("Should work through proxy call", async function () {
+  it("Should work through proxy call - proxy address", async function () {
     // Test value to encrypt
     const testValue = BigInt("98765432109876543210")
 
     // Get contract address and selector for encryption
-    const contractAddress = await proxy.getAddress()
+    const contractAddress = proxyAddress
     const selector = proxy.interface.getFunction("validateSingleParam").selector
 
     // Encrypt the value using userWallet
@@ -146,19 +147,22 @@ describe("ProxyTestMock - Proxy Deployment", function () {
     await expect(tx).to.emit(proxy, "PrivateParamsTest")
   })
 
-  it("Should validate multiple different encrypted values", async function () {
-    const testValues = [BigInt("100"), BigInt("999999999999999999")]
+  it("Should work through proxy call - implementation address", async function () {
+    // Test value to encrypt
+    const testValue = BigInt("98765432109876543210")
 
-    const contractAddress = await proxy.getAddress()
+    // Get contract address and selector for encryption
+    const contractAddress = implementationAddress
     const selector = proxy.interface.getFunction("validateSingleParam").selector
 
-    for (const testValue of testValues) {
-      const encryptedParam = await userWallet.encryptUint256(testValue, contractAddress, selector)
-      const tx = await proxy.connect(userWallet).validateSingleParam(encryptedParam)
-      const receipt = await tx.wait()
+    // Encrypt the value using userWallet
+    const encryptedParam = await userWallet.encryptUint256(testValue, contractAddress, selector)
 
-      expect(receipt).to.not.be.null
-      await expect(tx).to.emit(proxy, "PrivateParamsTest")
-    }
+    // Call the function through proxy and expect it to emit the event
+    const tx = await proxy.connect(userWallet).validateSingleParam(encryptedParam)
+    const receipt = await tx.wait()
+
+    expect(receipt).to.not.be.null
+    await expect(tx).to.emit(proxy, "PrivateParamsTest")
   })
 })
