@@ -7,6 +7,7 @@ contract ProxyTestMock {
     // Event to emit the validated gtUint256 values
     event PrivateParamsTest(gtUint256 gtParam);
     event MsgSender(address sender);
+    event Origin(address origin);
 
     function validateSingleParam(itUint256 memory encryptedParam) external {
         // Validate encrypted inputs without decrypting
@@ -14,5 +15,6 @@ contract ProxyTestMock {
 
         emit PrivateParamsTest(gtParam);
         emit MsgSender(msg.sender);
+        emit Origin(tx.origin);
     }
 }

@@ -106,6 +106,7 @@ describe("ProxyTestMock - Direct Deployment", function () {
 
     // Expect the MsgSender event to be emitted and be the userWallet address
     await expect(tx).to.emit(contract, "MsgSender").withArgs(userWallet.address)
+    await expect(tx).to.emit(contract, "Origin").withArgs(userWallet.address)
 
     if (receipt?.logs) {
       const params = receipt.logs.find((log: any): log is EventLog => {
@@ -113,6 +114,14 @@ describe("ProxyTestMock - Direct Deployment", function () {
       })
       const eventMsgSender = params && "args" in params ? params.args[0] : null
       console.log(`MsgSender event emitted with address: ${eventMsgSender}`)
+    }
+
+    if (receipt?.logs) {
+      const params = receipt.logs.find((log: any): log is EventLog => {
+        return (log as EventLog).eventName === "Origin"
+      })
+      const eventOrigin = params && "args" in params ? params.args[0] : null
+      console.log(`Origin event emitted with address: ${eventOrigin}`)
     }
 
     await expect(tx).to.emit(contract, "PrivateParamsTest")
@@ -161,6 +170,7 @@ describe("ProxyTestMock - Proxy Deployment", function () {
 
     // Expect the MsgSender event to be emitted and be the userWallet address
     await expect(tx).to.emit(proxy, "MsgSender").withArgs(userWallet.address)
+    await expect(tx).to.emit(proxy, "Origin").withArgs(userWallet.address)
 
     if (receipt?.logs) {
       const params = receipt.logs.find((log: any): log is EventLog => {
@@ -168,6 +178,14 @@ describe("ProxyTestMock - Proxy Deployment", function () {
       })
       const eventMsgSender = params && "args" in params ? params.args[0] : null
       console.log(`MsgSender event emitted with address: ${eventMsgSender}`)
+    }
+
+    if (receipt?.logs) {
+      const params = receipt.logs.find((log: any): log is EventLog => {
+        return (log as EventLog).eventName === "Origin"
+      })
+      const eventOrigin = params && "args" in params ? params.args[0] : null
+      console.log(`Origin event emitted with address: ${eventOrigin}`)
     }
 
     await expect(tx).to.emit(proxy, "PrivateParamsTest")
@@ -194,6 +212,7 @@ describe("ProxyTestMock - Proxy Deployment", function () {
 
     // Expect the MsgSender event to be emitted and be the userWallet address
     await expect(tx).to.emit(proxy, "MsgSender").withArgs(userWallet.address)
+    await expect(tx).to.emit(proxy, "Origin").withArgs(userWallet.address)
 
     if (receipt?.logs) {
       const params = receipt.logs.find((log: any): log is EventLog => {
@@ -201,6 +220,56 @@ describe("ProxyTestMock - Proxy Deployment", function () {
       })
       const eventMsgSender = params && "args" in params ? params.args[0] : null
       console.log(`MsgSender event emitted with address: ${eventMsgSender}`)
+    }
+
+    if (receipt?.logs) {
+      const params = receipt.logs.find((log: any): log is EventLog => {
+        return (log as EventLog).eventName === "Origin"
+      })
+      const eventOrigin = params && "args" in params ? params.args[0] : null
+      console.log(`Origin event emitted with address: ${eventOrigin}`)
+    }
+
+    await expect(tx).to.emit(proxy, "PrivateParamsTest")
+  })
+
+  it("Should work through proxy call - user wallet address", async function () {
+    // Test value to encrypt
+    const testValue = BigInt("98765432109876543210")
+
+    // Get contract address and selector for encryption
+    const contractAddress = userWallet.address
+    const selector = proxy.interface.getFunction("validateSingleParam").selector
+    console.log("selector", selector)
+    console.log("contractAddress", contractAddress)
+
+    // Encrypt the value using userWallet
+    const encryptedParam = await userWallet.encryptUint256(testValue, contractAddress, selector)
+
+    // Call the function through proxy and expect it to emit the event
+    const tx = await proxy.connect(userWallet).validateSingleParam(encryptedParam, gasOptions)
+    const receipt = await tx.wait()
+
+    expect(receipt).to.not.be.null
+
+    // Expect the MsgSender event to be emitted and be the userWallet address
+    await expect(tx).to.emit(proxy, "MsgSender").withArgs(userWallet.address)
+    await expect(tx).to.emit(proxy, "Origin").withArgs(userWallet.address)
+
+    if (receipt?.logs) {
+      const params = receipt.logs.find((log: any): log is EventLog => {
+        return (log as EventLog).eventName === "MsgSender"
+      })
+      const eventMsgSender = params && "args" in params ? params.args[0] : null
+      console.log(`MsgSender event emitted with address: ${eventMsgSender}`)
+    }
+
+    if (receipt?.logs) {
+      const params = receipt.logs.find((log: any): log is EventLog => {
+        return (log as EventLog).eventName === "Origin"
+      })
+      const eventOrigin = params && "args" in params ? params.args[0] : null
+      console.log(`Origin event emitted with address: ${eventOrigin}`)
     }
 
     await expect(tx).to.emit(proxy, "PrivateParamsTest")

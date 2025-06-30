@@ -68,7 +68,7 @@ export interface ProxyTestMockInterface extends Interface {
   getFunction(nameOrSignature: "validateSingleParam"): FunctionFragment;
 
   getEvent(
-    nameOrSignatureOrTopic: "MsgSender" | "PrivateParamsTest"
+    nameOrSignatureOrTopic: "MsgSender" | "Origin" | "PrivateParamsTest"
   ): EventFragment;
 
   encodeFunctionData(
@@ -87,6 +87,18 @@ export namespace MsgSenderEvent {
   export type OutputTuple = [sender: string];
   export interface OutputObject {
     sender: string;
+  }
+  export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
+  export type Filter = TypedDeferredTopicFilter<Event>;
+  export type Log = TypedEventLog<Event>;
+  export type LogDescription = TypedLogDescription<Event>;
+}
+
+export namespace OriginEvent {
+  export type InputTuple = [origin: AddressLike];
+  export type OutputTuple = [origin: string];
+  export interface OutputObject {
+    origin: string;
   }
   export type Event = TypedContractEvent<InputTuple, OutputTuple, OutputObject>;
   export type Filter = TypedDeferredTopicFilter<Event>;
@@ -175,6 +187,13 @@ export interface ProxyTestMock extends BaseContract {
     MsgSenderEvent.OutputObject
   >;
   getEvent(
+    key: "Origin"
+  ): TypedContractEvent<
+    OriginEvent.InputTuple,
+    OriginEvent.OutputTuple,
+    OriginEvent.OutputObject
+  >;
+  getEvent(
     key: "PrivateParamsTest"
   ): TypedContractEvent<
     PrivateParamsTestEvent.InputTuple,
@@ -192,6 +211,17 @@ export interface ProxyTestMock extends BaseContract {
       MsgSenderEvent.InputTuple,
       MsgSenderEvent.OutputTuple,
       MsgSenderEvent.OutputObject
+    >;
+
+    "Origin(address)": TypedContractEvent<
+      OriginEvent.InputTuple,
+      OriginEvent.OutputTuple,
+      OriginEvent.OutputObject
+    >;
+    Origin: TypedContractEvent<
+      OriginEvent.InputTuple,
+      OriginEvent.OutputTuple,
+      OriginEvent.OutputObject
     >;
 
     "PrivateParamsTest(tuple)": TypedContractEvent<
