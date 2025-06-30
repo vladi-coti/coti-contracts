@@ -92,6 +92,8 @@ describe("ProxyTestMock - Direct Deployment", function () {
     // Get contract address and selector for encryption
     const contractAddress = await contract.getAddress()
     const selector = (contract as any).interface.getFunction("validateSingleParam").selector
+    console.log("selector", selector)
+    console.log("contractAddress", contractAddress)
 
     // Encrypt the value using userWallet
     const encryptedParam = await userWallet.encryptUint256(testValue, contractAddress, selector)
@@ -145,6 +147,8 @@ describe("ProxyTestMock - Proxy Deployment", function () {
     // Get contract address and selector for encryption
     const contractAddress = proxyAddress
     const selector = proxy.interface.getFunction("validateSingleParam").selector
+    console.log("selector", selector)
+    console.log("contractAddress", contractAddress)
 
     // Encrypt the value using userWallet
     const encryptedParam = await userWallet.encryptUint256(testValue, contractAddress, selector)
@@ -176,6 +180,8 @@ describe("ProxyTestMock - Proxy Deployment", function () {
     // Get contract address and selector for encryption
     const contractAddress = implementationAddress
     const selector = proxy.interface.getFunction("validateSingleParam").selector
+    console.log("selector", selector)
+    console.log("contractAddress", contractAddress)
 
     // Encrypt the value using userWallet
     const encryptedParam = await userWallet.encryptUint256(testValue, contractAddress, selector)
