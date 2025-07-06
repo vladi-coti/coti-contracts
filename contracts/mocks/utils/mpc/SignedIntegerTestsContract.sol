@@ -5,7 +5,6 @@ pragma solidity ^0.8.19;
 import "../../../utils/mpc/MpcCore.sol";
 
 contract SignedIntegerTestsContract {
-
     struct AllGTCastingValues {
         gtInt8 a8_s;
         gtInt8 b8_s;
@@ -32,11 +31,6 @@ contract SignedIntegerTestsContract {
     utInt8 public offBoardCombinedResult;
     int8 public onBoardResult1;
     int8 public onBoardResult2;
-    
-    function setPublicValues(AllGTCastingValues memory castingValues, int8 a, int8 b) public {
-        castingValues.a8_s = MpcCore.setPublic8(a);
-        castingValues.b8_s = MpcCore.setPublic8(b);
-    }
 
     function validateCiphertextTest(itInt8 calldata value) public {
         validateResult = MpcCore.decrypt(MpcCore.validateCiphertext(value));
@@ -45,93 +39,127 @@ contract SignedIntegerTestsContract {
     function addTest(int8 a, int8 b) public {
         AllGTCastingValues memory castingValues;
 
-        setPublicValues(castingValues, a, b);
+        castingValues.a8_s = MpcCore.setPublic8(a);
+        castingValues.b8_s = MpcCore.setPublic8(b);
 
-        int8 result = MpcCore.decrypt(MpcCore.add(castingValues.a8_s, castingValues.b8_s));
+        int8 result = MpcCore.decrypt(
+            MpcCore.add(castingValues.a8_s, castingValues.b8_s)
+        );
         addResult = result;
     }
 
     function subTest(int8 a, int8 b) public {
         AllGTCastingValues memory castingValues;
 
-        setPublicValues(castingValues, a, b);
+        castingValues.a8_s = MpcCore.setPublic8(a);
+        castingValues.b8_s = MpcCore.setPublic8(b);
 
-        int8 result = MpcCore.decrypt(MpcCore.sub(castingValues.a8_s, castingValues.b8_s));
+        int8 result = MpcCore.decrypt(
+            MpcCore.sub(castingValues.a8_s, castingValues.b8_s)
+        );
         subResult = result;
     }
 
     function mulTest(int8 a, int8 b) public {
         AllGTCastingValues memory castingValues;
 
-        setPublicValues(castingValues, a, b);
+        castingValues.a8_s = MpcCore.setPublic8(a);
+        castingValues.b8_s = MpcCore.setPublic8(b);
 
-        int8 result = MpcCore.decrypt(MpcCore.mul(castingValues.a8_s, castingValues.b8_s));
+        int8 result = MpcCore.decrypt(
+            MpcCore.mul(castingValues.a8_s, castingValues.b8_s)
+        );
         mulResult = result;
     }
 
     function divTest(int8 a, int8 b) public {
         AllGTCastingValues memory castingValues;
 
-        setPublicValues(castingValues, a, b);
+        castingValues.a8_s = MpcCore.setPublic8(a);
+        castingValues.b8_s = MpcCore.setPublic8(b);
 
-        int8 result = MpcCore.decrypt(MpcCore.div(castingValues.a8_s, castingValues.b8_s));
+        int8 result = MpcCore.decrypt(
+            MpcCore.div(castingValues.a8_s, castingValues.b8_s)
+        );
         divResult = result;
     }
 
     function andTest(int8 a, int8 b) public {
         AllGTCastingValues memory castingValues;
 
-        setPublicValues(castingValues, a, b);
+        castingValues.a8_s = MpcCore.setPublic8(a);
+        castingValues.b8_s = MpcCore.setPublic8(b);
 
-        int8 result = MpcCore.decrypt(MpcCore.and(castingValues.a8_s, castingValues.b8_s));
+        int8 result = MpcCore.decrypt(
+            MpcCore.and(castingValues.a8_s, castingValues.b8_s)
+        );
         andResult = result;
     }
 
     function orTest(int8 a, int8 b) public {
         AllGTCastingValues memory castingValues;
 
-        setPublicValues(castingValues, a, b);
+        castingValues.a8_s = MpcCore.setPublic8(a);
+        castingValues.b8_s = MpcCore.setPublic8(b);
 
-        int8 result = MpcCore.decrypt(MpcCore.or(castingValues.a8_s, castingValues.b8_s));
+        int8 result = MpcCore.decrypt(
+            MpcCore.or(castingValues.a8_s, castingValues.b8_s)
+        );
         orResult = result;
     }
 
     function xorTest(int8 a, int8 b) public {
         AllGTCastingValues memory castingValues;
 
-        setPublicValues(castingValues, a, b);
+        castingValues.a8_s = MpcCore.setPublic8(a);
+        castingValues.b8_s = MpcCore.setPublic8(b);
 
-        int8 result = MpcCore.decrypt(MpcCore.xor(castingValues.a8_s, castingValues.b8_s));
+        int8 result = MpcCore.decrypt(
+            MpcCore.xor(castingValues.a8_s, castingValues.b8_s)
+        );
         xorResult = result;
     }
 
     function eqTest(int8 a, int8 b) public {
         AllGTCastingValues memory castingValues;
 
-        setPublicValues(castingValues, a, b);
+        castingValues.a8_s = MpcCore.setPublic8(a);
+        castingValues.b8_s = MpcCore.setPublic8(b);
 
-        bool result = MpcCore.decrypt(MpcCore.eq(castingValues.a8_s, castingValues.b8_s));
+        bool result = MpcCore.decrypt(
+            MpcCore.eq(castingValues.a8_s, castingValues.b8_s)
+        );
         eqResult = result;
     }
 
     function neTest(int8 a, int8 b) public {
         AllGTCastingValues memory castingValues;
 
-        setPublicValues(castingValues, a, b);
+        castingValues.a8_s = MpcCore.setPublic8(a);
+        castingValues.b8_s = MpcCore.setPublic8(b);
 
-        bool result = MpcCore.decrypt(MpcCore.ne(castingValues.a8_s, castingValues.b8_s));
+        bool result = MpcCore.decrypt(
+            MpcCore.ne(castingValues.a8_s, castingValues.b8_s)
+        );
         neResult = result;
     }
 
     function offBoardTest(int8 a, int8 b, int8 c) public {
         offBoardResult = MpcCore.offBoard(MpcCore.setPublic8(a));
-        offBoardToUserResult = MpcCore.offBoardToUser(MpcCore.setPublic8(b), msg.sender);
-        offBoardCombinedResult = MpcCore.offBoardCombined(MpcCore.setPublic8(c), msg.sender);
+        offBoardToUserResult = MpcCore.offBoardToUser(
+            MpcCore.setPublic8(b),
+            msg.sender
+        );
+        offBoardCombinedResult = MpcCore.offBoardCombined(
+            MpcCore.setPublic8(c),
+            msg.sender
+        );
     }
 
     function onBoardTest() public {
         onBoardResult1 = MpcCore.decrypt(MpcCore.onBoard(offBoardResult));
-        onBoardResult2 = MpcCore.decrypt(MpcCore.onBoard(offBoardCombinedResult.ciphertext));
+        onBoardResult2 = MpcCore.decrypt(
+            MpcCore.onBoard(offBoardCombinedResult.ciphertext)
+        );
     }
-
 }
