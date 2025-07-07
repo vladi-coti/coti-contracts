@@ -32,6 +32,24 @@ contract SignedIntegerTestsContract {
     int8 public onBoardResult1;
     int8 public onBoardResult2;
 
+    // Reset function to clear all state and potentially help with state pollution
+    function resetState() public {
+        validateResult = 0;
+        addResult = 0;
+        subResult = 0;
+        mulResult = 0;
+        divResult = 0;
+        andResult = 0;
+        orResult = 0;
+        xorResult = 0;
+        eqResult = false;
+        neResult = false;
+        onBoardResult1 = 0;
+        onBoardResult2 = 0;
+        // Note: offBoardResult, offBoardToUserResult, offBoardCombinedResult 
+        // are complex types and harder to reset cleanly
+    }
+
     function validateCiphertextTest(itInt8 calldata value) public {
         validateResult = MpcCore.decrypt(MpcCore.validateCiphertext(value));
     }

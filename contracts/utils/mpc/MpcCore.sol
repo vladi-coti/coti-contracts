@@ -1186,8 +1186,93 @@ library MpcCore {
         return (gtUint64.wrap(new_a), gtUint64.wrap(new_b), gtBool.wrap(res), gtUint64.wrap(new_allowance));
     }
 
+// =========== signed 128 bit operations ==============
 
-    // =========== 128 bit operations ============
+    function validateCiphertext(itInt128 memory input) internal returns (gtInt128 memory) {
+        return MpcSignedInt.validateCiphertext(input);
+    }
+
+    function onBoard(ctInt128 memory ct) internal returns (gtInt128 memory) {
+        return MpcSignedInt.onBoard(ct);
+    }
+
+    function offBoard(gtInt128 memory pt) internal returns (ctInt128 memory) {
+        return MpcSignedInt.offBoard(pt);
+    }
+
+    function offBoardToUser(gtInt128 memory pt, address addr) internal returns (ctInt128 memory) {
+        return MpcSignedInt.offBoardToUser(pt, addr);
+    }
+
+    function offBoardCombined(gtInt128 memory pt, address addr) internal returns (utInt128 memory ut) {
+        return MpcSignedInt.offBoardCombined(pt, addr);
+    }
+
+    function setPublic128(int128 pt) internal returns (gtInt128 memory) {
+        return MpcSignedInt.setPublic128(pt);
+    }
+
+    function add(gtInt128 memory a, gtInt128 memory b) internal returns (gtInt128 memory) {
+        return MpcSignedInt.add(a, b);
+    }
+
+    function sub(gtInt128 memory a, gtInt128 memory b) internal returns (gtInt128 memory) {
+        return MpcSignedInt.sub(a, b);
+    }
+
+    function mul(gtInt128 memory a, gtInt128 memory b) internal returns (gtInt128 memory) {
+        return MpcSignedInt.mul(a, b);
+    }
+
+    function div(gtInt128 memory a, gtInt128 memory b) internal returns (gtInt128 memory) {
+        return MpcSignedInt.div(a, b);
+    }
+
+    function and(gtInt128 memory a, gtInt128 memory b) internal returns (gtInt128 memory) {
+        return MpcSignedInt.and(a, b);
+    }
+
+    function or(gtInt128 memory a, gtInt128 memory b) internal returns (gtInt128 memory) {
+        return MpcSignedInt.or(a, b);
+    }
+
+    function xor(gtInt128 memory a, gtInt128 memory b) internal returns (gtInt128 memory) {
+        return MpcSignedInt.xor(a, b);
+    }
+
+    function gt(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
+        return MpcSignedInt.gt(a, b);
+    }
+
+    function lt(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
+        return MpcSignedInt.lt(a, b);
+    }
+
+    function ge(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
+        return MpcSignedInt.ge(a, b);
+    }
+
+    function le(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
+        return MpcSignedInt.le(a, b);
+    }
+
+    function eq(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
+        return MpcSignedInt.eq(a, b);
+    }
+
+    function ne(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
+        return MpcSignedInt.ne(a, b);
+    }
+
+    function decrypt(gtInt128 memory ct) internal returns (int128) {
+        return MpcSignedInt.decrypt(ct);
+    }
+
+    function mux(gtBool bit, gtInt128 memory a, gtInt128 memory b) internal returns (gtInt128 memory) {
+        return MpcSignedInt.mux(bit, a, b);
+    }
+
+    // =========== unsigned 128 bit operations ============
 
     function _splitUint128(uint128 number) private returns (uint64, uint64) {
         return (uint64(number >> 64), uint64(number));
@@ -1644,7 +1729,93 @@ library MpcCore {
         return (a_, b_, success, allowance_);
     }
 
-    // =========== 256 bit operations ============
+    // =========== signed 256 bit operations ==============
+
+    function validateCiphertext(itInt256 memory input) internal returns (gtInt256 memory) {
+        return MpcSignedInt.validateCiphertext(input);
+    }
+
+    function onBoard(ctInt256 memory ct) internal returns (gtInt256 memory) {
+        return MpcSignedInt.onBoard(ct);
+    }
+
+    function offBoard(gtInt256 memory pt) internal returns (ctInt256 memory) {
+        return MpcSignedInt.offBoard(pt);
+    }
+
+    function offBoardToUser(gtInt256 memory pt, address addr) internal returns (ctInt256 memory) {
+        return MpcSignedInt.offBoardToUser(pt, addr);
+    }
+
+    function offBoardCombined(gtInt256 memory pt, address addr) internal returns (utInt256 memory ut) {
+        return MpcSignedInt.offBoardCombined(pt, addr);
+    }
+
+    function setPublic256(int256 pt) internal returns (gtInt256 memory) {
+        return MpcSignedInt.setPublic256(pt);
+    }
+
+    function add(gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
+        return MpcSignedInt.add(a, b);
+    }
+
+    function sub(gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
+        return MpcSignedInt.sub(a, b);
+    }
+
+    function mul(gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
+        return MpcSignedInt.mul(a, b);
+    }
+
+    function div(gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
+        return MpcSignedInt.div(a, b);
+    }
+
+    function and(gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
+        return MpcSignedInt.and(a, b);
+    }
+
+    function or(gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
+        return MpcSignedInt.or(a, b);
+    }
+
+    function xor(gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
+        return MpcSignedInt.xor(a, b);
+    }
+
+    function gt(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
+        return MpcSignedInt.gt(a, b);
+    }
+
+    function lt(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
+        return MpcSignedInt.lt(a, b);
+    }
+
+    function ge(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
+        return MpcSignedInt.ge(a, b);
+    }
+
+    function le(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
+        return MpcSignedInt.le(a, b);
+    }
+
+    function eq(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
+        return MpcSignedInt.eq(a, b);
+    }
+
+    function ne(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
+        return MpcSignedInt.ne(a, b);
+    }
+
+    function decrypt(gtInt256 memory ct) internal returns (int256) {
+        return MpcSignedInt.decrypt(ct);
+    }
+
+    function mux(gtBool bit, gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
+        return MpcSignedInt.mux(bit, a, b);
+    }
+
+    // =========== unsigned 256 bit operations ============
 
     function _splitUint256(uint256 number) private returns (uint128, uint128) {
         return (uint128(number >> 128), uint128(number));
@@ -4864,7 +5035,7 @@ library MpcCore {
         if (b >= 128) {
             shl(a.high, b); // check for overflow in high part
 
-            result.low = setPublic128(0);
+            result.low = setPublic128(uint128(0));
             result.high = shl(a.low, b - 128);
         } else if (b > 0) {
             // Mask to clear the bits of the low part that will be shifted out
@@ -4891,7 +5062,7 @@ library MpcCore {
             shr(a.low, b); // check for overflow in low part
 
             result.low = shr(a.high, b - 128);
-            result.high = setPublic128(0);
+            result.high = setPublic128(uint128(0));
         } else if (b > 0) {
             // Mask to clear the bits of the low part that will be shifted out
             uint128 mask = uint128(type(uint128).max >> 128 - b);

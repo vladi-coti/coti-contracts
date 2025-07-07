@@ -260,7 +260,9 @@ describe("MPC Core - signed integers", function () {
     })
 
     it("Should encrypt, AND and decrypt two negative signed integers", async function () {
-      const { contract } = deployment
+      // Deploy fresh contract to avoid state pollution
+      const freshDeployment = await deploy()
+      const { contract } = freshDeployment
 
       await (await contract.andTest(-1, -1)).wait()
 
@@ -280,7 +282,9 @@ describe("MPC Core - signed integers", function () {
     })
 
     it("Should encrypt, AND and decrypt a negative and positive signed integer", async function () {
-      const { contract } = deployment
+      // Deploy fresh contract to avoid state pollution
+      const freshDeployment = await deploy()
+      const { contract } = freshDeployment
 
       await (await contract.andTest(-2, 1)).wait()
 
@@ -396,7 +400,9 @@ describe("MPC Core - signed integers", function () {
     })
 
     it("Should encrypt, EQ and decrypt a positive and negative signed integer", async function () {
-      const { contract } = deployment
+      // Deploy fresh contract to avoid state pollution
+      const freshDeployment = await deploy()
+      const { contract } = freshDeployment
 
       await (await contract.eqTest(1, -1)).wait()
 
@@ -406,7 +412,9 @@ describe("MPC Core - signed integers", function () {
     })
 
     it("Should encrypt, EQ and decrypt a negative and positive signed integer", async function () {
-      const { contract } = deployment
+      // Deploy fresh contract to avoid state pollution
+      const freshDeployment = await deploy()
+      const { contract } = freshDeployment
 
       await (await contract.eqTest(-2, 1)).wait()
 
