@@ -2,7 +2,7 @@ import hre from "hardhat"
 import { expect } from "chai"
 import { setupAccounts } from "../accounts"
 import { ItUint256Struct } from "../../../typechain-types/contracts/mocks/utils/mpc/Miscellaneous256BitTestsContract"
-import { decryptUint256, encryptUint256, generateRandomNumber } from "./helpers"
+import { generateRandomNumber } from "./helpers"
 
 const MAX_UINT256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 
@@ -49,9 +49,8 @@ describe("MPC Core", function () {
 
           numbers.push(number)
           encryptedNumbers.push(
-            await encryptUint256(
+            await owner.encryptUint256(
               number,
-              owner,
               await extendedMiscellaneousTests.getAddress(),
               extendedMiscellaneousTests.validateCiphertextTest.fragment.selector
             ) as ItUint256Struct
@@ -86,7 +85,7 @@ describe("MPC Core", function () {
       for (let i = 0; i < 1; i++) {
           const ctNumber = await extendedMiscellaneousTests.ctNumbers2(i)
 
-          const result = await decryptUint256(ctNumber, owner)
+          const result = await owner.decryptUint256(ctNumber)
 
           expect(result).to.equal(numbers[i])
       }

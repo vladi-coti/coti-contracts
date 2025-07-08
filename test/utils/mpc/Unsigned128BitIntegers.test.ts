@@ -1,7 +1,7 @@
 import hre from "hardhat"
 import { expect } from "chai"
 import { setupAccounts } from "../accounts"
-import { decryptUint128, encryptUint128, generateRandomNumber } from "./helpers"
+import { generateRandomNumber } from "./helpers"
 import { ItUint128Struct } from "../../../typechain-types/contracts/mocks/utils/mpc/Miscellaneous128BitTestsContract"
 
 
@@ -50,9 +50,8 @@ describe("MPC Core", function () {
 
           numbers.push(number)
           encryptedNumbers.push(
-            await encryptUint128(
+            await owner.encryptUint128(
               number,
-              owner,
               await extendedMiscellaneousTests.getAddress(),
               extendedMiscellaneousTests.validateCiphertextTest.fragment.selector
             )
@@ -87,7 +86,7 @@ describe("MPC Core", function () {
       for (let i = 0; i < 100; i++) {
           const ctNumber = await extendedMiscellaneousTests.ctNumbers(i)
 
-          const result = await decryptUint128(ctNumber, owner)
+          const result = await owner.decryptUint128(ctNumber)
 
           expect(result).to.equal(numbers[i])
       }

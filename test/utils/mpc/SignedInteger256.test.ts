@@ -1,7 +1,6 @@
 import hre from "hardhat"
 import { expect } from "chai"
 import { setupAccounts } from "../accounts"
-import { itUint } from "@coti-io/coti-ethers"
 
 const gasLimit = 12000000
 
@@ -27,11 +26,11 @@ describe("MPC Core - signed 256-bit integers", function () {
       const { contract, contractAddress, owner } = deployment
 
       const testValue = 1234567890123456789012345678901234567890n
-      const itValue = (await owner.encryptValue(
+      const itValue = await owner.encryptInt256(
         testValue,
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
-      )) as itUint
+      )
 
       await (await contract.validateCiphertextTest(itValue)).wait()
 
@@ -44,11 +43,11 @@ describe("MPC Core - signed 256-bit integers", function () {
       const { contract, contractAddress, owner } = deployment
 
       const testValue = -987654321098765432109876543210987654321n
-      const itValue = (await owner.encryptValue(
+      const itValue = await owner.encryptInt256(
         testValue,
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
-      )) as itUint
+      )
 
       await (await contract.validateCiphertextTest(itValue)).wait()
 

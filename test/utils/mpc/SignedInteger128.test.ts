@@ -1,7 +1,6 @@
 import hre from "hardhat"
 import { expect } from "chai"
 import { setupAccounts } from "../accounts"
-import { itUint } from "@coti-io/coti-ethers"
 
 const gasLimit = 12000000
 
@@ -13,18 +12,6 @@ async function deploy() {
   await contract.waitForDeployment()
 
   return { contract, contractAddress: await contract.getAddress(), owner, otherAccount }
-}
-
-function toSignedInt128(value: bigint): bigint {
-  const binaryStr = value.toString(2).padStart(128, "0")
-
-  if (binaryStr[0] !== "1") {
-    return BigInt(binaryStr, 2)
-  }
-
-  // Two's complement for negative numbers
-  const twosComplement = ~value + 1n
-  return -twosComplement
 }
 
 describe("MPC Core - signed 128-bit integers", function () {
@@ -39,11 +26,11 @@ describe("MPC Core - signed 128-bit integers", function () {
       const { contract, contractAddress, owner } = deployment
 
       const testValue = 123456789012345n
-      const itValue = (await owner.encryptValue(
+      const itValue = await owner.encryptInt128(
         testValue,
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
-      )) as itUint
+      )
 
       await (await contract.validateCiphertextTest(itValue)).wait()
 
@@ -56,11 +43,11 @@ describe("MPC Core - signed 128-bit integers", function () {
       const { contract, contractAddress, owner } = deployment
 
       const testValue = -987654321098765n
-      const itValue = (await owner.encryptValue(
+      const itValue = await owner.encryptInt128(
         testValue,
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
-      )) as itUint
+      )
 
       await (await contract.validateCiphertextTest(itValue)).wait()
 
@@ -578,7 +565,7 @@ describe("MPC Core - signed 128-bit integers", function () {
 
       const encryptedInt = await contract.offBoardToUserResult()
 
-      const decryptedInt = await owner.decryptValue(encryptedInt)
+      const decryptedInt = await owner.decryptInt128(encryptedInt)
 
       expect(decryptedInt).to.equal(2000000000n)
     })
@@ -602,7 +589,7 @@ describe("MPC Core - signed 128-bit integers", function () {
 
       const encryptedInt = await contract.offBoardToUserResult()
 
-      const decryptedInt = await owner.decryptValue(encryptedInt)
+      const decryptedInt = await owner.decryptInt128(encryptedInt)
 
       expect(decryptedInt).to.equal(-2000000000n)
     })

@@ -1,7 +1,6 @@
 import hre from "hardhat"
 import { expect } from "chai"
 import { setupAccounts } from "../accounts"
-import { itUint } from "@coti-io/coti-ethers"
 
 const gasLimit = 12000000
 
@@ -44,11 +43,11 @@ describe("MPC Core - signed integers", function () {
     it("Should validate positive signed integers", async function () {
       const { contract, contractAddress, owner } = deployment
 
-      const itValue = (await owner.encryptValue(
+      const itValue = await owner.encryptInt32(
         123,
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
-      )) as itUint
+      )
 
       await (await contract.validateCiphertextTest(itValue)).wait()
 
@@ -60,11 +59,11 @@ describe("MPC Core - signed integers", function () {
     it("Should validate negative signed integers", async function () {
       const { contract, contractAddress, owner } = deployment
 
-      const itValue = (await owner.encryptValue(
+      const itValue = await owner.encryptInt32(
         -20,
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
-      )) as itUint
+      )
 
       await (await contract.validateCiphertextTest(itValue)).wait()
 
@@ -486,7 +485,7 @@ describe("MPC Core - signed integers", function () {
 
       const encryptedInt = await contract.offBoardToUserResult()
 
-      const decryptedInt = await owner.decryptValue(encryptedInt)
+      const decryptedInt = await owner.decryptInt32(encryptedInt)
 
       expect(decryptedInt).to.equal(3)
     })
@@ -510,7 +509,7 @@ describe("MPC Core - signed integers", function () {
 
       const encryptedInt = await contract.offBoardToUserResult()
 
-      const decryptedInt = (await owner.decryptValue(encryptedInt)) as bigint
+      const decryptedInt = (await owner.decryptInt32(encryptedInt)) as bigint
 
       const signedInt = toSignedInt(decryptedInt)
 
