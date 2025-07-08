@@ -126,9 +126,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ShiftTestsContract__factory>;
     getContractFactory(
-      name: "SignedDivision",
+      name: "SignedInt128TestsContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SignedDivision__factory>;
+    ): Promise<Contracts.SignedInt128TestsContract__factory>;
+    getContractFactory(
+      name: "SignedInt256TestsContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SignedInt256TestsContract__factory>;
     getContractFactory(
       name: "SignedIntegerTestsContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -351,10 +355,15 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.ShiftTestsContract>;
     getContractAt(
-      name: "SignedDivision",
+      name: "SignedInt128TestsContract",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.SignedDivision>;
+    ): Promise<Contracts.SignedInt128TestsContract>;
+    getContractAt(
+      name: "SignedInt256TestsContract",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SignedInt256TestsContract>;
     getContractAt(
       name: "SignedIntegerTestsContract",
       address: string | ethers.Addressable,
@@ -569,9 +578,13 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ShiftTestsContract>;
     deployContract(
-      name: "SignedDivision",
+      name: "SignedInt128TestsContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.SignedDivision>;
+    ): Promise<Contracts.SignedInt128TestsContract>;
+    deployContract(
+      name: "SignedInt256TestsContract",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SignedInt256TestsContract>;
     deployContract(
       name: "SignedIntegerTestsContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -794,10 +807,15 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ShiftTestsContract>;
     deployContract(
-      name: "SignedDivision",
+      name: "SignedInt128TestsContract",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.SignedDivision>;
+    ): Promise<Contracts.SignedInt128TestsContract>;
+    deployContract(
+      name: "SignedInt256TestsContract",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SignedInt256TestsContract>;
     deployContract(
       name: "SignedIntegerTestsContract",
       args: any[],

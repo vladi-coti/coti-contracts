@@ -20,14 +20,24 @@ import type {
   TypedContractMethod,
 } from "../../../../common";
 
-export type ItInt8Struct = { ciphertext: BigNumberish; signature: BytesLike };
+export type CtInt128Struct = { high: BigNumberish; low: BigNumberish };
 
-export type ItInt8StructOutput = [ciphertext: bigint, signature: string] & {
-  ciphertext: bigint;
-  signature: string;
+export type CtInt128StructOutput = [high: bigint, low: bigint] & {
+  high: bigint;
+  low: bigint;
 };
 
-export interface SignedIntegerTestsContractInterface extends Interface {
+export type ItInt128Struct = {
+  ciphertext: CtInt128Struct;
+  signature: [BytesLike, BytesLike];
+};
+
+export type ItInt128StructOutput = [
+  ciphertext: CtInt128StructOutput,
+  signature: [string, string]
+] & { ciphertext: CtInt128StructOutput; signature: [string, string] };
+
+export interface SignedInt128TestsContractInterface extends Interface {
   getFunction(
     nameOrSignature:
       | "addResult"
@@ -38,6 +48,14 @@ export interface SignedIntegerTestsContractInterface extends Interface {
       | "divTest"
       | "eqResult"
       | "eqTest"
+      | "geResult"
+      | "geTest"
+      | "gtResult"
+      | "gtTest"
+      | "leResult"
+      | "leTest"
+      | "ltResult"
+      | "ltTest"
       | "mulResult"
       | "mulTest"
       | "neResult"
@@ -78,6 +96,26 @@ export interface SignedIntegerTestsContractInterface extends Interface {
   encodeFunctionData(functionFragment: "eqResult", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "eqTest",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "geResult", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "geTest",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "gtResult", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "gtTest",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "leResult", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "leTest",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "ltResult", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "ltTest",
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "mulResult", values?: undefined): string;
@@ -134,7 +172,7 @@ export interface SignedIntegerTestsContractInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "validateCiphertextTest",
-    values: [ItInt8Struct]
+    values: [ItInt128Struct]
   ): string;
   encodeFunctionData(
     functionFragment: "validateResult",
@@ -154,6 +192,14 @@ export interface SignedIntegerTestsContractInterface extends Interface {
   decodeFunctionResult(functionFragment: "divTest", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "eqResult", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "eqTest", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "geResult", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "geTest", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "gtResult", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "gtTest", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "leResult", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "leTest", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "ltResult", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "ltTest", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mulResult", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mulTest", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "neResult", data: BytesLike): Result;
@@ -203,11 +249,11 @@ export interface SignedIntegerTestsContractInterface extends Interface {
   decodeFunctionResult(functionFragment: "xorTest", data: BytesLike): Result;
 }
 
-export interface SignedIntegerTestsContract extends BaseContract {
-  connect(runner?: ContractRunner | null): SignedIntegerTestsContract;
+export interface SignedInt128TestsContract extends BaseContract {
+  connect(runner?: ContractRunner | null): SignedInt128TestsContract;
   waitForDeployment(): Promise<this>;
 
-  interface: SignedIntegerTestsContractInterface;
+  interface: SignedInt128TestsContractInterface;
 
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
@@ -278,6 +324,38 @@ export interface SignedIntegerTestsContract extends BaseContract {
     "nonpayable"
   >;
 
+  geResult: TypedContractMethod<[], [boolean], "view">;
+
+  geTest: TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  gtResult: TypedContractMethod<[], [boolean], "view">;
+
+  gtTest: TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  leResult: TypedContractMethod<[], [boolean], "view">;
+
+  leTest: TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  ltResult: TypedContractMethod<[], [boolean], "view">;
+
+  ltTest: TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   mulResult: TypedContractMethod<[], [bigint], "view">;
 
   mulTest: TypedContractMethod<
@@ -296,11 +374,20 @@ export interface SignedIntegerTestsContract extends BaseContract {
 
   offBoardCombinedResult: TypedContractMethod<
     [],
-    [[bigint, bigint] & { ciphertext: bigint; userCiphertext: bigint }],
+    [
+      [CtInt128StructOutput, CtInt128StructOutput] & {
+        ciphertext: CtInt128StructOutput;
+        userCiphertext: CtInt128StructOutput;
+      }
+    ],
     "view"
   >;
 
-  offBoardResult: TypedContractMethod<[], [bigint], "view">;
+  offBoardResult: TypedContractMethod<
+    [],
+    [[bigint, bigint] & { high: bigint; low: bigint }],
+    "view"
+  >;
 
   offBoardTest: TypedContractMethod<
     [a: BigNumberish, b: BigNumberish, c: BigNumberish],
@@ -308,7 +395,11 @@ export interface SignedIntegerTestsContract extends BaseContract {
     "nonpayable"
   >;
 
-  offBoardToUserResult: TypedContractMethod<[], [bigint], "view">;
+  offBoardToUserResult: TypedContractMethod<
+    [],
+    [[bigint, bigint] & { high: bigint; low: bigint }],
+    "view"
+  >;
 
   onBoardResult1: TypedContractMethod<[], [bigint], "view">;
 
@@ -335,7 +426,7 @@ export interface SignedIntegerTestsContract extends BaseContract {
   >;
 
   validateCiphertextTest: TypedContractMethod<
-    [value: ItInt8Struct],
+    [value: ItInt128Struct],
     [void],
     "nonpayable"
   >;
@@ -395,6 +486,46 @@ export interface SignedIntegerTestsContract extends BaseContract {
     "nonpayable"
   >;
   getFunction(
+    nameOrSignature: "geResult"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "geTest"
+  ): TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "gtResult"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "gtTest"
+  ): TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "leResult"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "leTest"
+  ): TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "ltResult"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "ltTest"
+  ): TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
     nameOrSignature: "mulResult"
   ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
@@ -418,12 +549,21 @@ export interface SignedIntegerTestsContract extends BaseContract {
     nameOrSignature: "offBoardCombinedResult"
   ): TypedContractMethod<
     [],
-    [[bigint, bigint] & { ciphertext: bigint; userCiphertext: bigint }],
+    [
+      [CtInt128StructOutput, CtInt128StructOutput] & {
+        ciphertext: CtInt128StructOutput;
+        userCiphertext: CtInt128StructOutput;
+      }
+    ],
     "view"
   >;
   getFunction(
     nameOrSignature: "offBoardResult"
-  ): TypedContractMethod<[], [bigint], "view">;
+  ): TypedContractMethod<
+    [],
+    [[bigint, bigint] & { high: bigint; low: bigint }],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "offBoardTest"
   ): TypedContractMethod<
@@ -433,7 +573,11 @@ export interface SignedIntegerTestsContract extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "offBoardToUserResult"
-  ): TypedContractMethod<[], [bigint], "view">;
+  ): TypedContractMethod<
+    [],
+    [[bigint, bigint] & { high: bigint; low: bigint }],
+    "view"
+  >;
   getFunction(
     nameOrSignature: "onBoardResult1"
   ): TypedContractMethod<[], [bigint], "view">;
@@ -468,7 +612,7 @@ export interface SignedIntegerTestsContract extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "validateCiphertextTest"
-  ): TypedContractMethod<[value: ItInt8Struct], [void], "nonpayable">;
+  ): TypedContractMethod<[value: ItInt128Struct], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "validateResult"
   ): TypedContractMethod<[], [bigint], "view">;

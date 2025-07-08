@@ -19,7 +19,8 @@ export { Miscellaneous256BitTestsContract__factory } from "./Miscellaneous256Bit
 export { MiscellaneousTestsContract__factory } from "./MiscellaneousTestsContract__factory";
 export { OffboardToUserKeyTestContract__factory } from "./OffboardToUserKeyTestContract__factory";
 export { ShiftTestsContract__factory } from "./ShiftTestsContract__factory";
-export { SignedDivision__factory } from "./SignedDivision__factory";
+export { SignedInt128TestsContract__factory } from "./SignedInt128TestsContract__factory";
+export { SignedInt256TestsContract__factory } from "./SignedInt256TestsContract__factory";
 export { SignedIntegerTestsContract__factory } from "./SignedIntegerTestsContract__factory";
 export { StringTestsContract__factory } from "./StringTestsContract__factory";
 export { TransferScalarTestsContract__factory } from "./TransferScalarTestsContract__factory";
