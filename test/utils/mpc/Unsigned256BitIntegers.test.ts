@@ -752,6 +752,105 @@ describe("MPC Core", function () {
       }
     })
 
+    it("div", async function () {
+      const { extendedArithmeticTests } = deployment
+
+      // Generate two arrays of random 256-bit integers
+      const numbers1: bigint[] = []
+      const numbers2: bigint[] = []
+      const expectedResults: bigint[] = []
+
+      for (let i = 0; i < 3; i++) {
+        // Generate random 256-bit integers, ensuring divisor is not zero
+        const num1 = generateRandomNumber(20)
+        let num2 = generateRandomNumber(10)
+        
+        // Ensure divisor is not zero
+        if (num2 === 0n) {
+          num2 = 1n
+        }
+        
+        numbers1.push(num1)
+        numbers2.push(num2)
+        expectedResults.push(num1 / num2)
+      }
+
+      // Call divTest with the arrays
+      await (await extendedArithmeticTests.divTest(numbers1, numbers2, 0n, { gasLimit: 80000000 })).wait()
+
+      // Verify results
+      for (let i = 0; i < 3; i++) {
+        const result = await extendedArithmeticTests.numbers2(i)
+        expect(result).to.equal(expectedResults[i])
+      }
+    })
+
+    // it("divLHS", async function () {
+    //   const { extendedArithmeticTests } = deployment
+
+    //   // Generate two arrays of random 256-bit integers
+    //   const numbers1: bigint[] = []
+    //   const numbers2: bigint[] = []
+    //   const expectedResults: bigint[] = []
+
+    //   for (let i = 0; i < 3; i++) {
+    //     // Generate random 256-bit integers, ensuring divisor is not zero
+    //     const num1 = generateRandomNumber(20)
+    //     let num2 = generateRandomNumber(10)
+        
+    //     // Ensure divisor is not zero
+    //     if (num2 === 0n) {
+    //       num2 = 1n
+    //     }
+        
+    //     numbers1.push(num1)
+    //     numbers2.push(num2)
+    //     expectedResults.push(num1 / num2)
+    //   }
+
+    //   // Call divTest with the arrays (LHS private input)
+    //   await (await extendedArithmeticTests.divTest(numbers1, numbers2, 1n, { gasLimit: 80000000 })).wait()
+
+    //   // Verify results
+    //   for (let i = 0; i < 3; i++) {
+    //     const result = await extendedArithmeticTests.numbers2(i)
+    //     expect(result).to.equal(expectedResults[i])
+    //   }
+    // })
+
+    // it("divRHS", async function () {
+    //   const { extendedArithmeticTests } = deployment
+
+    //   // Generate two arrays of random 256-bit integers
+    //   const numbers1: bigint[] = []
+    //   const numbers2: bigint[] = []
+    //   const expectedResults: bigint[] = []
+
+    //   for (let i = 0; i < 3; i++) {
+    //     // Generate random 256-bit integers, ensuring divisor is not zero
+    //     const num1 = generateRandomNumber(20)
+    //     let num2 = generateRandomNumber(10)
+        
+    //     // Ensure divisor is not zero
+    //     if (num2 === 0n) {
+    //       num2 = 1n
+    //     }
+        
+    //     numbers1.push(num1)
+    //     numbers2.push(num2)
+    //     expectedResults.push(num1 / num2)
+    //   }
+
+    //   // Call divTest with the arrays (RHS private input)
+    //   await (await extendedArithmeticTests.divTest(numbers1, numbers2, 2n, { gasLimit: 80000000 })).wait()
+
+    //   // Verify results
+    //   for (let i = 0; i < 3; i++) {
+    //     const result = await extendedArithmeticTests.numbers2(i)
+    //     expect(result).to.equal(expectedResults[i])
+    //   }
+    // })
+
     it("and", async function () {
       const { extendedBitwiseTests } = deployment
 

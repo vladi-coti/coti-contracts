@@ -202,6 +202,25 @@ contract Arithmetic256BitTestsContract {
         }
     }
 
+    function divTest(uint256[] calldata a, uint256[] calldata b, PrivateInput privateInput) public {
+        require(a.length == b.length, "Input length mismatch");
+        
+        _resetNumbers2(a.length);
+
+        for (uint256 i = 0; i < a.length; ++i) {
+            gtUint256 memory gtA = MpcCore.setPublic256(a[i]);
+            gtUint256 memory gtB = MpcCore.setPublic256(b[i]);
+            
+            if (privateInput == PrivateInput.BOTH) {
+                numbers2[i] = MpcCore.decrypt(MpcCore.div(gtA, gtB));
+            // } else if (privateInput == PrivateInput.LHS) {
+            //     numbers2[i] = MpcCore.decrypt(MpcCore.div(gtA, b[i]));
+            // } else if (privateInput == PrivateInput.RHS) {
+            //     numbers2[i] = MpcCore.decrypt(MpcCore.div(a[i], gtB));
+            }
+        }
+    }
+
     function _resetOverflows(uint256 length) internal {
         // Reset the overflows array
         delete overflows;

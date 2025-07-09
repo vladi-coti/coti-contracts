@@ -4,6 +4,7 @@ pragma solidity ^0.8.19;
 
 import "./MpcInterface.sol";
 import "./MpcSignedInt.sol";
+import "./MpcUnsignedInt.sol";
 
 library MpcCore {
     uint public constant RSA_SIZE = 256;
@@ -1610,6 +1611,10 @@ library MpcCore {
         return (bit, result);
     }
 
+    function div(gtUint128 memory a, gtUint128 memory b) internal returns (gtUint128 memory) {
+        return MpcUnsignedInt.div(a, b);
+    }
+
     function and(gtUint128 memory a, gtUint128 memory b) internal returns (gtUint128 memory) {
         gtUint128 memory result;
 
@@ -2151,6 +2156,10 @@ library MpcCore {
         );
         
         return (bit, result);
+    }
+
+    function div(gtUint256 memory a, gtUint256 memory b) internal returns (gtUint256 memory) {
+        return MpcUnsignedInt.div(a, b);
     }
 
     function and(gtUint256 memory a, gtUint256 memory b) internal returns (gtUint256 memory) {

@@ -46,7 +46,7 @@ function buildTestWithUser(contractName: string, func: string, resFunc: string, 
       if (i === 0) {
         expect(await owner.decryptBool(results[i])).to.equal(true)
       } else {
-        expect(await owner.decryptBool(results[i])).to.equal(param)
+        expect(await owner.decryptUint64(results[i])).to.equal(param)
       }
     }
   })

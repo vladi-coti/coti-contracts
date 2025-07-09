@@ -198,6 +198,22 @@ contract Arithmetic128BitTestsContract {
         }
     }
 
+    function divTest(uint128[] calldata a, uint128[] calldata b) public {
+        require(a.length == b.length, "Input length mismatch");
+        
+        _resetNumbers(a.length);
+
+        for (uint256 i = 0; i < a.length; ++i) {
+            gtUint128 memory gtA = MpcCore.setPublic128(a[i]);
+            gtUint128 memory gtB = MpcCore.setPublic128(b[i]);
+            
+            numbers[i] = MpcCore.decrypt(MpcCore.div(gtA, gtB));
+
+            // assert(numbers[i] == MpcCore.decrypt(MpcCore.div(MpcCore.setPublic128(a[i]), gtB)));
+            // assert(numbers[i] == MpcCore.decrypt(MpcCore.div(gtA, MpcCore.setPublic128(b[i]))));
+        }
+    }
+
     function _resetOverflows(uint256 length) internal {
         // Reset the overflows array
         delete overflows;
