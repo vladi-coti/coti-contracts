@@ -573,7 +573,7 @@ describe("MPC Core", function () {
       }
     })
 
-    it("128-bit unsigned integers - div", async function () {
+    it("div", async function () {
       const { extendedArithmeticTests } = deployment
 
       // Hardcoded test cases for each division scenario

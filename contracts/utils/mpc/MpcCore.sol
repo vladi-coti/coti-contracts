@@ -4,7 +4,6 @@ pragma solidity ^0.8.19;
 
 import "./MpcInterface.sol";
 import "./MpcSignedInt.sol";
-import "./MpcUnsignedInt.sol";
 
 library MpcCore {
     uint public constant RSA_SIZE = 256;
@@ -1612,7 +1611,25 @@ library MpcCore {
     }
 
     function div(gtUint128 memory a, gtUint128 memory b) internal returns (gtUint128 memory) {
-        return MpcUnsignedInt.div(a, b);
+        gtUint128 memory result;
+
+        gtUint64 zero = setPublic64(uint64(0));
+        bool aFitsIn64 = decrypt(eq(a.high, zero));
+        bool bFitsIn64 = decrypt(eq(b.high, zero));
+        
+        if (aFitsIn64 && bFitsIn64) {
+            // Case 1: Both fit in 64 bits - use simple 64-bit division
+            result.low = div(a.low, b.low);
+            result.high = zero;
+            return result;
+        }
+        
+        // TODO: fix unencrypted division
+        uint128 aValue = decrypt(a);
+        uint128 bValue = decrypt(b);
+        uint128 resultValue = aValue / bValue;
+        result = setPublic128(resultValue);
+        return result;
     }
 
     function and(gtUint128 memory a, gtUint128 memory b) internal returns (gtUint128 memory) {
@@ -2159,7 +2176,29 @@ library MpcCore {
     }
 
     function div(gtUint256 memory a, gtUint256 memory b) internal returns (gtUint256 memory) {
-        return MpcUnsignedInt.div(a, b);
+        gtUint256 memory result;
+
+        gtUint128 memory zeroHigh;
+        zeroHigh.high = setPublic64(uint64(0));
+        zeroHigh.low = setPublic64(uint64(0));
+        
+        gtBool aFitsIn128 = eq(a.high, zeroHigh);
+        gtBool bFitsIn128 = eq(b.high, zeroHigh);
+        gtBool bothFitIn128 = and(aFitsIn128, bFitsIn128);
+        
+        if (decrypt(bothFitIn128)) {
+            // Case 1: Both fit in 128 bits - use 128-bit division
+            result.low = div(a.low, b.low);
+            result.high = zeroHigh;
+            return result;
+        }
+
+        // TODO: fix unencrypted division
+        uint256 aValue = decrypt(a);
+        uint256 bValue = decrypt(b);
+        uint256 resultValue = aValue / bValue;
+        result = setPublic256(resultValue);
+        return result;
     }
 
     function and(gtUint256 memory a, gtUint256 memory b) internal returns (gtUint256 memory) {
