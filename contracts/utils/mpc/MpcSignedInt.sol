@@ -1563,35 +1563,40 @@ library MpcSignedInt {
     }
 
     function gt(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
-        // Extract sign bits (1 if negative, 0 if positive)
-        gtUint64 signA64 = MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a.high)), 63);
-        gtUint64 signB64 = MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(b.high)), 63);
-        gtBool signA = MpcCore.eq(signA64, MpcCore.setPublic64(uint64(1)));
-        gtBool signB = MpcCore.eq(signB64, MpcCore.setPublic64(uint64(1)));
-
-        gtBool signDiff = MpcCore.ne(signA, signB);
-        // If signA != signB, a > b iff signA == 0 (a is positive)
-        gtBool aPos_bNeg = MpcCore.and(signDiff, MpcCore.eq(signA, gtBool.wrap(0)));
-        // If signA == signB, compare as unsigned
-        gtBool sameSign = MpcCore.eq(signA, signB);
+        // Compare high parts as signed 64-bit
         gtBool highGt = gt(a.high, b.high);
-        gtBool highEq = MpcCore.eq(a.high, b.high);
-        gtBool lowGt = gt(a.low, b.low);
-        gtBool unsignedGt = MpcCore.or(highGt, MpcCore.and(highEq, lowGt));
-        gtBool result = MpcCore.or(aPos_bNeg, MpcCore.and(sameSign, unsignedGt));
-        return result;
+        gtBool highEq = eq(a.high, b.high);
+        // Compare low parts as unsigned 64-bit if high parts are equal
+        gtBool lowGt = MpcCore.gt(gtUint64.wrap(gtInt64.unwrap(a.low)), gtUint64.wrap(gtInt64.unwrap(b.low)));
+        return MpcCore.or(highGt, MpcCore.and(highEq, lowGt));
+    }
+
+    function lt(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
+        // Compare high parts as signed 64-bit
+        gtBool highLt = lt(a.high, b.high);
+        gtBool highEq = eq(a.high, b.high);
+        // Compare low parts as unsigned 64-bit if high parts are equal
+        gtBool lowLt = MpcCore.lt(gtUint64.wrap(gtInt64.unwrap(a.low)), gtUint64.wrap(gtInt64.unwrap(b.low)));
+        return MpcCore.or(highLt, MpcCore.and(highEq, lowLt));
     }
 
     function le(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
         gtBool highEqual = eq(a.high, b.high);
-
-        return MpcCore.mux(highEqual, lt(a.high, b.high), le(a.low, b.low));
-    }
-
-    function lt(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
-        gtBool highEqual = eq(a.high, b.high);
-
-        return MpcCore.mux(highEqual, lt(a.high, b.high), lt(a.low, b.low));
+        gtBool highLess = lt(a.high, b.high);
+        gtBool lowLessOrEqual = le(a.low, b.low);
+        return
+            gtBool.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Mux(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SBOOL_T,
+                        MPC_TYPE.SBOOL_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtBool.unwrap(highEqual),
+                    gtBool.unwrap(lowLessOrEqual),
+                    gtBool.unwrap(highLess)
+                )
+            );
     }
 
     function decrypt(gtInt128 memory ct) internal returns (int128) {
@@ -1938,92 +1943,34 @@ library MpcSignedInt {
             );
     }
 
-    function gt(
-        gtInt256 memory a,
-        gtInt256 memory b
-    ) internal returns (gtBool) {
-        gtBool highEqual = eq(a.high, b.high);
-        gtBool highGreater = gt(a.high, b.high);
-        gtBool lowGreater = gt(a.low, b.low);
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Mux(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SBOOL_T,
-                        MPC_TYPE.SBOOL_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtBool.unwrap(highEqual),
-                    gtBool.unwrap(lowGreater),
-                    gtBool.unwrap(highGreater)
-                )
-            );
+    function gt(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
+        // Compare high parts as signed 128-bit
+        gtBool highGt = gt(a.high, b.high);
+        gtBool highEq = eq(a.high, b.high);
+        // Compare low parts as unsigned 128-bit if high parts are equal
+        gtBool lowGt = MpcCore.gt(toUint128(a.low), toUint128(b.low));
+        return MpcCore.or(highGt, MpcCore.and(highEq, lowGt));
     }
 
-    function lt(
-        gtInt256 memory a,
-        gtInt256 memory b
-    ) internal returns (gtBool) {
-        gtBool highEqual = eq(a.high, b.high);
-        gtBool highLess = lt(a.high, b.high);
-        gtBool lowLess = lt(a.low, b.low);
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Mux(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SBOOL_T,
-                        MPC_TYPE.SBOOL_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtBool.unwrap(highEqual),
-                    gtBool.unwrap(lowLess),
-                    gtBool.unwrap(highLess)
-                )
-            );
+    function lt(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
+        // Compare high parts as signed 128-bit
+        gtBool highLt = lt(a.high, b.high);
+        gtBool highEq = eq(a.high, b.high);
+        // Compare low parts as unsigned 128-bit if high parts are equal
+        gtBool lowLt = MpcCore.lt(toUint128(a.low), toUint128(b.low));
+        return MpcCore.or(highLt, MpcCore.and(highEq, lowLt));
     }
 
-    function ge(
-        gtInt256 memory a,
-        gtInt256 memory b
-    ) internal returns (gtBool) {
-        gtBool highEqual = eq(a.high, b.high);
-        gtBool highGreater = gt(a.high, b.high);
-        gtBool lowGreaterOrEqual = ge(a.low, b.low);
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Mux(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SBOOL_T,
-                        MPC_TYPE.SBOOL_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtBool.unwrap(highEqual),
-                    gtBool.unwrap(lowGreaterOrEqual),
-                    gtBool.unwrap(highGreater)
-                )
-            );
+    function ge(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
+        // ge = not lt
+        gtBool isLt = lt(a, b);
+        return MpcCore.not(isLt);
     }
 
-    function le(
-        gtInt256 memory a,
-        gtInt256 memory b
-    ) internal returns (gtBool) {
-        gtBool highEqual = eq(a.high, b.high);
-        gtBool highLess = lt(a.high, b.high);
-        gtBool lowLessOrEqual = le(a.low, b.low);
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Mux(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SBOOL_T,
-                        MPC_TYPE.SBOOL_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtBool.unwrap(highEqual),
-                    gtBool.unwrap(lowLessOrEqual),
-                    gtBool.unwrap(highLess)
-                )
-            );
+    function le(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
+        // le = not gt
+        gtBool isGt = gt(a, b);
+        return MpcCore.not(isGt);
     }
 
     function decrypt(gtInt256 memory ct) internal returns (int256) {
@@ -2088,5 +2035,13 @@ library MpcSignedInt {
                     gtBool.unwrap(highLess)
                 )
             );
+    }
+
+    // Helper to convert gtInt128 to gtUint128 (for unsigned comparison)
+    function toUint128(gtInt128 memory a) internal pure returns (gtUint128 memory) {
+        return gtUint128({
+            high: gtUint64.wrap(gtInt64.unwrap(a.high)),
+            low: gtUint64.wrap(gtInt64.unwrap(a.low))
+        });
     }
 }
