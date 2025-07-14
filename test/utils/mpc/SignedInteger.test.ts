@@ -516,4 +516,216 @@ describe("MPC Core - signed integers", function () {
       expect(signedInt).to.equal(-11)
     })
   })
+
+  describe("GT signed 64-bit integers", function () {
+    it("should return false for equal positives", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(123456789n, 123456789n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return true for larger positive", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(987654321n, 123456789n)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+    })
+    it("should return false for smaller positive", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(123456789n, 987654321n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return false for equal negatives", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(-123456789n, -123456789n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return true for less negative vs more negative", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(-123456789n, -987654321n)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+    })
+    it("should return false for more negative vs less negative", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(-987654321n, -123456789n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return true for positive vs negative", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(123456789n, -123456789n)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+    })
+    it("should return false for negative vs positive", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(-123456789n, 123456789n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return true for max int64 vs min int64", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(9223372036854775807n, -9223372036854775808n)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+    })
+    it("should return false for min int64 vs max int64", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(-9223372036854775808n, 9223372036854775807n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+  })
+
+  describe("GE signed 64-bit integers", function () {
+    it("should return true for equal positives", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(123456789n, 123456789n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return true for larger positive", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(987654321n, 123456789n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return false for smaller positive", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(123456789n, 987654321n)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    it("should return true for equal negatives", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(-123456789n, -123456789n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return true for less negative vs more negative", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(-123456789n, -987654321n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return false for more negative vs less negative", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(-987654321n, -123456789n)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    it("should return true for positive vs negative", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(123456789n, -123456789n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return false for negative vs positive", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(-123456789n, 123456789n)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    it("should return true for max int64 vs min int64", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(9223372036854775807n, -9223372036854775808n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return false for min int64 vs max int64", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(-9223372036854775808n, 9223372036854775807n)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+  })
+
+  describe("LT signed 64-bit integers", function () {
+    it("should return false for equal positives", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(123456789n, 123456789n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return false for larger positive", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(987654321n, 123456789n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return true for smaller positive", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(123456789n, 987654321n)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    it("should return false for equal negatives", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(-123456789n, -123456789n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return true for more negative vs less negative", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(-987654321n, -123456789n)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    it("should return false for less negative vs more negative", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(-123456789n, -987654321n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return false for positive vs negative", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(123456789n, -123456789n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return true for negative vs positive", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(-123456789n, 123456789n)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    it("should return false for max int64 vs min int64", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(9223372036854775807n, -9223372036854775808n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return true for min int64 vs max int64", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(-9223372036854775808n, 9223372036854775807n)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+  })
+
+  describe("LE signed 64-bit integers", function () {
+    it("should return true for equal positives", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(123456789n, 123456789n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return false for larger positive", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(987654321n, 123456789n)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    it("should return true for smaller positive", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(123456789n, 987654321n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return true for equal negatives", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(-123456789n, -123456789n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return false for less negative vs more negative", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(-123456789n, -987654321n)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    it("should return true for more negative vs less negative", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(-987654321n, -123456789n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return false for positive vs negative", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(123456789n, -123456789n)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    it("should return true for negative vs positive", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(-123456789n, 123456789n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return false for max int64 vs min int64", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(9223372036854775807n, -9223372036854775808n)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    it("should return true for min int64 vs max int64", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(-9223372036854775808n, 9223372036854775807n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+  })
 })

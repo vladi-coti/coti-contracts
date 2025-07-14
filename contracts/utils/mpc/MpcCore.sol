@@ -228,6 +228,22 @@ library MpcCore {
         return MpcSignedInt.ne(a, b);
     }
 
+    function gt(gtInt8 a, gtInt8 b) internal returns (gtBool) {
+        return MpcSignedInt.gt(a, b);
+    }
+
+    function lt(gtInt8 a, gtInt8 b) internal returns (gtBool) {
+        return MpcSignedInt.lt(a, b);
+    }
+
+    function ge(gtInt8 a, gtInt8 b) internal returns (gtBool) {
+        return MpcSignedInt.ge(a, b);
+    }
+
+    function le(gtInt8 a, gtInt8 b) internal returns (gtBool) {
+        return MpcSignedInt.le(a, b);
+    }
+
     function decrypt(gtInt8 ct) internal returns (int8) {
         return MpcSignedInt.decrypt(ct);
     }
@@ -480,6 +496,22 @@ library MpcCore {
 
     function ne(gtInt16 a, gtInt16 b) internal returns (gtBool) {
         return MpcSignedInt.ne(a, b);
+    }
+
+    function gt(gtInt16 a, gtInt16 b) internal returns (gtBool) {
+        return MpcSignedInt.gt(a, b);
+    }
+
+    function lt(gtInt16 a, gtInt16 b) internal returns (gtBool) {
+        return MpcSignedInt.lt(a, b);
+    }
+
+    function ge(gtInt16 a, gtInt16 b) internal returns (gtBool) {
+        return MpcSignedInt.ge(a, b);
+    }
+
+    function le(gtInt16 a, gtInt16 b) internal returns (gtBool) {
+        return MpcSignedInt.le(a, b);
     }
 
     function decrypt(gtInt16 ct) internal returns (int16) {
@@ -737,6 +769,22 @@ library MpcCore {
         return MpcSignedInt.ne(a, b);
     }
 
+    function gt(gtInt32 a, gtInt32 b) internal returns (gtBool) {
+        return MpcSignedInt.gt(a, b);
+    }
+
+    function lt(gtInt32 a, gtInt32 b) internal returns (gtBool) {
+        return MpcSignedInt.lt(a, b);
+    }
+
+    function ge(gtInt32 a, gtInt32 b) internal returns (gtBool) {
+        return MpcSignedInt.ge(a, b);
+    }
+
+    function le(gtInt32 a, gtInt32 b) internal returns (gtBool) {
+        return MpcSignedInt.le(a, b);
+    }
+
     function decrypt(gtInt32 ct) internal returns (int32) {
         return MpcSignedInt.decrypt(ct);
     }
@@ -991,6 +1039,22 @@ library MpcCore {
 
     function ne(gtInt64 a, gtInt64 b) internal returns (gtBool) {
         return MpcSignedInt.ne(a, b);
+    }
+
+    function gt(gtInt64 a, gtInt64 b) internal returns (gtBool) {
+        return MpcSignedInt.gt(a, b);
+    }
+
+    function lt(gtInt64 a, gtInt64 b) internal returns (gtBool) {
+        return MpcSignedInt.lt(a, b);
+    }
+
+    function ge(gtInt64 a, gtInt64 b) internal returns (gtBool) {
+        return MpcSignedInt.ge(a, b);
+    }
+
+    function le(gtInt64 a, gtInt64 b) internal returns (gtBool) {
+        return MpcSignedInt.le(a, b);
     }
 
     function decrypt(gtInt64 ct) internal returns (int64) {

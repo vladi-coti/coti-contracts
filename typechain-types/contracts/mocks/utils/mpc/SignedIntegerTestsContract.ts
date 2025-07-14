@@ -38,6 +38,14 @@ export interface SignedIntegerTestsContractInterface extends Interface {
       | "divTest"
       | "eqResult"
       | "eqTest"
+      | "geResult"
+      | "geTest"
+      | "gtResult"
+      | "gtTest"
+      | "leResult"
+      | "leTest"
+      | "ltResult"
+      | "ltTest"
       | "mulResult"
       | "mulTest"
       | "neResult"
@@ -78,6 +86,26 @@ export interface SignedIntegerTestsContractInterface extends Interface {
   encodeFunctionData(functionFragment: "eqResult", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "eqTest",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "geResult", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "geTest",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "gtResult", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "gtTest",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "leResult", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "leTest",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "ltResult", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "ltTest",
     values: [BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "mulResult", values?: undefined): string;
@@ -154,6 +182,14 @@ export interface SignedIntegerTestsContractInterface extends Interface {
   decodeFunctionResult(functionFragment: "divTest", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "eqResult", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "eqTest", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "geResult", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "geTest", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "gtResult", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "gtTest", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "leResult", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "leTest", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "ltResult", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "ltTest", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mulResult", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mulTest", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "neResult", data: BytesLike): Result;
@@ -278,6 +314,38 @@ export interface SignedIntegerTestsContract extends BaseContract {
     "nonpayable"
   >;
 
+  geResult: TypedContractMethod<[], [boolean], "view">;
+
+  geTest: TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  gtResult: TypedContractMethod<[], [boolean], "view">;
+
+  gtTest: TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  leResult: TypedContractMethod<[], [boolean], "view">;
+
+  leTest: TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  ltResult: TypedContractMethod<[], [boolean], "view">;
+
+  ltTest: TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
   mulResult: TypedContractMethod<[], [bigint], "view">;
 
   mulTest: TypedContractMethod<
@@ -389,6 +457,46 @@ export interface SignedIntegerTestsContract extends BaseContract {
   ): TypedContractMethod<[], [boolean], "view">;
   getFunction(
     nameOrSignature: "eqTest"
+  ): TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "geResult"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "geTest"
+  ): TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "gtResult"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "gtTest"
+  ): TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "leResult"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "leTest"
+  ): TypedContractMethod<
+    [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "ltResult"
+  ): TypedContractMethod<[], [boolean], "view">;
+  getFunction(
+    nameOrSignature: "ltTest"
   ): TypedContractMethod<
     [a: BigNumberish, b: BigNumberish],
     [void],

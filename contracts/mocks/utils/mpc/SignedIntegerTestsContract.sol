@@ -26,6 +26,10 @@ contract SignedIntegerTestsContract {
     int8 public xorResult;
     bool public eqResult;
     bool public neResult;
+    bool public gtResult;
+    bool public ltResult;
+    bool public geResult;
+    bool public leResult;
     ctInt8 public offBoardResult;
     ctInt8 public offBoardToUserResult;
     utInt8 public offBoardCombinedResult;
@@ -44,6 +48,10 @@ contract SignedIntegerTestsContract {
         xorResult = 0;
         eqResult = false;
         neResult = false;
+        gtResult = false;
+        ltResult = false;
+        geResult = false;
+        leResult = false;
         onBoardResult1 = 0;
         onBoardResult2 = 0;
         // Note: offBoardResult, offBoardToUserResult, offBoardCombinedResult 
@@ -160,6 +168,42 @@ contract SignedIntegerTestsContract {
             MpcCore.ne(castingValues.a8_s, castingValues.b8_s)
         );
         neResult = result;
+    }
+
+    function gtTest(int64 a, int64 b) public {
+        gtResult = false;
+        gtInt64 gtA = MpcCore.setPublic64(a);
+        gtInt64 gtB = MpcCore.setPublic64(b);
+
+        gtBool result = MpcCore.gt(gtA, gtB);
+        gtResult = MpcCore.decrypt(result);
+    }
+
+    function ltTest(int64 a, int64 b) public {
+        ltResult = false;
+        gtInt64 gtA = MpcCore.setPublic64(a);
+        gtInt64 gtB = MpcCore.setPublic64(b);
+
+        gtBool result = MpcCore.lt(gtA, gtB);
+        ltResult = MpcCore.decrypt(result);
+    }
+
+    function geTest(int64 a, int64 b) public {
+        geResult = false;
+        gtInt64 gtA = MpcCore.setPublic64(a);
+        gtInt64 gtB = MpcCore.setPublic64(b);
+
+        gtBool result = MpcCore.ge(gtA, gtB);
+        geResult = MpcCore.decrypt(result);
+    }
+
+    function leTest(int64 a, int64 b) public {
+        leResult = false;
+        gtInt64 gtA = MpcCore.setPublic64(a);
+        gtInt64 gtB = MpcCore.setPublic64(b);
+
+        gtBool result = MpcCore.le(gtA, gtB);
+        leResult = MpcCore.decrypt(result);
     }
 
     function offBoardTest(int8 a, int8 b, int8 c) public {

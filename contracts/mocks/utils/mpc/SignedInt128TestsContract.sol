@@ -46,10 +46,12 @@ contract SignedInt128TestsContract {
     }
 
     function validateCiphertextTest(itInt128 calldata value) public {
+        validateResult = 0;
         validateResult = MpcCore.decrypt(MpcCore.validateCiphertext(value));
     }
 
     function addTest(int128 a, int128 b) public {
+        addResult = 0;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
@@ -58,6 +60,7 @@ contract SignedInt128TestsContract {
     }
 
     function subTest(int128 a, int128 b) public {
+        subResult = 0;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
@@ -66,6 +69,7 @@ contract SignedInt128TestsContract {
     }
 
     function mulTest(int128 a, int128 b) public {
+        mulResult = 0;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
@@ -74,6 +78,7 @@ contract SignedInt128TestsContract {
     }
 
     function divTest(int128 a, int128 b) public {
+        divResult = 0;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
@@ -82,6 +87,7 @@ contract SignedInt128TestsContract {
     }
 
     function andTest(int128 a, int128 b) public {
+        andResult = 0;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
@@ -90,6 +96,7 @@ contract SignedInt128TestsContract {
     }
 
     function orTest(int128 a, int128 b) public {
+        orResult = 0;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
@@ -98,6 +105,7 @@ contract SignedInt128TestsContract {
     }
 
     function xorTest(int128 a, int128 b) public {
+        xorResult = 0;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
@@ -106,6 +114,7 @@ contract SignedInt128TestsContract {
     }
 
     function eqTest(int128 a, int128 b) public {
+        eqResult = false;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
@@ -114,6 +123,7 @@ contract SignedInt128TestsContract {
     }
 
     function neTest(int128 a, int128 b) public {
+        neResult = false;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
@@ -122,35 +132,39 @@ contract SignedInt128TestsContract {
     }
 
     function gtTest(int128 a, int128 b) public {
+        gtResult = false;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
-        bool result = MpcCore.decrypt(MpcCore.gt(gtA, gtB));
-        gtResult = result;
+        gtBool result = MpcCore.gt(gtA, gtB);
+        gtResult = MpcCore.decrypt(result);
     }
 
     function ltTest(int128 a, int128 b) public {
+        ltResult = false;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
-        bool result = MpcCore.decrypt(MpcCore.lt(gtA, gtB));
-        ltResult = result;
+        gtBool result = MpcCore.lt(gtA, gtB);
+        ltResult = MpcCore.decrypt(result);
     }
 
     function geTest(int128 a, int128 b) public {
+        geResult = false;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
-        bool result = MpcCore.decrypt(MpcCore.ge(gtA, gtB));
-        geResult = result;
+        gtBool result = MpcCore.ge(gtA, gtB);
+        geResult = MpcCore.decrypt(result);
     }
 
     function leTest(int128 a, int128 b) public {
+        leResult = false;
         gtInt128 memory gtA = MpcCore.setPublic128(a);
         gtInt128 memory gtB = MpcCore.setPublic128(b);
 
-        bool result = MpcCore.decrypt(MpcCore.le(gtA, gtB));
-        leResult = result;
+        gtBool result = MpcCore.le(gtA, gtB);
+        leResult = MpcCore.decrypt(result);
     }
 
     function offBoardTest(int128 a, int128 b, int128 c) public {
@@ -166,6 +180,8 @@ contract SignedInt128TestsContract {
     }
 
     function onBoardTest() public {
+        onBoardResult1 = 0;
+        onBoardResult2 = 0;
         onBoardResult1 = MpcCore.decrypt(MpcCore.onBoard(offBoardResult));
         onBoardResult2 = MpcCore.decrypt(
             MpcCore.onBoard(offBoardCombinedResult.ciphertext)

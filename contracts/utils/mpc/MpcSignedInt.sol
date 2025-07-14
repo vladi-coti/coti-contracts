@@ -228,63 +228,39 @@ library MpcSignedInt {
     }
 
     function gt(gtInt8 a, gtInt8 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Gt(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT8_T,
-                        MPC_TYPE.SUINT8_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt8.unwrap(a),
-                    gtInt8.unwrap(b)
-                )
-            );
+        gtUint8 aU = gtUint8.wrap(gtInt8.unwrap(a));
+        gtUint8 bU = gtUint8.wrap(gtInt8.unwrap(b));
+        gtUint8 signA = MpcCore.shr(aU, 7);
+        gtUint8 signB = MpcCore.shr(bU, 7);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic8(uint8(1))), MpcCore.eq(signB, MpcCore.setPublic8(uint8(1))));
+        gtBool aPos_bNeg = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic8(uint8(0))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedGt = MpcCore.gt(aU, bU);
+        return MpcCore.or(aPos_bNeg, MpcCore.and(sameSign, unsignedGt));
     }
 
     function lt(gtInt8 a, gtInt8 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Lt(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT8_T,
-                        MPC_TYPE.SUINT8_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt8.unwrap(a),
-                    gtInt8.unwrap(b)
-                )
-            );
+        gtUint8 aU = gtUint8.wrap(gtInt8.unwrap(a));
+        gtUint8 bU = gtUint8.wrap(gtInt8.unwrap(b));
+        gtUint8 signA = MpcCore.shr(aU, 7);
+        gtUint8 signB = MpcCore.shr(bU, 7);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic8(uint8(1))), MpcCore.eq(signB, MpcCore.setPublic8(uint8(1))));
+        gtBool aNeg_bPos = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic8(uint8(1))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedLt = MpcCore.lt(aU, bU);
+        return MpcCore.or(aNeg_bPos, MpcCore.and(sameSign, unsignedLt));
     }
 
     function ge(gtInt8 a, gtInt8 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Ge(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT8_T,
-                        MPC_TYPE.SUINT8_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt8.unwrap(a),
-                    gtInt8.unwrap(b)
-                )
-            );
+        gtBool isGt = gt(a, b);
+        gtBool isEq = eq(a, b);
+        return MpcCore.or(isGt, isEq);
     }
 
     function le(gtInt8 a, gtInt8 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Le(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT8_T,
-                        MPC_TYPE.SUINT8_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt8.unwrap(a),
-                    gtInt8.unwrap(b)
-                )
-            );
+        gtBool isLt = lt(a, b);
+        gtBool isEq = eq(a, b);
+        return MpcCore.or(isLt, isEq);
     }
 
     function decrypt(gtInt8 ct) internal returns (int8) {
@@ -313,6 +289,24 @@ library MpcSignedInt {
                     gtInt8.unwrap(b)
                 )
             );
+    }
+
+    function shl(gtInt8 a, uint8 b) internal returns (gtInt8) {
+        gtUint8 unsignedResult = MpcCore.shl(gtUint8.wrap(gtInt8.unwrap(a)), b);
+        return gtInt8.wrap(gtUint8.unwrap(unsignedResult));
+    }
+    
+    function shr(gtInt8 a, uint8 b) internal returns (gtInt8) {
+        gtUint8 value = gtUint8.wrap(gtInt8.unwrap(a));
+        gtUint8 shifted = MpcCore.shr(value, b);
+        gtBool sign = MpcCore.eq(MpcCore.shr(value, 7), MpcCore.setPublic8(uint8(1)));
+        if (b > 0) {
+            if (MpcCore.decrypt(MpcCore.eq(sign, gtBool.wrap(1)))) {
+                uint8 mask = uint8(type(uint8).max << (8 - b));
+                shifted = MpcCore.or(shifted, MpcCore.setPublic8(mask));
+            }
+        }
+        return gtInt8.wrap(gtUint8.unwrap(shifted));
     }
 
     // =========== signed 16 bit operations ==============
@@ -558,63 +552,39 @@ library MpcSignedInt {
     }
 
     function gt(gtInt16 a, gtInt16 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Gt(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT16_T,
-                        MPC_TYPE.SUINT16_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt16.unwrap(a),
-                    gtInt16.unwrap(b)
-                )
-            );
+        gtUint16 aU = gtUint16.wrap(gtInt16.unwrap(a));
+        gtUint16 bU = gtUint16.wrap(gtInt16.unwrap(b));
+        gtUint16 signA = MpcCore.shr(aU, 15);
+        gtUint16 signB = MpcCore.shr(bU, 15);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic16(uint16(1))), MpcCore.eq(signB, MpcCore.setPublic16(uint16(1))));
+        gtBool aPos_bNeg = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic16(uint16(0))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedGt = MpcCore.gt(aU, bU);
+        return MpcCore.or(aPos_bNeg, MpcCore.and(sameSign, unsignedGt));
     }
 
     function lt(gtInt16 a, gtInt16 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Lt(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT16_T,
-                        MPC_TYPE.SUINT16_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt16.unwrap(a),
-                    gtInt16.unwrap(b)
-                )
-            );
+        gtUint16 aU = gtUint16.wrap(gtInt16.unwrap(a));
+        gtUint16 bU = gtUint16.wrap(gtInt16.unwrap(b));
+        gtUint16 signA = MpcCore.shr(aU, 15);
+        gtUint16 signB = MpcCore.shr(bU, 15);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic16(uint16(1))), MpcCore.eq(signB, MpcCore.setPublic16(uint16(1))));
+        gtBool aNeg_bPos = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic16(uint16(1))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedLt = MpcCore.lt(aU, bU);
+        return MpcCore.or(aNeg_bPos, MpcCore.and(sameSign, unsignedLt));
     }
 
     function ge(gtInt16 a, gtInt16 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Ge(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT16_T,
-                        MPC_TYPE.SUINT16_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt16.unwrap(a),
-                    gtInt16.unwrap(b)
-                )
-            );
+        gtBool isGt = gt(a, b);
+        gtBool isEq = eq(a, b);
+        return MpcCore.or(isGt, isEq);
     }
 
     function le(gtInt16 a, gtInt16 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Le(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT16_T,
-                        MPC_TYPE.SUINT16_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt16.unwrap(a),
-                    gtInt16.unwrap(b)
-                )
-            );
+        gtBool isLt = lt(a, b);
+        gtBool isEq = eq(a, b);
+        return MpcCore.or(isLt, isEq);
     }
 
     function decrypt(gtInt16 ct) internal returns (int16) {
@@ -643,6 +613,24 @@ library MpcSignedInt {
                     gtInt16.unwrap(b)
                 )
             );
+    }
+
+    function shl(gtInt16 a, uint8 b) internal returns (gtInt16) {
+        gtUint16 unsignedResult = MpcCore.shl(gtUint16.wrap(gtInt16.unwrap(a)), b);
+        return gtInt16.wrap(gtUint16.unwrap(unsignedResult));
+    }
+    
+    function shr(gtInt16 a, uint8 b) internal returns (gtInt16) {
+        gtUint16 value = gtUint16.wrap(gtInt16.unwrap(a));
+        gtUint16 shifted = MpcCore.shr(value, b);
+        gtBool sign = MpcCore.eq(MpcCore.shr(value, 15), MpcCore.setPublic16(uint16(1)));
+        if (b > 0) {
+            if (MpcCore.decrypt(MpcCore.eq(sign, gtBool.wrap(1)))) {
+                uint16 mask = uint16(type(uint16).max << (16 - b));
+                shifted = MpcCore.or(shifted, MpcCore.setPublic16(mask));
+            }
+        }
+        return gtInt16.wrap(gtUint16.unwrap(shifted));
     }
 
     // =========== signed 32 bit operations ==============
@@ -888,63 +876,39 @@ library MpcSignedInt {
     }
 
     function gt(gtInt32 a, gtInt32 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Gt(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT32_T,
-                        MPC_TYPE.SUINT32_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt32.unwrap(a),
-                    gtInt32.unwrap(b)
-                )
-            );
+        gtUint32 aU = gtUint32.wrap(gtInt32.unwrap(a));
+        gtUint32 bU = gtUint32.wrap(gtInt32.unwrap(b));
+        gtUint32 signA = MpcCore.shr(aU, 31);
+        gtUint32 signB = MpcCore.shr(bU, 31);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic32(uint32(1))), MpcCore.eq(signB, MpcCore.setPublic32(uint32(1))));
+        gtBool aPos_bNeg = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic32(uint32(0))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedGt = MpcCore.gt(aU, bU);
+        return MpcCore.or(aPos_bNeg, MpcCore.and(sameSign, unsignedGt));
     }
 
     function lt(gtInt32 a, gtInt32 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Lt(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT32_T,
-                        MPC_TYPE.SUINT32_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt32.unwrap(a),
-                    gtInt32.unwrap(b)
-                )
-            );
+        gtUint32 aU = gtUint32.wrap(gtInt32.unwrap(a));
+        gtUint32 bU = gtUint32.wrap(gtInt32.unwrap(b));
+        gtUint32 signA = MpcCore.shr(aU, 31);
+        gtUint32 signB = MpcCore.shr(bU, 31);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic32(uint32(1))), MpcCore.eq(signB, MpcCore.setPublic32(uint32(1))));
+        gtBool aNeg_bPos = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic32(uint32(1))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedLt = MpcCore.lt(aU, bU);
+        return MpcCore.or(aNeg_bPos, MpcCore.and(sameSign, unsignedLt));
     }
 
     function ge(gtInt32 a, gtInt32 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Ge(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT32_T,
-                        MPC_TYPE.SUINT32_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt32.unwrap(a),
-                    gtInt32.unwrap(b)
-                )
-            );
+        gtBool isGt = gt(a, b);
+        gtBool isEq = eq(a, b);
+        return MpcCore.or(isGt, isEq);
     }
 
     function le(gtInt32 a, gtInt32 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Le(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT32_T,
-                        MPC_TYPE.SUINT32_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt32.unwrap(a),
-                    gtInt32.unwrap(b)
-                )
-            );
+        gtBool isLt = lt(a, b);
+        gtBool isEq = eq(a, b);
+        return MpcCore.or(isLt, isEq);
     }
 
     function decrypt(gtInt32 ct) internal returns (int32) {
@@ -973,6 +937,24 @@ library MpcSignedInt {
                     gtInt32.unwrap(b)
                 )
             );
+    }
+
+    function shl(gtInt32 a, uint8 b) internal returns (gtInt32) {
+        gtUint32 unsignedResult = MpcCore.shl(gtUint32.wrap(gtInt32.unwrap(a)), b);
+        return gtInt32.wrap(gtUint32.unwrap(unsignedResult));
+    }
+
+    function shr(gtInt32 a, uint8 b) internal returns (gtInt32) {
+        gtUint32 value = gtUint32.wrap(gtInt32.unwrap(a));
+        gtUint32 shifted = MpcCore.shr(value, b);
+        gtBool sign = MpcCore.eq(MpcCore.shr(value, 31), MpcCore.setPublic32(uint32(1)));
+        if (b > 0) {
+            if (MpcCore.decrypt(MpcCore.eq(sign, gtBool.wrap(1)))) {
+                uint32 mask = uint32(type(uint32).max << (32 - b));
+                shifted = MpcCore.or(shifted, MpcCore.setPublic32(mask));
+            }
+        }
+        return gtInt32.wrap(gtUint32.unwrap(shifted));
     }
 
     // =========== signed 64 bit operations ==============
@@ -1213,63 +1195,39 @@ library MpcSignedInt {
     }
 
     function gt(gtInt64 a, gtInt64 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Gt(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT64_T,
-                        MPC_TYPE.SUINT64_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt64.unwrap(a),
-                    gtInt64.unwrap(b)
-                )
-            );
+        gtUint64 aU = gtUint64.wrap(gtInt64.unwrap(a));
+        gtUint64 bU = gtUint64.wrap(gtInt64.unwrap(b));
+        gtUint64 signA = MpcCore.shr(aU, 63);
+        gtUint64 signB = MpcCore.shr(bU, 63);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic64(uint64(1))), MpcCore.eq(signB, MpcCore.setPublic64(uint64(1))));
+        gtBool aPos_bNeg = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic64(uint64(0))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedGt = MpcCore.gt(aU, bU);
+        return MpcCore.or(aPos_bNeg, MpcCore.and(sameSign, unsignedGt));
     }
 
     function lt(gtInt64 a, gtInt64 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Lt(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT64_T,
-                        MPC_TYPE.SUINT64_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt64.unwrap(a),
-                    gtInt64.unwrap(b)
-                )
-            );
+        gtUint64 aU = gtUint64.wrap(gtInt64.unwrap(a));
+        gtUint64 bU = gtUint64.wrap(gtInt64.unwrap(b));
+        gtUint64 signA = MpcCore.shr(aU, 63);
+        gtUint64 signB = MpcCore.shr(bU, 63);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic64(uint64(1))), MpcCore.eq(signB, MpcCore.setPublic64(uint64(1))));
+        gtBool aNeg_bPos = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic64(uint64(1))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedLt = MpcCore.lt(aU, bU);
+        return MpcCore.or(aNeg_bPos, MpcCore.and(sameSign, unsignedLt));
     }
 
     function ge(gtInt64 a, gtInt64 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Ge(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT64_T,
-                        MPC_TYPE.SUINT64_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt64.unwrap(a),
-                    gtInt64.unwrap(b)
-                )
-            );
+        gtBool isGt = gt(a, b);
+        gtBool isEq = eq(a, b);
+        return MpcCore.or(isGt, isEq);
     }
-
+    
     function le(gtInt64 a, gtInt64 b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Le(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT64_T,
-                        MPC_TYPE.SUINT64_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt64.unwrap(a),
-                    gtInt64.unwrap(b)
-                )
-            );
+        gtBool isLt = lt(a, b);
+        gtBool isEq = eq(a, b);
+        return MpcCore.or(isLt, isEq);
     }
 
     function decrypt(gtInt64 ct) internal returns (int64) {
@@ -1298,6 +1256,24 @@ library MpcSignedInt {
                     gtInt64.unwrap(b)
                 )
             );
+    }
+
+    function shl(gtInt64 a, uint8 b) internal returns (gtInt64) {
+        gtUint64 unsignedResult = MpcCore.shl(gtUint64.wrap(gtInt64.unwrap(a)), b);
+        return gtInt64.wrap(gtUint64.unwrap(unsignedResult));
+    }
+
+    function shr(gtInt64 a, uint8 b) internal returns (gtInt64) {
+        gtUint64 value = gtUint64.wrap(gtInt64.unwrap(a));
+        gtUint64 shifted = MpcCore.shr(value, b);
+        gtBool sign = MpcCore.eq(MpcCore.shr(value, 63), MpcCore.setPublic64(uint64(1)));
+        if (b > 0) {
+            if (MpcCore.decrypt(MpcCore.eq(sign, gtBool.wrap(1)))) {
+                uint64 mask = uint64(type(uint64).max << (64 - b));
+                shifted = MpcCore.or(shifted, MpcCore.setPublic64(mask));
+            }
+        }
+        return gtInt64.wrap(gtUint64.unwrap(shifted));
     }
 
     // =========== signed 128 bit operations ==============
@@ -1587,9 +1563,23 @@ library MpcSignedInt {
     }
 
     function gt(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
-        gtBool highEqual = eq(a.high, b.high);
+        // Extract sign bits (1 if negative, 0 if positive)
+        gtUint64 signA64 = MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a.high)), 63);
+        gtUint64 signB64 = MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(b.high)), 63);
+        gtBool signA = MpcCore.eq(signA64, MpcCore.setPublic64(uint64(1)));
+        gtBool signB = MpcCore.eq(signB64, MpcCore.setPublic64(uint64(1)));
 
-        return MpcCore.mux(highEqual, gt(a.high, b.high), gt(a.low, b.low));
+        gtBool signDiff = MpcCore.ne(signA, signB);
+        // If signA != signB, a > b iff signA == 0 (a is positive)
+        gtBool aPos_bNeg = MpcCore.and(signDiff, MpcCore.eq(signA, gtBool.wrap(0)));
+        // If signA == signB, compare as unsigned
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool highGt = gt(a.high, b.high);
+        gtBool highEq = MpcCore.eq(a.high, b.high);
+        gtBool lowGt = gt(a.low, b.low);
+        gtBool unsignedGt = MpcCore.or(highGt, MpcCore.and(highEq, lowGt));
+        gtBool result = MpcCore.or(aPos_bNeg, MpcCore.and(sameSign, unsignedGt));
+        return result;
     }
 
     function le(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
@@ -1624,6 +1614,55 @@ library MpcSignedInt {
 
         return result;
     }
+
+    function shl(gtInt128 memory a, uint8 b) internal returns (gtInt128 memory) {
+        gtInt128 memory result;
+        result.low = shl(a.low, b);
+        result.high = shl(a.high, b);
+        return result;
+    }
+    
+    function shr(gtInt128 memory a, uint8 b) internal returns (gtInt128 memory) {
+        gtInt128 memory result;
+        // If shifting by 128 or more, result is all sign bits
+        gtBool sign = eq(shr(a.high, 63), setPublic64(int64(1)));
+        if (b >= 128) {
+            if (MpcCore.decrypt(sign)) {
+                result.high = setPublic64(int64(type(uint64).max));
+                result.low = setPublic64(int64(type(uint64).max));
+            } else {
+                result.high = setPublic64(int64(0));
+                result.low = setPublic64(int64(0));
+            }
+        } else if (b >= 64) {
+            uint8 shift = b - 64;
+            if (MpcCore.decrypt(sign)) {
+                result.high = setPublic64(int64(type(uint64).max));
+            } else {
+                result.high = setPublic64(int64(0));
+            }
+            result.low = gtInt64.wrap(gtUint64.unwrap(MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a.high)), shift)));
+        } else if (b > 0) {
+            uint64 mask = uint64(type(uint64).max >> (64 - b));
+            result.low = gtInt64.wrap(gtUint64.unwrap(MpcCore.or(
+                MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a.low)), b),
+                MpcCore.shl(MpcCore.and(gtUint64.wrap(gtInt64.unwrap(a.high)), mask), 64 - b)
+            )));
+            if (MpcCore.decrypt(sign)) {
+                uint64 signMask = uint64(type(uint64).max << (64 - b));
+                result.high = or(
+                    gtInt64.wrap(gtUint64.unwrap(MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a.high)), b))),
+                    setPublic64(int64(signMask))
+                );
+            } else {
+                result.high = gtInt64.wrap(gtUint64.unwrap(MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a.high)), b)));
+            }
+        } else {
+            result.low = a.low;
+            result.high = a.high;
+        }
+        return result;
+    } 
 
     // =========== signed 256 bit operations ==============
 
