@@ -1581,22 +1581,11 @@ library MpcSignedInt {
     }
 
     function le(gtInt128 memory a, gtInt128 memory b) internal returns (gtBool) {
-        gtBool highEqual = eq(a.high, b.high);
-        gtBool highLess = lt(a.high, b.high);
-        gtBool lowLessOrEqual = le(a.low, b.low);
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Mux(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SBOOL_T,
-                        MPC_TYPE.SBOOL_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtBool.unwrap(highEqual),
-                    gtBool.unwrap(lowLessOrEqual),
-                    gtBool.unwrap(highLess)
-                )
-            );
+        gtBool highLt = lt(a.high, b.high); // signed 64-bit
+        gtBool highEq = eq(a.high, b.high);
+        // Compare low as unsigned if high parts are equal
+        gtBool lowLe = MpcCore.le(gtUint64.wrap(gtInt64.unwrap(a.low)), gtUint64.wrap(gtInt64.unwrap(b.low)));
+        return MpcCore.or(highLt, MpcCore.and(highEq, lowLe));
     }
 
     function decrypt(gtInt128 memory ct) internal returns (int128) {
