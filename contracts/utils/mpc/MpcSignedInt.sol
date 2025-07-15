@@ -1422,18 +1422,40 @@ library MpcSignedInt {
         return result;
     }
 
+    function fromUint128(gtUint128 memory a) internal pure returns (gtInt128 memory) {
+        return gtInt128({
+            high: gtInt64.wrap(gtUint64.unwrap(a.high)),
+            low: gtInt64.wrap(gtUint64.unwrap(a.low))
+        });
+    }
+
     function mul(
         gtInt128 memory a,
         gtInt128 memory b
     ) internal returns (gtInt128 memory) {
-        gtInt128 memory result;
+        // Determine if a and b are negative (sign bit of high part)
+        gtBool aNegative = MpcCore.lt(a.high, MpcCore.setPublic64(int64(0)));
+        gtBool bNegative = MpcCore.lt(b.high, MpcCore.setPublic64(int64(0)));
 
-        // For simplicity, we'll use a basic multiplication
-        // In a real implementation, you'd want to handle overflow properly
-        result.low = mul(a.low, b.low);
-        result.high = add(mul(a.high, b.low), mul(a.low, b.high));
+        // Get absolute values
+        gtInt128 memory aAbs = MpcCore.mux(aNegative, negate(a), a);
+        gtInt128 memory bAbs = MpcCore.mux(bNegative, negate(b), b);
 
-        return result;
+        // Convert to unsigned for multiplication
+        gtUint128 memory aAbsU = toUint128(aAbs);
+        gtUint128 memory bAbsU = toUint128(bAbs);
+
+        // Use unsigned 128-bit multiplication
+        gtUint128 memory unsignedResultU = MpcCore.mul(aAbsU, bAbsU);
+
+        // Convert back to signed
+        gtInt128 memory unsignedResult = fromUint128(unsignedResultU);
+
+        // Result is negative if exactly one operand is negative
+        gtBool resultNegative = MpcCore.xor(aNegative, bNegative);
+
+        // Apply sign
+        return MpcCore.mux(resultNegative, unsignedResult, negate(unsignedResult));
     }
 
     function div(
