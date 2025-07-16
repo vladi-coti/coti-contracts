@@ -70,6 +70,8 @@ export interface SignedInt128TestsContractInterface extends Interface {
       | "orResult"
       | "orTest"
       | "resetState"
+      | "setPublicResult"
+      | "setPublicTest"
       | "subResult"
       | "subTest"
       | "validateCiphertextTest"
@@ -165,6 +167,14 @@ export interface SignedInt128TestsContractInterface extends Interface {
     functionFragment: "resetState",
     values?: undefined
   ): string;
+  encodeFunctionData(
+    functionFragment: "setPublicResult",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setPublicTest",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "subResult", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "subTest",
@@ -235,6 +245,14 @@ export interface SignedInt128TestsContractInterface extends Interface {
   decodeFunctionResult(functionFragment: "orResult", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "orTest", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "resetState", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setPublicResult",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setPublicTest",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "subResult", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "subTest", data: BytesLike): Result;
   decodeFunctionResult(
@@ -416,6 +434,14 @@ export interface SignedInt128TestsContract extends BaseContract {
   >;
 
   resetState: TypedContractMethod<[], [void], "nonpayable">;
+
+  setPublicResult: TypedContractMethod<[], [bigint], "view">;
+
+  setPublicTest: TypedContractMethod<
+    [value: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
 
   subResult: TypedContractMethod<[], [bigint], "view">;
 
@@ -600,6 +626,12 @@ export interface SignedInt128TestsContract extends BaseContract {
   getFunction(
     nameOrSignature: "resetState"
   ): TypedContractMethod<[], [void], "nonpayable">;
+  getFunction(
+    nameOrSignature: "setPublicResult"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "setPublicTest"
+  ): TypedContractMethod<[value: BigNumberish], [void], "nonpayable">;
   getFunction(
     nameOrSignature: "subResult"
   ): TypedContractMethod<[], [bigint], "view">;

@@ -24,6 +24,7 @@ contract SignedInt256TestsContract {
     utInt256 public offBoardCombinedResult;
     int256 public onBoardResult1;
     int256 public onBoardResult2;
+    int256 public setPublicResult;
 
     function resetState() public {
         validateResult = 0;
@@ -173,5 +174,11 @@ contract SignedInt256TestsContract {
         onBoardResult2 = MpcCore.decrypt(
             MpcCore.onBoard(offBoardCombinedResult.ciphertext)
         );
+    }
+
+    function setPublicTest(int256 value) public {
+        setPublicResult = 0;
+        gtInt256 memory gt = MpcCore.setPublic256(value);
+        setPublicResult = MpcCore.decrypt(gt);
     }
 } 

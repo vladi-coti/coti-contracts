@@ -24,6 +24,7 @@ contract SignedInt128TestsContract {
     utInt128 public offBoardCombinedResult;
     int128 public onBoardResult1;
     int128 public onBoardResult2;
+    int128 public setPublicResult;
 
     // Reset function to clear all state and potentially help with state pollution
     function resetState() public {
@@ -186,5 +187,11 @@ contract SignedInt128TestsContract {
         onBoardResult2 = MpcCore.decrypt(
             MpcCore.onBoard(offBoardCombinedResult.ciphertext)
         );
+    }
+
+    function setPublicTest(int128 value) public {
+        setPublicResult = 0;
+        gtInt128 memory gt = MpcCore.setPublic128(value);
+        setPublicResult = MpcCore.decrypt(gt);
     }
 }

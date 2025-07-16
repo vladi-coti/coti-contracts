@@ -1343,6 +1343,27 @@ describe("MPC Core - signed 128-bit integers", function () {
       expect(decryptedInt).to.equal(-2000000000n)
     })
   })
+
+  describe("setPublic for signed 128-bit integers", function () {
+    const testCases = [
+      0n,
+      1n,
+      -1n,
+      123456789012345n,
+      -98765432109876n,
+      (1n << 127n) - 1n, // max int128
+      -(1n << 127n),     // min int128
+    ];
+
+    for (const value of testCases) {
+      it(`Should setPublic and decrypt ${value}`, async function () {
+        const { contract } = deployment;
+        await (await contract.setPublicTest(value)).wait();
+        const result = await contract.setPublicResult();
+        expect(result).to.equal(value);
+      });
+    }
+  });
 })
 
 describe("Edge cases for signed 128-bit arithmetic", function () {

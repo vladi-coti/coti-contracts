@@ -13,6 +13,7 @@ function randomSigned256() {
       // Two's complement conversion for negative numbers
       unsigned = unsigned - (1n << 256n)
   }
+
   return unsigned
 }
 
@@ -36,26 +37,35 @@ describe("MPC Core - signed 256-bit integers", function () {
   describe("Validating encrypted signed 256-bit integers", function () {
     it("Should validate positive signed 256-bit integers", async function () {
       const { contract, contractAddress, owner } = deployment
+
       const testValue = 1234567890123456789012345678901234567890n
       const itValue = await owner.encryptInt256(
         testValue,
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
       )
+
       await (await contract.validateCiphertextTest(itValue)).wait()
+
       const decryptedInt = await contract.validateResult()
+
       expect(decryptedInt).to.equal(testValue)
     })
+
     it("Should validate negative signed 256-bit integers", async function () {
       const { contract, contractAddress, owner } = deployment
+
       const testValue = -987654321098765432109876543210987654321n
       const itValue = await owner.encryptInt256(
         testValue,
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
       )
+
       await (await contract.validateCiphertextTest(itValue)).wait()
+
       const decryptedInt = await contract.validateResult()
+
       expect(decryptedInt).to.equal(testValue)
     })
   })
@@ -63,224 +73,336 @@ describe("MPC Core - signed 256-bit integers", function () {
   describe("Adding signed 256-bit integers", function () {
     it("Should encrypt, add and decrypt two positive signed 256-bit integers", async function () {
       const { contract } = deployment
-      await (await contract.addTest(1000000000000000000000000000000000000000n, 2000000000000000000000000000000000000000n)).wait()
+
+      await (await contract.addTest(10000000000000000000000000000000000n, 20000000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.addResult()
-      expect(decryptedInt).to.equal(3000000000000000000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(30000000000000000000000000000000000n)
     })
+
     it("Should encrypt, add and decrypt two negative signed 256-bit integers", async function () {
       const { contract } = deployment
-      await (await contract.addTest(-1000000000000000000000000000000000000000n, -2000000000000000000000000000000000000000n)).wait()
+
+      await (await contract.addTest(-10000000000000000000000000000000000n, -20000000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.addResult()
-      expect(decryptedInt).to.equal(-3000000000000000000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(-30000000000000000000000000000000000n)
     })
+
     it("Should encrypt, add and decrypt a positive and negative signed 256-bit integer", async function () {
       const { contract } = deployment
-      await (await contract.addTest(5000000000000000000000000000000000000000n, -3000000000000000000000000000000000000000n)).wait()
+
+      await (await contract.addTest(50000000000000000000000000000000000n, -30000000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.addResult()
-      expect(decryptedInt).to.equal(2000000000000000000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(20000000000000000000000000000000000n)
     })
+
     it("Should encrypt, add and decrypt a negative and positive signed 256-bit integer", async function () {
       const { contract } = deployment
-      await (await contract.addTest(-8000000000000000000000000000000000000000n, 3000000000000000000000000000000000000000n)).wait()
+
+      await (await contract.addTest(-80000000000000000000000000000000000n, 30000000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.addResult()
-      expect(decryptedInt).to.equal(-5000000000000000000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(-50000000000000000000000000000000000n)
     })
   })
 
-  // Subtraction
   describe("Subtracting signed 256-bit integers", function () {
     it("Should encrypt, subtract and decrypt two positive signed 256-bit integers", async function () {
       const { contract } = deployment
-      await (await contract.subTest(5000000000000000000000000000000000000000n, 2000000000000000000000000000000000000000n)).wait()
+
+      await (await contract.subTest(50000000000000000000000000000000000n, 20000000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.subResult()
-      expect(decryptedInt).to.equal(3000000000000000000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(30000000000000000000000000000000000n)
     })
+
     it("Should encrypt, subtract and decrypt two negative signed 256-bit integers", async function () {
-      const { contract } = deployment
-      await (await contract.subTest(-5000000000000000000000000000000000000000n, -2000000000000000000000000000000000000000n)).wait()
+      // Deploy fresh contract to avoid state pollution
+      const freshDeployment = await deploy()
+      const { contract } = freshDeployment
+
+      await (await contract.subTest(-50000000000000000000000000000000000n, -20000000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.subResult()
-      expect(decryptedInt).to.equal(-3000000000000000000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(-30000000000000000000000000000000000n)
     })
+
     it("Should encrypt, subtract and decrypt a positive and negative signed 256-bit integer", async function () {
-      const { contract } = deployment
-      await (await contract.subTest(5000000000000000000000000000000000000000n, -3000000000000000000000000000000000000000n)).wait()
+      // Deploy fresh contract to avoid state pollution
+      const freshDeployment = await deploy()
+      const { contract } = freshDeployment
+
+      await (await contract.subTest(50000000000000000000000000000000000n, -30000000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.subResult()
-      expect(decryptedInt).to.equal(8000000000000000000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(80000000000000000000000000000000000n)
     })
+
     it("Should encrypt, subtract and decrypt a negative and positive signed 256-bit integer", async function () {
-      const { contract } = deployment
-      await (await contract.subTest(-8000000000000000000000000000000000000000n, 3000000000000000000000000000000000000000n)).wait()
+      // Deploy fresh contract to avoid state pollution
+      const freshDeployment = await deploy()
+      const { contract } = freshDeployment
+
+      await (await contract.subTest(-80000000000000000000000000000000000n, 30000000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.subResult()
-      expect(decryptedInt).to.equal(-11000000000000000000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(-110000000000000000000000000000000000n)
     })
   })
 
-  // Multiplication
   describe("Multiplying signed 256-bit integers", function () {
     it("Should encrypt, multiply and decrypt two positive signed 256-bit integers", async function () {
       const { contract } = deployment
-      await (await contract.mulTest(1000000000000000n, 2000000000000n)).wait()
+
+      await (await contract.mulTest(10000000000000000n, 20000n)).wait()
+
       const decryptedInt = await contract.mulResult()
-      expect(decryptedInt).to.equal(2000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(200000000000000000000n)
     })
+
     it("Should encrypt, multiply and decrypt two negative signed 256-bit integers", async function () {
       const { contract } = deployment
-      await (await contract.mulTest(-1000000000000000n, -3000000000000n)).wait()
+
+      await (await contract.mulTest(-10000000000000000n, -30000n)).wait()
+
       const decryptedInt = await contract.mulResult()
-      expect(decryptedInt).to.equal(3000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(300000000000000000000n)
     })
+
     it("Should encrypt, multiply and decrypt a positive and negative signed 256-bit integer", async function () {
       const { contract } = deployment
-      await (await contract.mulTest(2000000000000000n, -1500000000000n)).wait()
+
+      await (await contract.mulTest(20000000000000000n, -15000n)).wait()
+
       const decryptedInt = await contract.mulResult()
-      expect(decryptedInt).to.equal(-3000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(-300000000000000000000n)
     })
+
     it("Should encrypt, multiply and decrypt a negative and positive signed 256-bit integer", async function () {
       const { contract } = deployment
-      await (await contract.mulTest(-2000000000000000n, 1500000000000n)).wait()
+
+      await (await contract.mulTest(-20000000000000000n, 15000n)).wait()
+
       const decryptedInt = await contract.mulResult()
-      expect(decryptedInt).to.equal(-3000000000000000000000000n)
+
+      expect(decryptedInt).to.equal(-300000000000000000000n)
     })
   })
 
-  // Division
   describe("Dividing signed 256-bit integers", function () {
     it("Should encrypt, divide and decrypt two positive signed 256-bit integers", async function () {
       const { contract } = deployment
-      await (await contract.divTest(6000000000000000000000000n, 2000000000000000000000000n)).wait()
+
+      await (await contract.divTest(60000000000000000000000000000000n, 20000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.divResult()
+
       expect(decryptedInt).to.equal(3n)
     })
+
     it("Should encrypt, divide and decrypt two negative signed 256-bit integers", async function () {
       const { contract } = deployment
-      await (await contract.divTest(-9000000000000000000000000n, -3000000000000000000000000n)).wait()
+
+      await (await contract.divTest(-90000000000000000000000000000000n, -30000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.divResult()
+
       expect(decryptedInt).to.equal(3n)
     })
+
     it("Should encrypt, divide and decrypt a positive and negative signed 256-bit integer", async function () {
       const { contract } = deployment
-      await (await contract.divTest(8000000000000000000000000n, -2000000000000000000000000n)).wait()
+
+      await (await contract.divTest(80000000000000000000000000000000n, -20000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.divResult()
+
       expect(decryptedInt).to.equal(-4n)
     })
+
     it("Should encrypt, divide and decrypt a negative and positive signed 256-bit integer", async function () {
       const { contract } = deployment
-      await (await contract.divTest(-12000000000000000000000000n, 3000000000000000000000000n)).wait()
+
+      await (await contract.divTest(-120000000000000000000000000000000n, 30000000000000000000000000000000n)).wait()
+
       const decryptedInt = await contract.divResult()
+
       expect(decryptedInt).to.equal(-4n)
     })
   })
 
-  // Bitwise AND
   describe("AND signed 256-bit integers", function () {
     it("Should encrypt, AND and decrypt two positive signed 256-bit integers", async function () {
       const { contract } = deployment
-      await (await contract.andTest(0xFFFFFFFn, 0x123456789n)).wait()
+
+      const a = 0xFFFFFFFn
+      const b = 0x123456789n
+      await (await contract.andTest(a, b)).wait()
+
       const decryptedInt = await contract.andResult()
-      expect(decryptedInt).to.equal(0x23456789n)
+      expect(decryptedInt).to.equal(BigInt.asIntN(256, a & b))
     })
+
     it("Should encrypt, AND and decrypt two negative signed 256-bit integers", async function () {
-      const { contract } = deployment
+      // Deploy fresh contract to avoid state pollution
+      const freshDeployment = await deploy()
+      const { contract } = freshDeployment
+
       await (await contract.andTest(-1n, -1n)).wait()
+
       const decryptedInt = await contract.andResult()
+
       expect(decryptedInt).to.equal(-1n)
     })
+
     it("Should encrypt, AND and decrypt a positive and negative signed 256-bit integer", async function () {
       const { contract } = deployment
+
       await (await contract.andTest(0xFFFFFFFFn, -1n)).wait()
+
       const decryptedInt = await contract.andResult()
+
       expect(decryptedInt).to.equal(0xFFFFFFFFn)
     })
+
     it("Should encrypt, AND and decrypt a negative and positive signed 256-bit integer", async function () {
-      const { contract } = deployment
+      // Deploy fresh contract to avoid state pollution
+      const freshDeployment = await deploy()
+      const { contract } = freshDeployment
+
       await (await contract.andTest(-2n, 1n)).wait()
+
       const decryptedInt = await contract.andResult()
+
       expect(decryptedInt).to.equal(0n)
     })
   })
 
-  // Bitwise OR
   describe("OR signed 256-bit integers", function () {
     it("Should encrypt, OR and decrypt two positive signed 256-bit integers", async function () {
       const { contract } = deployment
+
       await (await contract.orTest(0xF0F0F0F0n, 0x0F0F0F0Fn)).wait()
+
       const decryptedInt = await contract.orResult()
+
       expect(decryptedInt).to.equal(0xFFFFFFFFn)
     })
+
     it("Should encrypt, OR and decrypt two negative signed 256-bit integers", async function () {
       const { contract } = deployment
+
       await (await contract.orTest(-1n, -1n)).wait()
+
       const decryptedInt = await contract.orResult()
+
       expect(decryptedInt).to.equal(-1n)
     })
+
     it("Should encrypt, OR and decrypt a positive and negative signed 256-bit integer", async function () {
       const { contract } = deployment
+
       await (await contract.orTest(1n, -1n)).wait()
+
       const decryptedInt = await contract.orResult()
+
       expect(decryptedInt).to.equal(-1n)
     })
+
     it("Should encrypt, OR and decrypt a negative and positive signed 256-bit integer", async function () {
       const { contract } = deployment
+
       await (await contract.orTest(-2n, 1n)).wait()
+
       const decryptedInt = await contract.orResult()
+
       expect(decryptedInt).to.equal(-1n)
     })
   })
 
-  // Bitwise XOR
   describe("XOR signed 256-bit integers", function () {
     it("Should encrypt, XOR and decrypt two positive signed 256-bit integers", async function () {
       const { contract } = deployment
+
       await (await contract.xorTest(0xAAAAAAAAn, 0x55555555n)).wait()
+
       const decryptedInt = await contract.xorResult()
+
       expect(decryptedInt).to.equal(0xFFFFFFFFn)
     })
+
     it("Should encrypt, XOR and decrypt two negative signed 256-bit integers", async function () {
       const { contract } = deployment
+
       await (await contract.xorTest(-1n, -1n)).wait()
+
       const decryptedInt = await contract.xorResult()
+
       expect(decryptedInt).to.equal(0n)
     })
+
     it("Should encrypt, XOR and decrypt a positive and negative signed 256-bit integer", async function () {
       const { contract } = deployment
+
       await (await contract.xorTest(1n, -1n)).wait()
+
       const decryptedInt = await contract.xorResult()
+
       expect(decryptedInt).to.equal(-2n)
     })
+
     it("Should encrypt, XOR and decrypt a negative and positive signed 256-bit integer", async function () {
       const { contract } = deployment
+
       await (await contract.xorTest(-2n, 1n)).wait()
+
       const decryptedInt = await contract.xorResult()
+
       expect(decryptedInt).to.equal(-1n)
     })
   })
 
-  // EQ
   describe("EQ signed 256-bit integers", function () {
+    // 1. Both numbers < 2^128
     it("should return true for equal small positives", async function () {
       const { contract } = deployment
-      await (await contract.eqTest(123456789n, 123456789n)).wait()
+      await (await contract.eqTest(123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
       expect(await contract.eqResult()).to.equal(true)
     })
     it("should return false for different small positives", async function () {
       const { contract } = deployment
-      await (await contract.eqTest(123456789n, 987654321n)).wait()
+      await (await contract.eqTest(123456789012345678901234567890n, 987654321098765432109876543210n)).wait()
       expect(await contract.eqResult()).to.equal(false)
     })
     it("should return true for equal small negatives", async function () {
       const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -123456789n)).wait()
+      await (await contract.eqTest(-123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
       expect(await contract.eqResult()).to.equal(true)
     })
     it("should return false for different small negatives", async function () {
       const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -987654321n)).wait()
+      await (await contract.eqTest(-123456789012345678901234567890n, -987654321098765432109876543210n)).wait()
       expect(await contract.eqResult()).to.equal(false)
     })
+
+    // 2. One < 2^128, one between 2^128 and 2^256
     it("should return false for small positive vs large positive", async function () {
       const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
       await (await contract.eqTest(small, large)).wait()
       expect(await contract.eqResult()).to.equal(false)
       await (await contract.eqTest(large, small)).wait()
@@ -288,8 +410,8 @@ describe("MPC Core - signed 256-bit integers", function () {
     })
     it("should return false for small negative vs large negative", async function () {
       const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
       await (await contract.eqTest(small, large)).wait()
       expect(await contract.eqResult()).to.equal(false)
       await (await contract.eqTest(large, small)).wait()
@@ -297,8 +419,8 @@ describe("MPC Core - signed 256-bit integers", function () {
     })
     it("should return false for small positive vs large negative", async function () {
       const { contract } = deployment
-      const small = 123456789n
-      const large = -(2n ** 200n) - 123456789n
+      const small = 123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
       await (await contract.eqTest(small, large)).wait()
       expect(await contract.eqResult()).to.equal(false)
       await (await contract.eqTest(large, small)).wait()
@@ -306,1004 +428,1102 @@ describe("MPC Core - signed 256-bit integers", function () {
     })
     it("should return false for small negative vs large positive", async function () {
       const { contract } = deployment
-      const small = -123456789n
-      const large = (2n ** 200n) + 123456789n
+      const small = -123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
       await (await contract.eqTest(small, large)).wait()
       expect(await contract.eqResult()).to.equal(false)
       await (await contract.eqTest(large, small)).wait()
       expect(await contract.eqResult()).to.equal(false)
     })
+
+    // 3. Both above 2^128
     it("should return true for equal large positives", async function () {
       const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
+      const a = (2n ** 200n) + 123456789012345678901234567890n
       await (await contract.eqTest(a, a)).wait()
       expect(await contract.eqResult()).to.equal(true)
     })
     it("should return false for different large positives", async function () {
       const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = (2n ** 200n) + 987654321n
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = (2n ** 200n) + 987654321098765432109876543210n
       await (await contract.eqTest(a, b)).wait()
       expect(await contract.eqResult()).to.equal(false)
     })
     it("should return true for equal large negatives", async function () {
       const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
       await (await contract.eqTest(a, a)).wait()
       expect(await contract.eqResult()).to.equal(true)
     })
     it("should return false for different large negatives", async function () {
       const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      const b = -(2n ** 200n) - 987654321n
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 987654321098765432109876543210n
       await (await contract.eqTest(a, b)).wait()
       expect(await contract.eqResult()).to.equal(false)
     })
     it("should return false for large positive vs large negative", async function () {
       const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
       await (await contract.eqTest(a, b)).wait()
       expect(await contract.eqResult()).to.equal(false)
       await (await contract.eqTest(b, a)).wait()
       expect(await contract.eqResult()).to.equal(false)
     })
+
+    // 4. Positive vs positive, left small/right small
     it("should return false for small positive vs large positive", async function () {
       const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
       await (await contract.eqTest(small, large)).wait()
       expect(await contract.eqResult()).to.equal(false)
       await (await contract.eqTest(large, small)).wait()
       expect(await contract.eqResult()).to.equal(false)
     })
+
+    // 5. Positive vs negative, left small/right small, left negative/positive
     it("should return false for small positive vs small negative", async function () {
       const { contract } = deployment
-      await (await contract.eqTest(123456789n, -123456789n)).wait()
+      await (await contract.eqTest(123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
       expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(-123456789n, 123456789n)).wait()
+      await (await contract.eqTest(-123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
       expect(await contract.eqResult()).to.equal(false)
     })
     it("should return false for large positive vs large negative", async function () {
       const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
       await (await contract.eqTest(a, b)).wait()
       expect(await contract.eqResult()).to.equal(false)
       await (await contract.eqTest(b, a)).wait()
       expect(await contract.eqResult()).to.equal(false)
+    })
+
+    // 6. Negative vs negative, left small/right small
+    it("should return false for small negative vs large negative", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.eqTest(small, large)).wait()
+      expect(await contract.eqResult()).to.equal(false)
+      await (await contract.eqTest(large, small)).wait()
+      expect(await contract.eqResult()).to.equal(false)
+    })
+  })
+
+  describe("NE signed 256-bit integers", function () {
+    // 1. Both numbers < 2^128
+    it("should return false for equal small positives", async function () {
+      const { contract } = deployment
+      await (await contract.neTest(123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
+      expect(await contract.neResult()).to.equal(false)
+    })
+    it("should return true for different small positives", async function () {
+      const { contract } = deployment
+      await (await contract.neTest(123456789012345678901234567890n, 987654321098765432109876543210n)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+    it("should return false for equal small negatives", async function () {
+      const { contract } = deployment
+      await (await contract.neTest(-123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
+      expect(await contract.neResult()).to.equal(false)
+    })
+    it("should return true for different small negatives", async function () {
+      const { contract } = deployment
+      await (await contract.neTest(-123456789012345678901234567890n, -987654321098765432109876543210n)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+
+    // 2. One < 2^128, one between 2^128 and 2^256
+    it("should return true for small positive vs large positive", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.neTest(small, large)).wait()
+      expect(await contract.neResult()).to.equal(true)
+      await (await contract.neTest(large, small)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+    it("should return true for small negative vs large negative", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.neTest(small, large)).wait()
+      expect(await contract.neResult()).to.equal(true)
+      await (await contract.neTest(large, small)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+    it("should return true for small positive vs large negative", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.neTest(small, large)).wait()
+      expect(await contract.neResult()).to.equal(true)
+      await (await contract.neTest(large, small)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+    it("should return true for small negative vs large positive", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.neTest(small, large)).wait()
+      expect(await contract.neResult()).to.equal(true)
+      await (await contract.neTest(large, small)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+
+    // 3. Both above 2^128
+    it("should return false for equal large positives", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.neTest(a, a)).wait()
+      expect(await contract.neResult()).to.equal(false)
+    })
+    it("should return true for different large positives", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = (2n ** 200n) + 987654321098765432109876543210n
+      await (await contract.neTest(a, b)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+    it("should return false for equal large negatives", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.neTest(a, a)).wait()
+      expect(await contract.neResult()).to.equal(false)
+    })
+    it("should return true for different large negatives", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 987654321098765432109876543210n
+      await (await contract.neTest(a, b)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+    it("should return true for large positive vs large negative", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.neTest(a, b)).wait()
+      expect(await contract.neResult()).to.equal(true)
+      await (await contract.neTest(b, a)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+
+    // 4. Positive vs positive, left small/right small
+    it("should return true for small positive vs large positive", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.neTest(small, large)).wait()
+      expect(await contract.neResult()).to.equal(true)
+      await (await contract.neTest(large, small)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+
+    // 5. Positive vs negative, left small/right small, left negative/positive
+    it("should return true for small positive vs small negative", async function () {
+      const { contract } = deployment
+      await (await contract.neTest(123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
+      expect(await contract.neResult()).to.equal(true)
+      await (await contract.neTest(-123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+    it("should return true for large positive vs large negative", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.neTest(a, b)).wait()
+      expect(await contract.neResult()).to.equal(true)
+      await (await contract.neTest(b, a)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+
+    // 6. Negative vs negative, left small/right small
+    it("should return false for small negative vs large negative", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.neTest(small, large)).wait()
+      expect(await contract.neResult()).to.equal(true)
+      await (await contract.neTest(large, small)).wait()
+      expect(await contract.neResult()).to.equal(true)
+    })
+  })
+
+  describe("GT signed 256-bit integers", function () {
+    // 1. Both numbers < 2^128
+    it("should return false for equal small positives", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return false for small positive less than another", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(123456789012345678901234567890n, 987654321098765432109876543210n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return true for small positive greater than another", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(987654321098765432109876543210n, 123456789012345678901234567890n)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+    })
+    it("should return false for equal small negatives", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(-123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return false for small negative less than another", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(-987654321098765432109876543210n, -123456789012345678901234567890n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return true for small negative greater than another (less negative)", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(-123456789012345678901234567890n, -987654321098765432109876543210n)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+    })
+
+    // 2. One < 2^128, one between 2^128 and 2^256
+    it("should return false for small positive vs large positive", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.gtTest(small, large)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+
+      await (await contract.gtTest(large, small)).wait()
+      expect(await contract.gtResult()).to.equal(true)
     })
     it("should return false for small negative vs large negative", async function () {
       const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.gtTest(small, large)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+
+      await (await contract.gtTest(large, small)).wait()
+      expect(await contract.gtResult()).to.equal(false)
     })
-    it("should match equality for random 256-bit numbers", async function () {
+    it("should return true for small positive vs large negative", async function () {
       const { contract } = deployment
-      for (let i = 0; i < 5; i++) {
-        const a = randomSigned256()
-        const b = randomSigned256()
+      const small = 123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.gtTest(small, large)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+      await (await contract.gtTest(large, small)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return false for small negative vs large positive", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.gtTest(small, large)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+
+      await (await contract.gtTest(large, small)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+    })
+
+    // 3. Both above 2^128
+    it("should return false for equal large positives", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.gtTest(a, a)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return false for large positive less than another", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = (2n ** 200n) + 987654321098765432109876543210n
+      await (await contract.gtTest(a, b)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return true for large positive greater than another", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 987654321098765432109876543210n
+      const b = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.gtTest(a, b)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+    })
+    it("should return false for equal large negatives", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.gtTest(a, a)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return false for large negative less than another (more negative)", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 987654321098765432109876543210n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.gtTest(a, b)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return true for large negative greater than another (less negative)", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 987654321098765432109876543210n
+      await (await contract.gtTest(a, b)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+    })
+    it("should return true for large positive vs large negative", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.gtTest(a, b)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+
+      await (await contract.gtTest(b, a)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+
+    // 4. Positive vs positive, left small/right small
+    it("should return false for small positive vs large positive", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.gtTest(small, large)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+      await (await contract.gtTest(large, small)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+    })
+
+    // 5. Positive vs negative, left small/right small, left negative/positive
+    it("should return true for small positive vs small negative", async function () {
+      const { contract } = deployment
+      await (await contract.gtTest(123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+
+      await (await contract.gtTest(-123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+    it("should return true for large positive vs large negative", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.gtTest(a, b)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+
+      await (await contract.gtTest(b, a)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+
+    // 6. Negative vs negative, left small/right small
+    it("should return false for small negative vs large negative", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.gtTest(small, large)).wait()
+      expect(await contract.gtResult()).to.equal(true)
+
+      await (await contract.gtTest(large, small)).wait()
+      expect(await contract.gtResult()).to.equal(false)
+    })
+  })
+
+  describe("LT signed 256-bit integers", function () {
+    it("should return false for equal small positives", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return true for small positive less than another", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(123456789012345678901234567890n, 987654321098765432109876543210n)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    it("should return false for small positive greater than another", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(987654321098765432109876543210n, 123456789012345678901234567890n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return false for equal small negatives", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(-123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return true for small negative less than another", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(-987654321098765432109876543210n, -123456789012345678901234567890n)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    it("should return false for small negative greater than another (less negative)", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(-123456789012345678901234567890n, -987654321098765432109876543210n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    // 2. One < 2^128, one between 2^128 and 2^256
+    it("should return true for small positive vs large positive", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.ltTest(small, large)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+      await (await contract.ltTest(large, small)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return false for small negative vs large negative", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.ltTest(small, large)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+      await (await contract.ltTest(large, small)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    it("should return false for small positive vs large negative", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.ltTest(small, large)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+      await (await contract.ltTest(large, small)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    it("should return true for small negative vs large positive", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.ltTest(small, large)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+      await (await contract.ltTest(large, small)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    // 3. Both above 2^128
+    it("should return false for equal large positives", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.ltTest(a, a)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return true for large positive less than another", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = (2n ** 200n) + 987654321098765432109876543210n
+      await (await contract.ltTest(a, b)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    it("should return false for large positive greater than another", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 987654321098765432109876543210n
+      const b = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.ltTest(a, b)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return false for equal large negatives", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.ltTest(a, a)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return true for large negative less than another (more negative)", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 987654321098765432109876543210n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.ltTest(a, b)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    it("should return false for large negative greater than another (less negative)", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 987654321098765432109876543210n
+      await (await contract.ltTest(a, b)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    it("should return false for large positive vs large negative", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.ltTest(a, b)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+      await (await contract.ltTest(b, a)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    // 4. Positive vs positive, left small/right small
+    it("should return true for small positive vs large positive", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.ltTest(small, large)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+      await (await contract.ltTest(large, small)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+    })
+    // 5. Positive vs negative, left small/right small, left negative/positive
+    it("should return false for small positive vs small negative", async function () {
+      const { contract } = deployment
+      await (await contract.ltTest(123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+      await (await contract.ltTest(-123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    it("should return false for large positive vs large negative", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.ltTest(a, b)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+      await (await contract.ltTest(b, a)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+    // 6. Negative vs negative, left small/right small
+    it("should return false for small negative vs large negative", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.ltTest(small, large)).wait()
+      expect(await contract.ltResult()).to.equal(false)
+      await (await contract.ltTest(large, small)).wait()
+      expect(await contract.ltResult()).to.equal(true)
+    })
+  })
+
+  describe("GE signed 256-bit integers", function () {
+    it("should return true for equal small positives", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return false for small positive less than another", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(123456789012345678901234567890n, 987654321098765432109876543210n)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    it("should return true for small positive greater than another", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(987654321098765432109876543210n, 123456789012345678901234567890n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return true for equal small negatives", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(-123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return false for small negative less than another", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(-987654321098765432109876543210n, -123456789012345678901234567890n)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    it("should return true for small negative greater than another (less negative)", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(-123456789012345678901234567890n, -987654321098765432109876543210n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    // 2. One < 2^128, one between 2^128 and 2^256
+    it("should return false for small positive vs large positive", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.geTest(small, large)).wait()
+      expect(await contract.geResult()).to.equal(false)
+      await (await contract.geTest(large, small)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return true for small negative vs large negative", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.geTest(small, large)).wait()
+      expect(await contract.geResult()).to.equal(true)
+      await (await contract.geTest(large, small)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    it("should return true for small positive vs large negative", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.geTest(small, large)).wait()
+      expect(await contract.geResult()).to.equal(true)
+      await (await contract.geTest(large, small)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    it("should return false for small negative vs large positive", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.geTest(small, large)).wait()
+      expect(await contract.geResult()).to.equal(false)
+      await (await contract.geTest(large, small)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    // 3. Both above 2^128
+    it("should return true for equal large positives", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.geTest(a, a)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return false for large positive less than another", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = (2n ** 200n) + 987654321098765432109876543210n
+      await (await contract.geTest(a, b)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    it("should return true for large positive greater than another", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 987654321098765432109876543210n
+      const b = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.geTest(a, b)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return true for equal large negatives", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.geTest(a, a)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return false for large negative less than another (more negative)", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 987654321098765432109876543210n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.geTest(a, b)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    it("should return true for large negative greater than another (less negative)", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 987654321098765432109876543210n
+      await (await contract.geTest(a, b)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    it("should return true for large positive vs large negative", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.geTest(a, b)).wait()
+      expect(await contract.geResult()).to.equal(true)
+      await (await contract.geTest(b, a)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    // 4. Positive vs positive, left small/right small
+    it("should return false for small positive vs large positive", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.geTest(small, large)).wait()
+      expect(await contract.geResult()).to.equal(false)
+      await (await contract.geTest(large, small)).wait()
+      expect(await contract.geResult()).to.equal(true)
+    })
+    // 5. Positive vs negative, left small/right small, left negative/positive
+    it("should return true for small positive vs small negative", async function () {
+      const { contract } = deployment
+      await (await contract.geTest(123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
+      expect(await contract.geResult()).to.equal(true)
+      await (await contract.geTest(-123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    it("should return true for large positive vs large negative", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.geTest(a, b)).wait()
+      expect(await contract.geResult()).to.equal(true)
+      await (await contract.geTest(b, a)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+    // 6. Negative vs negative, left small/right small
+    it("should return false for small negative vs large negative", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.geTest(small, large)).wait()
+      expect(await contract.geResult()).to.equal(true)
+      await (await contract.geTest(large, small)).wait()
+      expect(await contract.geResult()).to.equal(false)
+    })
+  })
+
+  describe("LE signed 256-bit integers", function () {
+    it("should return true for equal small positives", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return true for small positive less than another", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(123456789012345678901234567890n, 987654321098765432109876543210n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return false for small positive greater than another", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(987654321098765432109876543210n, 123456789012345678901234567890n)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    it("should return true for equal small negatives", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(-123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return true for small negative less than another", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(-987654321098765432109876543210n, -123456789012345678901234567890n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return false for small negative greater than another (less negative)", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(-123456789012345678901234567890n, -987654321098765432109876543210n)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    // 2. One < 2^128, one between 2^128 and 2^256
+    it("should return true for small positive vs large positive", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.leTest(small, large)).wait()
+      expect(await contract.leResult()).to.equal(true)
+      await (await contract.leTest(large, small)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    it("should return false for small negative vs large negative", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.leTest(small, large)).wait()
+      expect(await contract.leResult()).to.equal(false)
+      await (await contract.leTest(large, small)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return false for small positive vs large negative", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.leTest(small, large)).wait()
+      expect(await contract.leResult()).to.equal(false)
+      await (await contract.leTest(large, small)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return true for small negative vs large positive", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.leTest(small, large)).wait()
+      expect(await contract.leResult()).to.equal(true)
+      await (await contract.leTest(large, small)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    // 3. Both above 2^128
+    it("should return true for equal large positives", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.leTest(a, a)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return true for large positive less than another", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = (2n ** 200n) + 987654321098765432109876543210n
+      await (await contract.leTest(a, b)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return false for large positive greater than another", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 987654321098765432109876543210n
+      const b = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.leTest(a, b)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    it("should return true for equal large negatives", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.leTest(a, a)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return true for large negative less than another (more negative)", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 987654321098765432109876543210n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.leTest(a, b)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return false for large negative greater than another (less negative)", async function () {
+      const { contract } = deployment
+      const a = -(2n ** 200n) - 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 987654321098765432109876543210n
+      await (await contract.leTest(a, b)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    it("should return false for large positive vs large negative", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.leTest(a, b)).wait()
+      expect(await contract.leResult()).to.equal(false)
+      await (await contract.leTest(b, a)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    // 4. Positive vs positive, left small/right small
+    it("should return true for small positive vs large positive", async function () {
+      const { contract } = deployment
+      const small = 123456789012345678901234567890n
+      const large = (2n ** 200n) + 123456789012345678901234567890n
+      await (await contract.leTest(small, large)).wait()
+      expect(await contract.leResult()).to.equal(true)
+      await (await contract.leTest(large, small)).wait()
+      expect(await contract.leResult()).to.equal(false)
+    })
+    // 5. Positive vs negative, left small/right small, left negative/positive
+    it("should return false for small positive vs small negative", async function () {
+      const { contract } = deployment
+      await (await contract.leTest(123456789012345678901234567890n, -123456789012345678901234567890n)).wait()
+      expect(await contract.leResult()).to.equal(false)
+      await (await contract.leTest(-123456789012345678901234567890n, 123456789012345678901234567890n)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    it("should return false for large positive vs large negative", async function () {
+      const { contract } = deployment
+      const a = (2n ** 200n) + 123456789012345678901234567890n
+      const b = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.leTest(a, b)).wait()
+      expect(await contract.leResult()).to.equal(false)
+      await (await contract.leTest(b, a)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+    // 6. Negative vs negative, left small/right small
+    it("should return false for small negative vs large negative", async function () {
+      const { contract } = deployment
+      const small = -123456789012345678901234567890n
+      const large = -(2n ** 200n) - 123456789012345678901234567890n
+      await (await contract.leTest(small, large)).wait()
+      expect(await contract.leResult()).to.equal(false)
+      await (await contract.leTest(large, small)).wait()
+      expect(await contract.leResult()).to.equal(true)
+    })
+  })
+
+  describe("Offboard signed 256-bit integers", function () {
+    it("Should offboard positive signed 256-bit integers", async function () {
+      const { contract } = deployment
+
+      await (await contract.offBoardTest(10000000000000000000000000000000000n, 20000000000000000000000000000000000n, 30000000000000000000000000000000000n)).wait()
+
+      await (await contract.onBoardTest()).wait()
+
+      const decryptedInt1 = await contract.onBoardResult1()
+      const decryptedInt2 = await contract.onBoardResult2()
+
+      expect(decryptedInt1).to.equal(10000000000000000000000000000000000n)
+      expect(decryptedInt2).to.equal(30000000000000000000000000000000000n)
+    })
+
+    it("Should decrypt the positive signed 256-bit integers", async function () {
+      const { contract, owner } = deployment
+
+      const encryptedInt = await contract.offBoardToUserResult()
+
+      const decryptedInt = await owner.decryptInt256(encryptedInt)
+
+      expect(decryptedInt).to.equal(20000000000000000000000000000000000n)
+    })
+
+    it("Should offboard negative signed 256-bit integers", async function () {
+      const { contract } = deployment
+
+      await (await contract.offBoardTest(-10000000000000000000000000000000000n, -20000000000000000000000000000000000n, -30000000000000000000000000000000000n)).wait()
+
+      await (await contract.onBoardTest()).wait()
+
+      const decryptedInt1 = await contract.onBoardResult1()
+      const decryptedInt2 = await contract.onBoardResult2()
+
+      expect(decryptedInt1).to.equal(-10000000000000000000000000000000000n)
+      expect(decryptedInt2).to.equal(-30000000000000000000000000000000000n)
+    })
+
+    it("Should decrypt the negative signed 256-bit integers", async function () {
+      const { contract, owner } = deployment
+
+      const encryptedInt = await contract.offBoardToUserResult()
+
+      const decryptedInt = await owner.decryptInt256(encryptedInt)
+
+      expect(decryptedInt).to.equal(-20000000000000000000000000000000000n)
+    })
+  })
+
+  describe("Edge cases for signed 256-bit arithmetic", function () {
+    let deployment: Awaited<ReturnType<typeof deploy>>
+    before(async function () { deployment = await deploy() })
+  
+    const MAX = (1n << 255n) - 1n
+    const MIN = -(1n << 255n)
+    const testCases = [
+      { a: 0n, b: 0n },
+      { a: 1n, b: 0n },
+      { a: 0n, b: 1n },
+      { a: -1n, b: 0n },
+      { a: 0n, b: -1n },
+      { a: 1n, b: -1n },
+      { a: -1n, b: 1n },
+      { a: MAX, b: 1n },
+      { a: MIN, b: -1n },
+      { a: MAX, b: -1n },
+      { a: MIN, b: 1n },
+      { a: MAX, b: MAX },
+      { a: MIN, b: MIN },
+      { a: MAX, b: MIN },
+      { a: MIN, b: MAX },
+      { a: 123456789012345678901234567890n, b: -987654321098765432109876543210n },
+      { a: -987654321098765432109876543210n, b: 123456789012345678901234567890n },
+    ]
+  
+    for (const { a, b } of testCases) {
+      it(`addTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.addTest(a, b)).wait()
+        const decryptedInt = await contract.addResult()
+        expect(decryptedInt).to.equal(a + b)
+      })
+      it(`subTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.subTest(a, b)).wait()
+        const decryptedInt = await contract.subResult()
+        expect(decryptedInt).to.equal(a - b)
+      })
+      it(`mulTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.mulTest(a, b)).wait()
+        const decryptedInt = await contract.mulResult()
+        expect(decryptedInt).to.equal(a * b)
+      })
+      it(`divTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        // Solidity/contract may return 0 for div by 0, so handle that
+        let expected: bigint
+        if (b === 0n) expected = 0n
+        else expected = a / b
+        await (await contract.divTest(a, b)).wait()
+        const decryptedInt = await contract.divResult()
+        expect(decryptedInt).to.equal(expected)
+      })
+    }
+  })
+  
+  describe("Fuzz testing signed 256-bit arithmetic", function () {
+    let deployment: Awaited<ReturnType<typeof deploy>>
+    before(async function () { deployment = await deploy() })
+  
+    for (let i = 0; i < 10; i++) {
+      const a = randomSigned256()
+      const b = randomSigned256()
+      it(`fuzz addTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.addTest(a, b)).wait()
+        const decryptedInt = await contract.addResult()
+        expect(decryptedInt).to.equal(a + b)
+      })
+      it(`fuzz subTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.subTest(a, b)).wait()
+        const decryptedInt = await contract.subResult()
+        expect(decryptedInt).to.equal(a - b)
+      })
+      it(`fuzz mulTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.mulTest(a, b)).wait()
+        const decryptedInt = await contract.mulResult()
+        expect(decryptedInt).to.equal(a * b)
+      })
+      it(`fuzz divTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        // Avoid division by zero
+        if (b === 0n) return
+        await (await contract.divTest(a, b)).wait()
+        const decryptedInt = await contract.divResult()
+        expect(decryptedInt).to.equal(a / b)
+      })
+      it(`fuzz andTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.andTest(a, b)).wait()
+        const decryptedInt = await contract.andResult()
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a & b))
+      })
+      it(`fuzz orTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.orTest(a, b)).wait()
+        const decryptedInt = await contract.orResult()
+        expect(decryptedInt).to.equal(a | b)
+      })
+      it(`fuzz xorTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.xorTest(a, b)).wait()
+        const decryptedInt = await contract.xorResult()
+        expect(decryptedInt).to.equal(a ^ b)
+      })
+      it(`fuzz eqTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
         await (await contract.eqTest(a, b)).wait()
         expect(await contract.eqResult()).to.equal(a === b)
         await (await contract.eqTest(a, a)).wait()
         expect(await contract.eqResult()).to.equal(true)
-      }
-    })
-  })
-
-  // NE
-  describe("NE signed 256-bit integers", function () {
-    it("should return false for equal small positives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, 123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for different small positives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, 987654321n)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return false for equal small negatives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for different small negatives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -987654321n)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return true for small positive vs large positive", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small negative vs large negative", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small positive vs large negative", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small negative vs large positive", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for equal large positives", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return true for different large positives", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = (2n ** 200n) + 987654321n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for equal large negatives", async function () {
-      const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return true for different large negatives", async function () {
-      const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      const b = -(2n ** 200n) - 987654321n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for large positive vs large negative", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(b, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small positive vs large positive", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small positive vs small negative", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, -123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(-123456789n, 123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for large positive vs large negative", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(b, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small negative vs large negative", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should match inequality for random 256-bit numbers", async function () {
-      const { contract } = deployment
-      for (let i = 0; i < 5; i++) {
-        const a = randomSigned256()
-        const b = randomSigned256()
-        await (await contract.eqTest(a, b)).wait()
-        expect(await contract.eqResult()).to.equal(a !== b)
-      }
-    })
-  })
-
-  // GT
-  describe("GT signed 256-bit integers", function () {
-    it("should return false for equal small positives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, 123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for different small positives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, 987654321n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for equal small negatives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for different small negatives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -987654321n)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return false for small positive vs large positive", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small negative vs large negative", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs large negative", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small negative vs large positive", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for equal large positives", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for different large positives", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = (2n ** 200n) + 987654321n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for equal large negatives", async function () {
-      const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for different large negatives", async function () {
-      const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      const b = -(2n ** 200n) - 987654321n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return true for large positive vs large negative", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-      await (await contract.eqTest(b, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs large positive", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs small negative", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, -123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(-123456789n, 123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for large positive vs large negative", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-      await (await contract.eqTest(b, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small negative vs large negative", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should match greater than for random 256-bit numbers", async function () {
-      const { contract } = deployment
-      for (let i = 0; i < 5; i++) {
-        const a = randomSigned256()
-        const b = randomSigned256()
-        await (await contract.eqTest(a, b)).wait()
-        expect(await contract.eqResult()).to.equal(false)
-        await (await contract.gtTest(a, b)).wait()
-        expect(await contract.gtResult()).to.equal(a > b)
-        await (await contract.gtTest(b, a)).wait()
-        expect(await contract.gtResult()).to.equal(b > a)
-      }
-    })
-  })
-
-  // LT
-  describe("LT signed 256-bit integers", function () {
-    it("should return false for equal small positives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, 123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for different small positives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, 987654321n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for equal small negatives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for different small negatives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -987654321n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small positive vs large positive", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small negative vs large negative", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs large negative", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small negative vs large positive", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for equal large positives", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for different large positives", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = (2n ** 200n) + 987654321n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for equal large negatives", async function () {
-      const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for different large negatives", async function () {
-      const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      const b = -(2n ** 200n) - 987654321n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return true for large positive vs large negative", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-      await (await contract.eqTest(b, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs large positive", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs small negative", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, -123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(-123456789n, 123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for large positive vs large negative", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-      await (await contract.eqTest(b, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small negative vs large negative", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should match less than for random 256-bit numbers", async function () {
-      const { contract } = deployment
-      for (let i = 0; i < 5; i++) {
-        const a = randomSigned256()
-        const b = randomSigned256()
-        await (await contract.eqTest(a, b)).wait()
-        expect(await contract.eqResult()).to.equal(false)
-        await (await contract.ltTest(a, b)).wait()
-        expect(await contract.ltResult()).to.equal(a < b)
-        await (await contract.ltTest(b, a)).wait()
-        expect(await contract.ltResult()).to.equal(b < a)
-      }
-    })
-  })
-
-  // GE
-  describe("GE signed 256-bit integers", function () {
-    it("should return true for equal small positives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, 123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return false for different small positives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, 987654321n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for equal small negatives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return false for different small negatives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -987654321n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small positive vs large positive", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small negative vs large negative", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs large negative", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small negative vs large positive", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for equal large positives", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return false for different large positives", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = (2n ** 200n) + 987654321n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for equal large negatives", async function () {
-      const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return false for different large negatives", async function () {
-      const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      const b = -(2n ** 200n) - 987654321n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for large positive vs large negative", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-      await (await contract.eqTest(b, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs large positive", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs small negative", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, -123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(-123456789n, 123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for large positive vs large negative", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-      await (await contract.eqTest(b, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small negative vs large negative", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should match greater than or equal for random 256-bit numbers", async function () {
-      const { contract } = deployment
-      for (let i = 0; i < 5; i++) {
-        const a = randomSigned256()
-        const b = randomSigned256()
-        await (await contract.eqTest(a, b)).wait()
-        expect(await contract.eqResult()).to.equal(a === b)
-        await (await contract.geTest(a, b)).wait()
-        expect(await contract.geResult()).to.equal(a >= b)
-        await (await contract.geTest(b, a)).wait()
-        expect(await contract.geResult()).to.equal(b >= a)
-      }
-    })
-  })
-
-  // LE
-  describe("LE signed 256-bit integers", function () {
-    it("should return true for equal small positives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, 123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return false for different small positives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, 987654321n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for equal small negatives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return false for different small negatives", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(-123456789n, -987654321n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small positive vs large positive", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small negative vs large negative", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs large negative", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for small negative vs large positive", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for equal large positives", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return false for different large positives", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = (2n ** 200n) + 987654321n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for equal large negatives", async function () {
-      const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it("should return false for different large negatives", async function () {
-      const { contract } = deployment
-      const a = -(2n ** 200n) - 123456789n
-      const b = -(2n ** 200n) - 987654321n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for large positive vs large negative", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-      await (await contract.eqTest(b, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs large positive", async function () {
-      const { contract } = deployment
-      const small = 123456789n
-      const large = (2n ** 200n) + 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small positive vs small negative", async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(123456789n, -123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(-123456789n, 123456789n)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return true for large positive vs large negative", async function () {
-      const { contract } = deployment
-      const a = (2n ** 200n) + 123456789n
-      const b = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-      await (await contract.eqTest(b, a)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should return false for small negative vs large negative", async function () {
-      const { contract } = deployment
-      const small = -123456789n
-      const large = -(2n ** 200n) - 123456789n
-      await (await contract.eqTest(small, large)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-      await (await contract.eqTest(large, small)).wait()
-      expect(await contract.eqResult()).to.equal(false)
-    })
-    it("should match less than or equal for random 256-bit numbers", async function () {
-      const { contract } = deployment
-      for (let i = 0; i < 5; i++) {
-        const a = randomSigned256()
-        const b = randomSigned256()
-        await (await contract.eqTest(a, b)).wait()
-        expect(await contract.eqResult()).to.equal(a === b)
+      })
+      it(`fuzz neTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.neTest(a, b)).wait()
+        expect(await contract.neResult()).to.equal(a !== b)
+        await (await contract.neTest(a, a)).wait()
+        expect(await contract.neResult()).to.equal(false)
+      })
+      it(`fuzz ltTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+          await (await contract.ltTest(a, b)).wait()
+          expect(await contract.ltResult()).to.equal(a < b)
+          await (await contract.ltTest(b, a)).wait()
+          expect(await contract.ltResult()).to.equal(b < a)
+          await (await contract.ltTest(a, a)).wait()
+          expect(await contract.ltResult()).to.equal(false)
+      })
+      it(`fuzz leTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
         await (await contract.leTest(a, b)).wait()
         expect(await contract.leResult()).to.equal(a <= b)
         await (await contract.leTest(b, a)).wait()
         expect(await contract.leResult()).to.equal(b <= a)
-      }
-    })
-  })
+        await (await contract.leTest(a, a)).wait()
+        expect(await contract.leResult()).to.equal(true)
+      })
+      it(`fuzz gtTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.gtTest(a, b)).wait()
+        expect(await contract.gtResult()).to.equal(a > b)
+        await (await contract.gtTest(b, a)).wait()
+        expect(await contract.gtResult()).to.equal(b > a)
+        await (await contract.gtTest(a, a)).wait()
+        expect(await contract.gtResult()).to.equal(false)
+      })
+      it(`fuzz geTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.geTest(a, b)).wait()
+        expect(await contract.geResult()).to.equal(a >= b)
+        await (await contract.geTest(b, a)).wait()
+        expect(await contract.geResult()).to.equal(b >= a)
+        await (await contract.geTest(a, a)).wait()
+        expect(await contract.geResult()).to.equal(true)
+      })
+    }
+  }) 
 
-  // Offboard/Onboard
-  describe("Offboard/Onboard signed 256-bit integers", function () {
-    it("should return true for positive number offboard", async function () {
-      const { contract } = deployment
-      const testValue = 1234567890123456789012345678901234567890n
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.offBoardTest.fragment.selector
-      )
-      await (await contract.offBoardTest(itValue)).wait()
-      expect(await contract.offBoardResult()).to.equal(true)
-    })
-    it("should return false for positive number onboard", async function () {
-      const { contract } = deployment
-      const testValue = 1234567890123456789012345678901234567890n
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.onBoardTest.fragment.selector
-      )
-      await (await contract.onBoardTest(itValue)).wait()
-      expect(await contract.onBoardResult()).to.equal(false)
-    })
-    it("should return true for negative number offboard", async function () {
-      const { contract } = deployment
-      const testValue = -987654321098765432109876543210987654321n
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.offBoardTest.fragment.selector
-      )
-      await (await contract.offBoardTest(itValue)).wait()
-      expect(await contract.offBoardResult()).to.equal(true)
-    })
-    it("should return false for negative number onboard", async function () {
-      const { contract } = deployment
-      const testValue = -987654321098765432109876543210987654321n
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.onBoardTest.fragment.selector
-      )
-      await (await contract.onBoardTest(itValue)).wait()
-      expect(await contract.onBoardResult()).to.equal(false)
-    })
-    it("should return true for zero offboard", async function () {
-      const { contract } = deployment
-      const testValue = 0n
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.offBoardTest.fragment.selector
-      )
-      await (await contract.offBoardTest(itValue)).wait()
-      expect(await contract.offBoardResult()).to.equal(true)
-    })
-    it("should return false for zero onboard", async function () {
-      const { contract } = deployment
-      const testValue = 0n
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.onBoardTest.fragment.selector
-      )
-      await (await contract.onBoardTest(itValue)).wait()
-      expect(await contract.onBoardResult()).to.equal(false)
-    })
-    it("should return true for large positive number offboard", async function () {
-      const { contract } = deployment
-      const testValue = (2n ** 200n) + 123456789n
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.offBoardTest.fragment.selector
-      )
-      await (await contract.offBoardTest(itValue)).wait()
-      expect(await contract.offBoardResult()).to.equal(true)
-    })
-    it("should return false for large positive number onboard", async function () {
-      const { contract } = deployment
-      const testValue = (2n ** 200n) + 123456789n
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.onBoardTest.fragment.selector
-      )
-      await (await contract.onBoardTest(itValue)).wait()
-      expect(await contract.onBoardResult()).to.equal(false)
-    })
-    it("should return true for large negative number offboard", async function () {
-      const { contract } = deployment
-      const testValue = -(2n ** 200n) - 123456789n
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.offBoardTest.fragment.selector
-      )
-      await (await contract.offBoardTest(itValue)).wait()
-      expect(await contract.offBoardResult()).to.equal(true)
-    })
-    it("should return false for large negative number onboard", async function () {
-      const { contract } = deployment
-      const testValue = -(2n ** 200n) - 123456789n
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.onBoardTest.fragment.selector
-      )
-      await (await contract.onBoardTest(itValue)).wait()
-      expect(await contract.onBoardResult()).to.equal(false)
-    })
-    it("should return true for random positive number offboard", async function () {
-      const { contract } = deployment
-      const testValue = randomSigned256()
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.offBoardTest.fragment.selector
-      )
-      await (await contract.offBoardTest(itValue)).wait()
-      expect(await contract.offBoardResult()).to.equal(true)
-    })
-    it("should return false for random positive number onboard", async function () {
-      const { contract } = deployment
-      const testValue = randomSigned256()
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.onBoardTest.fragment.selector
-      )
-      await (await contract.onBoardTest(itValue)).wait()
-      expect(await contract.onBoardResult()).to.equal(false)
-    })
-    it("should return true for random negative number offboard", async function () {
-      const { contract } = deployment
-      const testValue = randomSigned256()
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.offBoardTest.fragment.selector
-      )
-      await (await contract.offBoardTest(itValue)).wait()
-      expect(await contract.offBoardResult()).to.equal(true)
-    })
-    it("should return false for random negative number onboard", async function () {
-      const { contract } = deployment
-      const testValue = randomSigned256()
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.onBoardTest.fragment.selector
-      )
-      await (await contract.onBoardTest(itValue)).wait()
-      expect(await contract.onBoardResult()).to.equal(false)
-    })
-  })
+  describe("setPublic for signed 256-bit integers", function () {
+    const testCases = [
+      0n,
+      1n,
+      -1n,
+      1234567890123456789012345678901234567890n,
+      -987654321098765432109876543210987654321n,
+      (1n << 255n) - 1n, // max int256
+      -(1n << 255n),     // min int256
+    ];
 
-  // Fuzz/Randomized
-  describe("Fuzzing signed 256-bit integers", function () {
-    it("should return true for random positive number offboard", async function () {
-      const { contract } = deployment
-      const testValue = randomSigned256()
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.offBoardTest.fragment.selector
-      )
-      await (await contract.offBoardTest(itValue)).wait()
-      expect(await contract.offBoardResult()).to.equal(true)
-    })
-    it("should return false for random positive number onboard", async function () {
-      const { contract } = deployment
-      const testValue = randomSigned256()
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.onBoardTest.fragment.selector
-      )
-      await (await contract.onBoardTest(itValue)).wait()
-      expect(await contract.onBoardResult()).to.equal(false)
-    })
-    it("should return true for random negative number offboard", async function () {
-      const { contract } = deployment
-      const testValue = randomSigned256()
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.offBoardTest.fragment.selector
-      )
-      await (await contract.offBoardTest(itValue)).wait()
-      expect(await contract.offBoardResult()).to.equal(true)
-    })
-    it("should return false for random negative number onboard", async function () {
-      const { contract } = deployment
-      const testValue = randomSigned256()
-      const itValue = await contract.encryptInt256(
-        testValue,
-        contract.contractAddress,
-        contract.onBoardTest.fragment.selector
-      )
-      await (await contract.onBoardTest(itValue)).wait()
-      expect(await contract.onBoardResult()).to.equal(false)
-    })
-  })
+    for (const value of testCases) {
+      it(`Should setPublic and decrypt ${value}`, async function () {
+        const { contract } = deployment;
+        await (await contract.setPublicTest(value)).wait();
+        const result = await contract.setPublicResult();
+        expect(result).to.equal(value);
+      });
+    }
+  });
 })
