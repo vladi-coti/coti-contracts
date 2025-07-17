@@ -1,9 +1,7 @@
 import hre from "hardhat"
 import { expect } from "chai"
 import { setupAccounts } from "../accounts"
-import { generateRandomNumber } from "./helpers";
-
-const gasLimit = 12000000
+import { wrapContractWithGasOptions,gasOptions, generateRandomNumber } from "./helpers";
 
 function randomSigned128() {
   let unsigned = generateRandomNumber(16);
@@ -21,10 +19,12 @@ async function deploy() {
   const [owner, otherAccount] = await setupAccounts()
 
   const factory = await hre.ethers.getContractFactory("SignedInt128TestsContract")
-  const contract = await factory.connect(owner).deploy({ gasLimit })
+  const contract = await factory.connect(owner).deploy(gasOptions)
   await contract.waitForDeployment()
 
-  return { contract, contractAddress: await contract.getAddress(), owner, otherAccount }
+  const wrappedContract = wrapContractWithGasOptions(contract)
+
+  return { contract: wrappedContract, contractAddress: await contract.getAddress(), owner, otherAccount }
 }
 
 describe("MPC Core - signed 128-bit integers", function () {
@@ -1364,166 +1364,166 @@ describe("MPC Core - signed 128-bit integers", function () {
       });
     }
   });
+
+  describe("Edge cases for signed 128-bit arithmetic", function () {
+    let deployment: Awaited<ReturnType<typeof deploy>>
+    before(async function () { deployment = await deploy() })
+  
+    const MAX = (1n << 127n) - 1n
+    const MIN = -(1n << 127n)
+    const testCases = [
+      { a: 0n, b: 0n },
+      { a: 1n, b: 0n },
+      { a: 0n, b: 1n },
+      { a: -1n, b: 0n },
+      { a: 0n, b: -1n },
+      { a: 1n, b: -1n },
+      { a: -1n, b: 1n },
+      { a: MAX, b: 1n },
+      { a: MIN, b: -1n },
+      { a: MAX, b: -1n },
+      { a: MIN, b: 1n },
+      { a: MAX, b: MAX },
+      { a: MIN, b: MIN },
+      { a: MAX, b: MIN },
+      { a: MIN, b: MAX },
+      { a: 123456789n, b: -987654321n },
+      { a: -987654321n, b: 123456789n },
+    ]
+  
+    for (const { a, b } of testCases) {
+      it(`edge case 128-bit addTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.addTest(a, b)).wait()
+        const decryptedInt = await contract.addResult()
+        expect(decryptedInt).to.equal(BigInt.asIntN(128, a + b))
+      })
+      it(`edge case 128-bit subTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.subTest(a, b)).wait()
+        const decryptedInt = await contract.subResult()
+        expect(decryptedInt).to.equal(BigInt.asIntN(128, a - b))
+      })
+      it(`edge case 128-bit mulTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.mulTest(a, b)).wait()
+        const decryptedInt = await contract.mulResult()
+        expect(decryptedInt).to.equal(BigInt.asIntN(128, a * b))
+      })
+      it(`edge case 128-bit divTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        // Solidity/contract may return 0 for div by 0, so handle that
+        let expected: bigint
+        if (b === 0n) expected = 0n
+        else expected = BigInt.asIntN(128, a / b)
+        await (await contract.divTest(a, b)).wait()
+        const decryptedInt = await contract.divResult()
+        expect(decryptedInt).to.equal(expected)
+      })
+    }
+  })
+  
+  describe("Fuzz testing signed 128-bit arithmetic", function () {
+    let deployment: Awaited<ReturnType<typeof deploy>>
+    before(async function () { deployment = await deploy() })
+  
+    for (let i = 0; i < 10; i++) {
+      const a = randomSigned128()
+      const b = randomSigned128()
+      it(`fuzz 128-bit addTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.addTest(a, b)).wait()
+        const decryptedInt = await contract.addResult()
+        expect(decryptedInt).to.equal(BigInt.asIntN(128, a + b))
+      })
+      it(`fuzz 128-bit subTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.subTest(a, b)).wait()
+        const decryptedInt = await contract.subResult()
+        expect(decryptedInt).to.equal(BigInt.asIntN(128, a - b))
+      })
+      it(`fuzz 128-bit mulTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.mulTest(a, b)).wait()
+        const decryptedInt = await contract.mulResult()
+        expect(decryptedInt).to.equal(BigInt.asIntN(128, a * b))
+      })
+      it(`fuzz 128-bit divTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        // Avoid division by zero
+        if (b === 0n) return
+        await (await contract.divTest(a, b)).wait()
+        const decryptedInt = await contract.divResult()
+        expect(decryptedInt).to.equal(BigInt.asIntN(128, a / b))
+      })
+      it(`fuzz 128-bit andTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.andTest(a, b)).wait()
+        const decryptedInt = await contract.andResult()
+        expect(decryptedInt).to.equal(BigInt.asIntN(128, a & b))
+      })
+      it(`fuzz 128-bit orTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.orTest(a, b)).wait()
+        const decryptedInt = await contract.orResult()
+        expect(decryptedInt).to.equal(a | b)
+      })
+      it(`fuzz 128-bit xorTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.xorTest(a, b)).wait()
+        const decryptedInt = await contract.xorResult()
+        expect(decryptedInt).to.equal(a ^ b)
+      })
+      it(`fuzz 128-bit eqTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.eqTest(a, b)).wait()
+        expect(await contract.eqResult()).to.equal(a === b)
+        await (await contract.eqTest(a, a)).wait()
+        expect(await contract.eqResult()).to.equal(true)
+      })
+      it(`fuzz 128-bit neTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.neTest(a, b)).wait()
+        expect(await contract.neResult()).to.equal(a !== b)
+        await (await contract.neTest(a, a)).wait()
+        expect(await contract.neResult()).to.equal(false)
+      })
+      it(`fuzz 128-bit ltTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+          await (await contract.ltTest(a, b)).wait()
+          expect(await contract.ltResult()).to.equal(a < b)
+          await (await contract.ltTest(b, a)).wait()
+          expect(await contract.ltResult()).to.equal(b < a)
+          await (await contract.ltTest(a, a)).wait()
+          expect(await contract.ltResult()).to.equal(false)
+      })
+      it(`fuzz 128-bit leTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.leTest(a, b)).wait()
+        expect(await contract.leResult()).to.equal(a <= b)
+        await (await contract.leTest(b, a)).wait()
+        expect(await contract.leResult()).to.equal(b <= a)
+        await (await contract.leTest(a, a)).wait()
+        expect(await contract.leResult()).to.equal(true)
+      })
+      it(`fuzz 128-bit gtTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.gtTest(a, b)).wait()
+        expect(await contract.gtResult()).to.equal(a > b)
+        await (await contract.gtTest(b, a)).wait()
+        expect(await contract.gtResult()).to.equal(b > a)
+        await (await contract.gtTest(a, a)).wait()
+        expect(await contract.gtResult()).to.equal(false)
+      })
+      it(`fuzz 128-bit geTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.geTest(a, b)).wait()
+        expect(await contract.geResult()).to.equal(a >= b)
+        await (await contract.geTest(b, a)).wait()
+        expect(await contract.geResult()).to.equal(b >= a)
+        await (await contract.geTest(a, a)).wait()
+        expect(await contract.geResult()).to.equal(true)
+      })
+    }
+  }) 
 })
-
-describe("Edge cases for signed 128-bit arithmetic", function () {
-  let deployment: Awaited<ReturnType<typeof deploy>>
-  before(async function () { deployment = await deploy() })
-
-  const MAX = (1n << 127n) - 1n
-  const MIN = -(1n << 127n)
-  const testCases = [
-    { a: 0n, b: 0n },
-    { a: 1n, b: 0n },
-    { a: 0n, b: 1n },
-    { a: -1n, b: 0n },
-    { a: 0n, b: -1n },
-    { a: 1n, b: -1n },
-    { a: -1n, b: 1n },
-    { a: MAX, b: 1n },
-    { a: MIN, b: -1n },
-    { a: MAX, b: -1n },
-    { a: MIN, b: 1n },
-    { a: MAX, b: MAX },
-    { a: MIN, b: MIN },
-    { a: MAX, b: MIN },
-    { a: MIN, b: MAX },
-    { a: 123456789n, b: -987654321n },
-    { a: -987654321n, b: 123456789n },
-  ]
-
-  for (const { a, b } of testCases) {
-    it(`addTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.addTest(a, b)).wait()
-      const decryptedInt = await contract.addResult()
-      expect(decryptedInt).to.equal(a + b)
-    })
-    it(`subTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.subTest(a, b)).wait()
-      const decryptedInt = await contract.subResult()
-      expect(decryptedInt).to.equal(a - b)
-    })
-    it(`mulTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.mulTest(a, b)).wait()
-      const decryptedInt = await contract.mulResult()
-      expect(decryptedInt).to.equal(a * b)
-    })
-    it(`divTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      // Solidity/contract may return 0 for div by 0, so handle that
-      let expected: bigint
-      if (b === 0n) expected = 0n
-      else expected = a / b
-      await (await contract.divTest(a, b)).wait()
-      const decryptedInt = await contract.divResult()
-      expect(decryptedInt).to.equal(expected)
-    })
-  }
-})
-
-describe("Fuzz testing signed 128-bit arithmetic", function () {
-  let deployment: Awaited<ReturnType<typeof deploy>>
-  before(async function () { deployment = await deploy() })
-
-  for (let i = 0; i < 10; i++) {
-    const a = randomSigned128()
-    const b = randomSigned128()
-    it(`fuzz addTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.addTest(a, b)).wait()
-      const decryptedInt = await contract.addResult()
-      expect(decryptedInt).to.equal(a + b)
-    })
-    it(`fuzz subTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.subTest(a, b)).wait()
-      const decryptedInt = await contract.subResult()
-      expect(decryptedInt).to.equal(a - b)
-    })
-    it(`fuzz mulTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.mulTest(a, b)).wait()
-      const decryptedInt = await contract.mulResult()
-      expect(decryptedInt).to.equal(a * b)
-    })
-    it(`fuzz divTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      // Avoid division by zero
-      if (b === 0n) return
-      await (await contract.divTest(a, b)).wait()
-      const decryptedInt = await contract.divResult()
-      expect(decryptedInt).to.equal(a / b)
-    })
-    it(`fuzz andTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.andTest(a, b)).wait()
-      const decryptedInt = await contract.andResult()
-      expect(decryptedInt).to.equal(BigInt.asIntN(128, a & b))
-    })
-    it(`fuzz orTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.orTest(a, b)).wait()
-      const decryptedInt = await contract.orResult()
-      expect(decryptedInt).to.equal(a | b)
-    })
-    it(`fuzz xorTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.xorTest(a, b)).wait()
-      const decryptedInt = await contract.xorResult()
-      expect(decryptedInt).to.equal(a ^ b)
-    })
-    it(`fuzz eqTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.eqTest(a, b)).wait()
-      expect(await contract.eqResult()).to.equal(a === b)
-      await (await contract.eqTest(a, a)).wait()
-      expect(await contract.eqResult()).to.equal(true)
-    })
-    it(`fuzz neTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.neTest(a, b)).wait()
-      expect(await contract.neResult()).to.equal(a !== b)
-      await (await contract.neTest(a, a)).wait()
-      expect(await contract.neResult()).to.equal(false)
-    })
-    it(`fuzz ltTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-        await (await contract.ltTest(a, b)).wait()
-        expect(await contract.ltResult()).to.equal(a < b)
-        await (await contract.ltTest(b, a)).wait()
-        expect(await contract.ltResult()).to.equal(b < a)
-        await (await contract.ltTest(a, a)).wait()
-        expect(await contract.ltResult()).to.equal(false)
-    })
-    it(`fuzz leTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.leTest(a, b)).wait()
-      expect(await contract.leResult()).to.equal(a <= b)
-      await (await contract.leTest(b, a)).wait()
-      expect(await contract.leResult()).to.equal(b <= a)
-      await (await contract.leTest(a, a)).wait()
-      expect(await contract.leResult()).to.equal(true)
-    })
-    it(`fuzz gtTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.gtTest(a, b)).wait()
-      expect(await contract.gtResult()).to.equal(a > b)
-      await (await contract.gtTest(b, a)).wait()
-      expect(await contract.gtResult()).to.equal(b > a)
-      await (await contract.gtTest(a, a)).wait()
-      expect(await contract.gtResult()).to.equal(false)
-    })
-    it(`fuzz geTest(${a}, ${b})`, async function () {
-      const { contract } = deployment
-      await (await contract.geTest(a, b)).wait()
-      expect(await contract.geResult()).to.equal(a >= b)
-      await (await contract.geTest(b, a)).wait()
-      expect(await contract.geResult()).to.equal(b >= a)
-      await (await contract.geTest(a, a)).wait()
-      expect(await contract.geResult()).to.equal(true)
-    })
-  }
-}) 

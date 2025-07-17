@@ -1,9 +1,7 @@
 import hre from "hardhat"
 import { expect } from "chai"
 import { setupAccounts } from "../accounts"
-import { generateRandomNumber } from "./helpers";
-
-const gasLimit = 12000000
+import { gasOptions, generateRandomNumber, wrapContractWithGasOptions } from "./helpers";
 
 function randomSigned256() {
   let unsigned = generateRandomNumber(32);
@@ -21,10 +19,12 @@ async function deploy() {
   const [owner, otherAccount] = await setupAccounts()
 
   const factory = await hre.ethers.getContractFactory("SignedInt256TestsContract")
-  const contract = await factory.connect(owner).deploy({ gasLimit })
+  const contract = await factory.connect(owner).deploy(gasOptions)
   await contract.waitForDeployment()
 
-  return { contract, contractAddress: await contract.getAddress(), owner, otherAccount }
+  const wrappedContract = wrapContractWithGasOptions(contract)
+
+  return { contract:wrappedContract, contractAddress: await contract.getAddress(), owner, otherAccount }
 }
 
 describe("MPC Core - signed 256-bit integers", function () {
@@ -1344,6 +1344,27 @@ describe("MPC Core - signed 256-bit integers", function () {
     })
   })
 
+  describe("setPublic for signed 256-bit integers", function () {
+    const testCases = [
+      0n,
+      1n,
+      -1n,
+      1234567890123456789012345678901234567890n,
+      -987654321098765432109876543210987654321n,
+      (1n << 255n) - 1n, // max int256
+      -(1n << 255n),     // min int256
+    ];
+
+    for (const value of testCases) {
+      it(`Should setPublic and decrypt ${value}`, async function () {
+        const { contract } = deployment;
+        await (await contract.setPublicTest(value)).wait();
+        const result = await contract.setPublicResult();
+        expect(result).to.equal(value);
+      });
+    }
+  });
+
   describe("Edge cases for signed 256-bit arithmetic", function () {
     let deployment: Awaited<ReturnType<typeof deploy>>
     before(async function () { deployment = await deploy() })
@@ -1371,30 +1392,30 @@ describe("MPC Core - signed 256-bit integers", function () {
     ]
   
     for (const { a, b } of testCases) {
-      it(`addTest(${a}, ${b})`, async function () {
+      it(`edge case 256-bit addTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.addTest(a, b)).wait()
         const decryptedInt = await contract.addResult()
-        expect(decryptedInt).to.equal(a + b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a + b))
       })
-      it(`subTest(${a}, ${b})`, async function () {
+      it(`edge case 256-bit subTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.subTest(a, b)).wait()
         const decryptedInt = await contract.subResult()
-        expect(decryptedInt).to.equal(a - b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a - b))
       })
-      it(`mulTest(${a}, ${b})`, async function () {
+      it(`edge case 256-bit mulTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.mulTest(a, b)).wait()
         const decryptedInt = await contract.mulResult()
-        expect(decryptedInt).to.equal(a * b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a * b))
       })
-      it(`divTest(${a}, ${b})`, async function () {
+      it(`edge case 256-bit divTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         // Solidity/contract may return 0 for div by 0, so handle that
         let expected: bigint
         if (b === 0n) expected = 0n
-        else expected = a / b
+        else expected = BigInt.asIntN(256, a / b)
         await (await contract.divTest(a, b)).wait()
         const decryptedInt = await contract.divResult()
         expect(decryptedInt).to.equal(expected)
@@ -1409,65 +1430,65 @@ describe("MPC Core - signed 256-bit integers", function () {
     for (let i = 0; i < 10; i++) {
       const a = randomSigned256()
       const b = randomSigned256()
-      it(`fuzz addTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit addTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.addTest(a, b)).wait()
         const decryptedInt = await contract.addResult()
-        expect(decryptedInt).to.equal(a + b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a + b))
       })
-      it(`fuzz subTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit subTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.subTest(a, b)).wait()
         const decryptedInt = await contract.subResult()
-        expect(decryptedInt).to.equal(a - b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a - b))
       })
-      it(`fuzz mulTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit mulTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.mulTest(a, b)).wait()
         const decryptedInt = await contract.mulResult()
-        expect(decryptedInt).to.equal(a * b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a * b))
       })
-      it(`fuzz divTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit divTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         // Avoid division by zero
         if (b === 0n) return
         await (await contract.divTest(a, b)).wait()
         const decryptedInt = await contract.divResult()
-        expect(decryptedInt).to.equal(a / b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a / b))
       })
-      it(`fuzz andTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit andTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.andTest(a, b)).wait()
         const decryptedInt = await contract.andResult()
         expect(decryptedInt).to.equal(BigInt.asIntN(256, a & b))
       })
-      it(`fuzz orTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit orTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.orTest(a, b)).wait()
         const decryptedInt = await contract.orResult()
         expect(decryptedInt).to.equal(a | b)
       })
-      it(`fuzz xorTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit xorTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.xorTest(a, b)).wait()
         const decryptedInt = await contract.xorResult()
         expect(decryptedInt).to.equal(a ^ b)
       })
-      it(`fuzz eqTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit eqTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.eqTest(a, b)).wait()
         expect(await contract.eqResult()).to.equal(a === b)
         await (await contract.eqTest(a, a)).wait()
         expect(await contract.eqResult()).to.equal(true)
       })
-      it(`fuzz neTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit neTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.neTest(a, b)).wait()
         expect(await contract.neResult()).to.equal(a !== b)
         await (await contract.neTest(a, a)).wait()
         expect(await contract.neResult()).to.equal(false)
       })
-      it(`fuzz ltTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit ltTest(${a}, ${b})`, async function () {
         const { contract } = deployment
           await (await contract.ltTest(a, b)).wait()
           expect(await contract.ltResult()).to.equal(a < b)
@@ -1476,7 +1497,7 @@ describe("MPC Core - signed 256-bit integers", function () {
           await (await contract.ltTest(a, a)).wait()
           expect(await contract.ltResult()).to.equal(false)
       })
-      it(`fuzz leTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit leTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.leTest(a, b)).wait()
         expect(await contract.leResult()).to.equal(a <= b)
@@ -1485,7 +1506,7 @@ describe("MPC Core - signed 256-bit integers", function () {
         await (await contract.leTest(a, a)).wait()
         expect(await contract.leResult()).to.equal(true)
       })
-      it(`fuzz gtTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit gtTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.gtTest(a, b)).wait()
         expect(await contract.gtResult()).to.equal(a > b)
@@ -1494,7 +1515,7 @@ describe("MPC Core - signed 256-bit integers", function () {
         await (await contract.gtTest(a, a)).wait()
         expect(await contract.gtResult()).to.equal(false)
       })
-      it(`fuzz geTest(${a}, ${b})`, async function () {
+      it(`fuzz 256-bit geTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.geTest(a, b)).wait()
         expect(await contract.geResult()).to.equal(a >= b)
@@ -1505,25 +1526,4 @@ describe("MPC Core - signed 256-bit integers", function () {
       })
     }
   }) 
-
-  describe("setPublic for signed 256-bit integers", function () {
-    const testCases = [
-      0n,
-      1n,
-      -1n,
-      1234567890123456789012345678901234567890n,
-      -987654321098765432109876543210987654321n,
-      (1n << 255n) - 1n, // max int256
-      -(1n << 255n),     // min int256
-    ];
-
-    for (const value of testCases) {
-      it(`Should setPublic and decrypt ${value}`, async function () {
-        const { contract } = deployment;
-        await (await contract.setPublicTest(value)).wait();
-        const result = await contract.setPublicResult();
-        expect(result).to.equal(value);
-      });
-    }
-  });
 })

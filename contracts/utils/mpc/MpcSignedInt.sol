@@ -1472,6 +1472,12 @@ library MpcSignedInt {
             return setPublic128(int128(0));
         }
         
+        // Handle the overflow case: MIN / -1 = -MIN, but -MIN overflows
+        // In 2's complement, this wraps around to MIN itself
+        if (aValue == type(int128).min && bValue == -1) {
+            return setPublic128(type(int128).min);
+        }
+        
         int128 resultValue = aValue / bValue;
         return setPublic128(resultValue);
     }
@@ -1814,7 +1820,7 @@ library MpcSignedInt {
         gtUint256 memory unsignedResultU = MpcCore.mul(aAbsU, bAbsU);
         gtInt256 memory unsignedResult = fromUint256(unsignedResultU);
         gtBool resultNegative = MpcCore.xor(aNegative, bNegative);
-        return MpcCore.mux(resultNegative, negate256(unsignedResult), unsignedResult);
+        return MpcCore.mux(resultNegative, unsignedResult, negate256(unsignedResult));
     }
 
     function div(
@@ -1826,6 +1832,13 @@ library MpcSignedInt {
         if (bValue == 0) {
             return setPublic256(int256(0));
         }
+        
+        // Handle the overflow case: MIN / -1 = -MIN, but -MIN overflows
+        // In 2's complement arithmetic, this wraps around to MIN itself
+        if (aValue == type(int256).min && bValue == -1) {
+            return setPublic256(type(int256).min);
+        }
+        
         int256 resultValue = aValue / bValue;
         return setPublic256(resultValue);
     }
