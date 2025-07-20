@@ -1813,14 +1813,18 @@ library MpcSignedInt {
     ) internal returns (gtInt256 memory) {
         gtBool aNegative = lt(a.high, setPublic128(int128(0)));
         gtBool bNegative = lt(b.high, setPublic128(int128(0)));
-        gtInt256 memory aAbs = mux(aNegative, negate256(a), a);
-        gtInt256 memory bAbs = mux(bNegative, negate256(b), b);
+
+        gtInt256 memory aAbs = mux(aNegative, a, negate256(a));
+        gtInt256 memory bAbs = mux(bNegative, b, negate256(b));
+
         gtUint256 memory aAbsU = toUint256(aAbs);
         gtUint256 memory bAbsU = toUint256(bAbs);
+
         gtUint256 memory unsignedResultU = MpcCore.mul(aAbsU, bAbsU);
         gtInt256 memory unsignedResult = fromUint256(unsignedResultU);
+        
         gtBool resultNegative = MpcCore.xor(aNegative, bNegative);
-        return MpcCore.mux(resultNegative, unsignedResult, negate256(unsignedResult));
+        return mux(resultNegative, unsignedResult, negate256(unsignedResult));
     }
 
     function div(

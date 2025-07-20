@@ -22,7 +22,7 @@ async function deploy() {
   const contract = await factory.connect(owner).deploy(gasOptions)
   await contract.waitForDeployment()
 
-  const wrappedContract = wrapContractWithGasOptions(contract)
+  const wrappedContract = wrapContractWithGasOptions(contract) as typeof contract
 
   return { contract:wrappedContract, contractAddress: await contract.getAddress(), owner, otherAccount }
 }
