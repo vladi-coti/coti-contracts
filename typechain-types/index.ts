@@ -30,6 +30,8 @@ export type { Arithmetic128BitTestsContract } from "./contracts/mocks/utils/mpc/
 export { Arithmetic128BitTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/Arithmetic128BitTestsContract__factory";
 export type { Arithmetic256BitTestsContract } from "./contracts/mocks/utils/mpc/Arithmetic256BitTestsContract";
 export { Arithmetic256BitTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/Arithmetic256BitTestsContract__factory";
+export type { ArithmeticSigned256BitTestsContract } from "./contracts/mocks/utils/mpc/ArithmeticSigned256BitTestsContract";
+export { ArithmeticSigned256BitTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/ArithmeticSigned256BitTestsContract__factory";
 export type { ArithmeticTestsContract } from "./contracts/mocks/utils/mpc/ArithmeticTestsContract";
 export { ArithmeticTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/ArithmeticTestsContract__factory";
 export type { Bitwise128BitTestsContract } from "./contracts/mocks/utils/mpc/Bitwise128BitTestsContract";

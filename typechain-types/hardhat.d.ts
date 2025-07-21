@@ -62,6 +62,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Arithmetic256BitTestsContract__factory>;
     getContractFactory(
+      name: "ArithmeticSigned256BitTestsContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.ArithmeticSigned256BitTestsContract__factory>;
+    getContractFactory(
       name: "ArithmeticTestsContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ArithmeticTestsContract__factory>;
@@ -275,6 +279,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Arithmetic256BitTestsContract>;
     getContractAt(
+      name: "ArithmeticSigned256BitTestsContract",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.ArithmeticSigned256BitTestsContract>;
+    getContractAt(
       name: "ArithmeticTestsContract",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -514,6 +523,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Arithmetic256BitTestsContract>;
     deployContract(
+      name: "ArithmeticSigned256BitTestsContract",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ArithmeticSigned256BitTestsContract>;
+    deployContract(
       name: "ArithmeticTestsContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ArithmeticTestsContract>;
@@ -726,6 +739,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Arithmetic256BitTestsContract>;
+    deployContract(
+      name: "ArithmeticSigned256BitTestsContract",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.ArithmeticSigned256BitTestsContract>;
     deployContract(
       name: "ArithmeticTestsContract",
       args: any[],

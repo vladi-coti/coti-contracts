@@ -5,6 +5,7 @@ import type * as checkedArithmeticWIthOverflowBitTestsContractSol from "./Checke
 export type { checkedArithmeticWIthOverflowBitTestsContractSol };
 export type { Arithmetic128BitTestsContract } from "./Arithmetic128BitTestsContract";
 export type { Arithmetic256BitTestsContract } from "./Arithmetic256BitTestsContract";
+export type { ArithmeticSigned256BitTestsContract } from "./ArithmeticSigned256BitTestsContract";
 export type { ArithmeticTestsContract } from "./ArithmeticTestsContract";
 export type { Bitwise128BitTestsContract } from "./Bitwise128BitTestsContract";
 export type { Bitwise256BitTestsContract } from "./Bitwise256BitTestsContract";

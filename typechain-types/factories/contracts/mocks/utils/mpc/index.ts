@@ -4,6 +4,7 @@
 export * as checkedArithmeticWIthOverflowBitTestsContractSol from "./CheckedArithmeticWIthOverflowBitTestsContract.sol";
 export { Arithmetic128BitTestsContract__factory } from "./Arithmetic128BitTestsContract__factory";
 export { Arithmetic256BitTestsContract__factory } from "./Arithmetic256BitTestsContract__factory";
+export { ArithmeticSigned256BitTestsContract__factory } from "./ArithmeticSigned256BitTestsContract__factory";
 export { ArithmeticTestsContract__factory } from "./ArithmeticTestsContract__factory";
 export { Bitwise128BitTestsContract__factory } from "./Bitwise128BitTestsContract__factory";
 export { Bitwise256BitTestsContract__factory } from "./Bitwise256BitTestsContract__factory";
