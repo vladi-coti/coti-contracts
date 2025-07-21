@@ -27,11 +27,25 @@ async function deploy() {
   return { contract:wrappedContract, contractAddress: await contract.getAddress(), owner, otherAccount }
 }
 
+async function deploySigned256BitTestsContract() {
+  const [owner, otherAccount] = await setupAccounts()
+
+  const factory = await hre.ethers.getContractFactory("ArithmeticSigned256BitTestsContract")
+  const contract = await factory.connect(owner).deploy(gasOptions)
+  await contract.waitForDeployment()
+
+  const wrappedContract = wrapContractWithGasOptions(contract) as typeof contract
+
+  return { contract:wrappedContract, contractAddress: await contract.getAddress(), owner, otherAccount }
+}
+
 describe("MPC Core - signed 256-bit integers", function () {
   let deployment: Awaited<ReturnType<typeof deploy>>
+  let signed256BitTestsDeployment: Awaited<ReturnType<typeof deploySigned256BitTestsContract>>
 
   before(async function () {
     deployment = await deploy()
+    signed256BitTestsDeployment = await deploySigned256BitTestsContract()
   })
 
   describe("Validating encrypted signed 256-bit integers", function () {
@@ -72,41 +86,41 @@ describe("MPC Core - signed 256-bit integers", function () {
 
   describe("Adding signed 256-bit integers", function () {
     it("Should encrypt, add and decrypt two positive signed 256-bit integers", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.addTest(10000000000000000000000000000000000n, 20000000000000000000000000000000000n)).wait()
+      await (await contract.addTest([10000000000000000000000000000000000n], [20000000000000000000000000000000000n])).wait()
 
-      const decryptedInt = await contract.addResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(30000000000000000000000000000000000n)
     })
 
     it("Should encrypt, add and decrypt two negative signed 256-bit integers", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.addTest(-10000000000000000000000000000000000n, -20000000000000000000000000000000000n)).wait()
+      await (await contract.addTest([-10000000000000000000000000000000000n], [-20000000000000000000000000000000000n])).wait()
 
-      const decryptedInt = await contract.addResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(-30000000000000000000000000000000000n)
     })
 
     it("Should encrypt, add and decrypt a positive and negative signed 256-bit integer", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.addTest(50000000000000000000000000000000000n, -30000000000000000000000000000000000n)).wait()
+      await (await contract.addTest([50000000000000000000000000000000000n], [-30000000000000000000000000000000000n])).wait()
 
-      const decryptedInt = await contract.addResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(20000000000000000000000000000000000n)
     })
 
     it("Should encrypt, add and decrypt a negative and positive signed 256-bit integer", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.addTest(-80000000000000000000000000000000000n, 30000000000000000000000000000000000n)).wait()
+      await (await contract.addTest([-80000000000000000000000000000000000n], [30000000000000000000000000000000000n])).wait()
 
-      const decryptedInt = await contract.addResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(-50000000000000000000000000000000000n)
     })
@@ -114,11 +128,11 @@ describe("MPC Core - signed 256-bit integers", function () {
 
   describe("Subtracting signed 256-bit integers", function () {
     it("Should encrypt, subtract and decrypt two positive signed 256-bit integers", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.subTest(50000000000000000000000000000000000n, 20000000000000000000000000000000000n)).wait()
+      await (await contract.subTest([50000000000000000000000000000000000n], [20000000000000000000000000000000000n])).wait()
 
-      const decryptedInt = await contract.subResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(30000000000000000000000000000000000n)
     })
@@ -162,41 +176,41 @@ describe("MPC Core - signed 256-bit integers", function () {
 
   describe("Multiplying signed 256-bit integers", function () {
     it("Should encrypt, multiply and decrypt two positive signed 256-bit integers", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.mulTest(10000000000000000n, 20000n)).wait()
+      await (await contract.mulTest([10000000000000000n], [20000n])).wait()
 
-      const decryptedInt = await contract.mulResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(200000000000000000000n)
     })
 
     it("Should encrypt, multiply and decrypt two negative signed 256-bit integers", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.mulTest(-10000000000000000n, -30000n)).wait()
+      await (await contract.mulTest([-10000000000000000n], [-30000n])).wait()
 
-      const decryptedInt = await contract.mulResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(300000000000000000000n)
     })
 
     it("Should encrypt, multiply and decrypt a positive and negative signed 256-bit integer", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.mulTest(20000000000000000n, -15000n)).wait()
+      await (await contract.mulTest([20000000000000000n], [-15000n])).wait()
 
-      const decryptedInt = await contract.mulResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(-300000000000000000000n)
     })
 
     it("Should encrypt, multiply and decrypt a negative and positive signed 256-bit integer", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.mulTest(-20000000000000000n, 15000n)).wait()
+      await (await contract.mulTest([-20000000000000000n], [15000n])).wait()
 
-      const decryptedInt = await contract.mulResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(-300000000000000000000n)
     })
@@ -204,41 +218,41 @@ describe("MPC Core - signed 256-bit integers", function () {
 
   describe("Dividing signed 256-bit integers", function () {
     it("Should encrypt, divide and decrypt two positive signed 256-bit integers", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.divTest(60000000000000000000000000000000n, 20000000000000000000000000000000n)).wait()
+      await (await contract.divTest([60000000000000000000000000000000n], [20000000000000000000000000000000n])).wait()
 
-      const decryptedInt = await contract.divResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(3n)
     })
 
     it("Should encrypt, divide and decrypt two negative signed 256-bit integers", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.divTest(-90000000000000000000000000000000n, -30000000000000000000000000000000n)).wait()
+      await (await contract.divTest([-90000000000000000000000000000000n], [-30000000000000000000000000000000n])).wait()
 
-      const decryptedInt = await contract.divResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(3n)
     })
 
     it("Should encrypt, divide and decrypt a positive and negative signed 256-bit integer", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.divTest(80000000000000000000000000000000n, -20000000000000000000000000000000n)).wait()
+      await (await contract.divTest([80000000000000000000000000000000n], [-20000000000000000000000000000000n])).wait()
 
-      const decryptedInt = await contract.divResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(-4n)
     })
 
     it("Should encrypt, divide and decrypt a negative and positive signed 256-bit integer", async function () {
-      const { contract } = deployment
+      const { contract } = signed256BitTestsDeployment
 
-      await (await contract.divTest(-120000000000000000000000000000000n, 30000000000000000000000000000000n)).wait()
+      await (await contract.divTest([-120000000000000000000000000000000n], [30000000000000000000000000000000n])).wait()
 
-      const decryptedInt = await contract.divResult()
+      const decryptedInt = await contract.numbers(0)
 
       expect(decryptedInt).to.equal(-4n)
     })
@@ -1366,8 +1380,8 @@ describe("MPC Core - signed 256-bit integers", function () {
   });
 
   describe("Edge cases for signed 256-bit arithmetic", function () {
-    let deployment: Awaited<ReturnType<typeof deploy>>
-    before(async function () { deployment = await deploy() })
+    let signed256BitTestsDeployment: Awaited<ReturnType<typeof deploySigned256BitTestsContract>>
+    before(async function () { signed256BitTestsDeployment = await deploySigned256BitTestsContract() })
   
     const MAX = (1n << 255n) - 1n
     const MIN = -(1n << 255n)
@@ -1393,31 +1407,31 @@ describe("MPC Core - signed 256-bit integers", function () {
   
     for (const { a, b } of testCases) {
       it(`edge case 256-bit addTest(${a}, ${b})`, async function () {
-        const { contract } = deployment
-        await (await contract.addTest(a, b)).wait()
-        const decryptedInt = await contract.addResult()
+        const { contract } = signed256BitTestsDeployment
+        await (await contract.addTest([a], [b])).wait()
+        const decryptedInt = await contract.numbers(0)
         expect(decryptedInt).to.equal(BigInt.asIntN(256, a + b))
       })
       it(`edge case 256-bit subTest(${a}, ${b})`, async function () {
-        const { contract } = deployment
-        await (await contract.subTest(a, b)).wait()
-        const decryptedInt = await contract.subResult()
+        const { contract } = signed256BitTestsDeployment
+        await (await contract.subTest([a], [b])).wait()
+        const decryptedInt = await contract.numbers(0)
         expect(decryptedInt).to.equal(BigInt.asIntN(256, a - b))
       })
       it(`edge case 256-bit mulTest(${a}, ${b})`, async function () {
-        const { contract } = deployment
-        await (await contract.mulTest(a, b)).wait()
-        const decryptedInt = await contract.mulResult()
+        const { contract } = signed256BitTestsDeployment
+        await (await contract.mulTest([a], [b])).wait()
+        const decryptedInt = await contract.numbers(0)
         expect(decryptedInt).to.equal(BigInt.asIntN(256, a * b))
       })
       it(`edge case 256-bit divTest(${a}, ${b})`, async function () {
-        const { contract } = deployment
+        const { contract } = signed256BitTestsDeployment
         // Solidity/contract may return 0 for div by 0, so handle that
         let expected: bigint
         if (b === 0n) expected = 0n
         else expected = BigInt.asIntN(256, a / b)
-        await (await contract.divTest(a, b)).wait()
-        const decryptedInt = await contract.divResult()
+        await (await contract.divTest([a], [b])).wait()
+        const decryptedInt = await contract.numbers(0)
         expect(decryptedInt).to.equal(expected)
       })
     }
@@ -1425,35 +1439,39 @@ describe("MPC Core - signed 256-bit integers", function () {
   
   describe("Fuzz testing signed 256-bit arithmetic", function () {
     let deployment: Awaited<ReturnType<typeof deploy>>
-    before(async function () { deployment = await deploy() })
+    let signed256BitTestsDeployment: Awaited<ReturnType<typeof deploySigned256BitTestsContract>>
+    before(async function () { 
+      deployment = await deploy() 
+      signed256BitTestsDeployment = await deploySigned256BitTestsContract() 
+    })
   
     for (let i = 0; i < 10; i++) {
       const a = randomSigned256()
       const b = randomSigned256()
       it(`fuzz 256-bit addTest(${a}, ${b})`, async function () {
-        const { contract } = deployment
-        await (await contract.addTest(a, b)).wait()
-        const decryptedInt = await contract.addResult()
+        const { contract } = signed256BitTestsDeployment
+        await (await contract.addTest([a], [b])).wait()
+        const decryptedInt = await contract.numbers(0)
         expect(decryptedInt).to.equal(BigInt.asIntN(256, a + b))
       })
       it(`fuzz 256-bit subTest(${a}, ${b})`, async function () {
-        const { contract } = deployment
-        await (await contract.subTest(a, b)).wait()
-        const decryptedInt = await contract.subResult()
+        const { contract } = signed256BitTestsDeployment
+        await (await contract.subTest([a], [b])).wait()
+        const decryptedInt = await contract.numbers(0)
         expect(decryptedInt).to.equal(BigInt.asIntN(256, a - b))
       })
       it(`fuzz 256-bit mulTest(${a}, ${b})`, async function () {
-        const { contract } = deployment
-        await (await contract.mulTest(a, b)).wait()
-        const decryptedInt = await contract.mulResult()
+        const { contract } = signed256BitTestsDeployment
+        await (await contract.mulTest([a], [b])).wait()
+        const decryptedInt = await contract.numbers(0)
         expect(decryptedInt).to.equal(BigInt.asIntN(256, a * b))
       })
       it(`fuzz 256-bit divTest(${a}, ${b})`, async function () {
-        const { contract } = deployment
+        const { contract } = signed256BitTestsDeployment
         // Avoid division by zero
         if (b === 0n) return
-        await (await contract.divTest(a, b)).wait()
-        const decryptedInt = await contract.divResult()
+        await (await contract.divTest([a], [b])).wait()
+        const decryptedInt = await contract.numbers(0)
         expect(decryptedInt).to.equal(BigInt.asIntN(256, a / b))
       })
       it(`fuzz 256-bit andTest(${a}, ${b})`, async function () {
