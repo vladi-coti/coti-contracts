@@ -13,6 +13,7 @@ contract SignedInt128TestsContract {
     int128 public andResult;
     int128 public orResult;
     int128 public xorResult;
+    int128 public muxResult;
     bool public eqResult;
     bool public neResult;
     bool public gtResult;
@@ -36,6 +37,7 @@ contract SignedInt128TestsContract {
         andResult = 0;
         orResult = 0;
         xorResult = 0;
+        muxResult = 0;
         eqResult = false;
         neResult = false;
         gtResult = false;
@@ -112,6 +114,15 @@ contract SignedInt128TestsContract {
 
         int128 result = MpcCore.decrypt(MpcCore.xor(gtA, gtB));
         xorResult = result;
+    }
+
+    function muxTest(bool bit, int128 a, int128 b) public {
+        muxResult = 0;
+        gtInt128 memory gtA = MpcCore.setPublic128(a);
+        gtInt128 memory gtB = MpcCore.setPublic128(b);
+        gtBool gtBit = MpcCore.setPublic(bit);
+        int128 result = MpcCore.decrypt(MpcCore.mux(gtBit, gtA, gtB));
+        muxResult = result;
     }
 
     function eqTest(int128 a, int128 b) public {

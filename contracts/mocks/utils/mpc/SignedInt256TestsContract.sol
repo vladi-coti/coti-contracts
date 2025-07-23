@@ -13,6 +13,7 @@ contract SignedInt256TestsContract {
     int256 public andResult;
     int256 public orResult;
     int256 public xorResult;
+    int256 public muxResult;
     bool public eqResult;
     bool public neResult;
     bool public gtResult;
@@ -35,6 +36,7 @@ contract SignedInt256TestsContract {
         andResult = 0;
         orResult = 0;
         xorResult = 0;
+        muxResult = 0;
         eqResult = false;
         neResult = false;
         gtResult = false;
@@ -105,6 +107,15 @@ contract SignedInt256TestsContract {
         gtInt256 memory gtB = MpcCore.setPublic256(b);
         int256 result = MpcCore.decrypt(MpcCore.xor(gtA, gtB));
         xorResult = result;
+    }
+
+    function muxTest(bool bit, int256 a, int256 b) public {
+        muxResult = 0;
+        gtInt256 memory gtA = MpcCore.setPublic256(a);
+        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtBool gtBit = MpcCore.setPublic(bit);
+        int256 result = MpcCore.decrypt(MpcCore.mux(gtBit, gtA, gtB));
+        muxResult = result;
     }
 
     function eqTest(int256 a, int256 b) public {

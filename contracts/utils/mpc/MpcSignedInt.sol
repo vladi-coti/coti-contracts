@@ -1370,25 +1370,14 @@ library MpcSignedInt {
         // Add low parts using gtInt64 addition
         result.low = add(a.low, b.low);
 
-        // Simple carry detection: if result is less than one operand, there was overflow
-        gtBool overflow_low = gtBool.wrap(
-            ExtendedOperations(address(MPC_PRECOMPILE)).Lt(
-                combineEnumsToBytes3(
-                    MPC_TYPE.SUINT64_T,
-                    MPC_TYPE.SUINT64_T,
-                    ARGS.BOTH_SECRET
-                ),
-                gtInt64.unwrap(result.low),
-                gtInt64.unwrap(a.low)
-            )
-        );
+        gtBool overflow = MpcCore.lt(gtUint64.wrap(gtInt64.unwrap(result.low)), gtUint64.wrap(gtInt64.unwrap(a.low)));
 
         // Add high parts
         result.high = add(a.high, b.high);
 
         // Add carry to high part if needed
         result.high = mux(
-            overflow_low,
+            overflow,
             result.high,
             add(result.high, setPublic64(int64(1)))
         );
@@ -1406,17 +1395,7 @@ library MpcSignedInt {
         result.low = sub(a.low, b.low);
 
         // Simple borrow detection: if a.low < b.low, there was underflow
-        gtBool borrow = gtBool.wrap(
-            ExtendedOperations(address(MPC_PRECOMPILE)).Lt(
-                combineEnumsToBytes3(
-                    MPC_TYPE.SUINT64_T,
-                    MPC_TYPE.SUINT64_T,
-                    ARGS.BOTH_SECRET
-                ),
-                gtInt64.unwrap(a.low),
-                gtInt64.unwrap(b.low)
-            )
-        );
+        gtBool borrow = MpcCore.lt(gtUint64.wrap(gtInt64.unwrap(a.low)), gtUint64.wrap(gtInt64.unwrap(b.low)));
 
         // Subtract high parts with borrow if needed
         result.high = sub(a.high, b.high);
@@ -1790,7 +1769,7 @@ library MpcSignedInt {
     ) internal returns (gtInt256 memory) {
         gtInt256 memory result;
         result.low = add(a.low, b.low);
-        gtBool carry = isLessThanInt128(result.low, a.low);
+        gtBool carry = MpcCore.lt(toUint128(result.low), toUint128(a.low));
         result.high = add(a.high, b.high);
         result.high = mux(
             carry,
@@ -1804,7 +1783,16 @@ library MpcSignedInt {
         gtInt256 memory a,
         gtInt256 memory b
     ) internal returns (gtInt256 memory) {
-        return add(a, negate256(b));
+        gtInt256 memory result;
+        result.low = sub(a.low, b.low);
+        gtBool borrow = MpcCore.lt(toUint128(a.low), toUint128(b.low));
+        result.high = sub(a.high, b.high);
+        result.high = mux(
+            borrow,
+            result.high,
+            sub(result.high, setPublic128(int128(1)))
+        );
+        return result;
     }
 
     function mul(
@@ -1939,19 +1927,6 @@ library MpcSignedInt {
     function le(gtInt256 memory a, gtInt256 memory b) internal returns (gtBool) {
         gtBool isGt = gt(a, b);
         return MpcCore.not(isGt);
-    }
-
-    // Helper function to compare gtInt128 values
-    function isLessThanInt128(
-        gtInt128 memory a,
-        gtInt128 memory b
-    ) internal returns (gtBool) {
-        // Compare high parts as signed 64-bit integers
-        gtBool highLt = lt(a.high, b.high);
-        gtBool highEq = eq(a.high, b.high);
-        // Compare low parts as unsigned 64-bit if high parts are equal
-        gtBool lowLt = MpcCore.lt(gtUint64.wrap(gtInt64.unwrap(a.low)), gtUint64.wrap(gtInt64.unwrap(b.low)));
-        return MpcCore.or(highLt, MpcCore.and(highEq, lowLt));
     }
 
     // Helper to convert gtInt128 to gtUint128 (for unsigned comparison)

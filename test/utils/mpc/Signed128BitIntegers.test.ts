@@ -1344,6 +1344,34 @@ describe("MPC Core - signed 128-bit integers", function () {
     })
   })
 
+  describe("Mux for signed 128-bit integers", function () {
+    const MAX = (1n << 127n) - 1n;
+    const MIN = -(1n << 127n);
+    const testCases = [
+      { bit: true, a: 0n, b: 1n, expected: 1n },
+      { bit: false, a: 0n, b: 1n, expected: 0n },
+      { bit: true, a: -1n, b: 1n, expected: 1n },
+      { bit: false, a: -1n, b: 1n, expected: -1n },
+      { bit: true, a: 1n, b: -1n, expected: -1n },
+      { bit: false, a: 1n, b: -1n, expected: 1n },
+      { bit: true, a: MAX, b: MIN, expected: MIN },
+      { bit: false, a: MAX, b: MIN, expected: MAX },
+      { bit: true, a: MIN, b: MAX, expected: MAX },
+      { bit: false, a: MIN, b: MAX, expected: MIN },
+      { bit: true, a: 0n, b: 0n, expected: 0n },
+      { bit: false, a: 0n, b: 0n, expected: 0n },
+      { bit: true, a: 1234567890123456789n, b: -9876543210987654321n, expected: -9876543210987654321n },
+      { bit: false, a: 1234567890123456789n, b: -9876543210987654321n, expected: 1234567890123456789n },
+    ];
+    for (const { bit, a, b, expected } of testCases) {
+      it(`Should mux ${bit} and (${a}, ${b}) => ${expected}`, async function () {
+        const { contract } = deployment;
+        await (await contract.muxTest(bit, a, b)).wait();
+        expect(await contract.muxResult()).to.equal(expected);
+      });
+    }
+  });
+
   describe("setPublic for signed 128-bit integers", function () {
     const testCases = [
       0n,
@@ -1419,6 +1447,56 @@ describe("MPC Core - signed 128-bit integers", function () {
         await (await contract.divTest(a, b)).wait()
         const decryptedInt = await contract.divResult()
         expect(decryptedInt).to.equal(expected)
+      })
+      it(`edge case 128-bit eqTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.eqTest(a, b)).wait()
+        expect(await contract.eqResult()).to.equal(a === b)
+        await (await contract.eqTest(a, a)).wait()
+        expect(await contract.eqResult()).to.equal(true)
+      })
+      it(`edge case 128-bit neTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.neTest(a, b)).wait()
+        expect(await contract.neResult()).to.equal(a !== b)
+        await (await contract.neTest(a, a)).wait()
+        expect(await contract.neResult()).to.equal(false)
+      })
+      it(`edge case 128-bit ltTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+          await (await contract.ltTest(a, b)).wait()
+          expect(await contract.ltResult()).to.equal(a < b)
+          await (await contract.ltTest(b, a)).wait()
+          expect(await contract.ltResult()).to.equal(b < a)
+          await (await contract.ltTest(a, a)).wait()
+          expect(await contract.ltResult()).to.equal(false)
+      })
+      it(`edge case 128-bit leTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.leTest(a, b)).wait()
+        expect(await contract.leResult()).to.equal(a <= b)
+        await (await contract.leTest(b, a)).wait()
+        expect(await contract.leResult()).to.equal(b <= a)
+        await (await contract.leTest(a, a)).wait()
+        expect(await contract.leResult()).to.equal(true)
+      })
+      it(`edge case 128-bit gtTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.gtTest(a, b)).wait()
+        expect(await contract.gtResult()).to.equal(a > b)
+        await (await contract.gtTest(b, a)).wait()
+        expect(await contract.gtResult()).to.equal(b > a)
+        await (await contract.gtTest(a, a)).wait()
+        expect(await contract.gtResult()).to.equal(false)
+      })
+      it(`edge case 128-bit geTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.geTest(a, b)).wait()
+        expect(await contract.geResult()).to.equal(a >= b)
+        await (await contract.geTest(b, a)).wait()
+        expect(await contract.geResult()).to.equal(b >= a)
+        await (await contract.geTest(a, a)).wait()
+        expect(await contract.geResult()).to.equal(true)
       })
     }
   })

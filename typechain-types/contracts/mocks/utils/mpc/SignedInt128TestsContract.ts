@@ -58,6 +58,8 @@ export interface SignedInt128TestsContractInterface extends Interface {
       | "ltTest"
       | "mulResult"
       | "mulTest"
+      | "muxResult"
+      | "muxTest"
       | "neResult"
       | "neTest"
       | "offBoardCombinedResult"
@@ -124,6 +126,11 @@ export interface SignedInt128TestsContractInterface extends Interface {
   encodeFunctionData(
     functionFragment: "mulTest",
     values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(functionFragment: "muxResult", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "muxTest",
+    values: [boolean, BigNumberish, BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "neResult", values?: undefined): string;
   encodeFunctionData(
@@ -212,6 +219,8 @@ export interface SignedInt128TestsContractInterface extends Interface {
   decodeFunctionResult(functionFragment: "ltTest", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mulResult", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "mulTest", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "muxResult", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "muxTest", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "neResult", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "neTest", data: BytesLike): Result;
   decodeFunctionResult(
@@ -378,6 +387,14 @@ export interface SignedInt128TestsContract extends BaseContract {
 
   mulTest: TypedContractMethod<
     [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+
+  muxResult: TypedContractMethod<[], [bigint], "view">;
+
+  muxTest: TypedContractMethod<
+    [bit: boolean, a: BigNumberish, b: BigNumberish],
     [void],
     "nonpayable"
   >;
@@ -558,6 +575,16 @@ export interface SignedInt128TestsContract extends BaseContract {
     nameOrSignature: "mulTest"
   ): TypedContractMethod<
     [a: BigNumberish, b: BigNumberish],
+    [void],
+    "nonpayable"
+  >;
+  getFunction(
+    nameOrSignature: "muxResult"
+  ): TypedContractMethod<[], [bigint], "view">;
+  getFunction(
+    nameOrSignature: "muxTest"
+  ): TypedContractMethod<
+    [bit: boolean, a: BigNumberish, b: BigNumberish],
     [void],
     "nonpayable"
   >;

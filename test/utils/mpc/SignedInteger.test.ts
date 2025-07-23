@@ -728,4 +728,65 @@ describe("MPC Core - signed integers", function () {
       expect(await contract.leResult()).to.equal(true)
     })
   })
+
+  describe("Edge cases for signed 64-bit", function () {
+    const MAX = (1n << 63n) - 1n
+    const MIN = -(1n << 63n)
+    const testCases = [
+      { a: 0n, b: 0n },
+      { a: 1n, b: 0n },
+      { a: 0n, b: 1n },
+      { a: -1n, b: 0n },
+      { a: 0n, b: -1n },
+      { a: 1n, b: -1n },
+      { a: -1n, b: 1n },
+      { a: MAX, b: 1n },
+      { a: MIN, b: -1n },
+      { a: MAX, b: -1n },
+      { a: MIN, b: 1n },
+      { a: MAX, b: MAX },
+      { a: MIN, b: MIN },
+      { a: MAX, b: MIN },
+      { a: MIN, b: MAX },
+    ]
+  
+    for (const { a, b } of testCases) {
+      it(`edge case 64-bit ltTest(${a}, ${b})`, async function () {
+        const { contract } = deployment
+        await (await contract.ltTest(a, b)).wait()
+        const decryptedInt = await contract.ltResult()
+        expect(decryptedInt).to.equal(a < b)
+      })
+      // it(`edge case 64-bit leTest(${a}, ${b})`, async function () {
+      //   const { contract } = deployment
+      //   await (await contract.leTest(a, b)).wait()
+      //   const decryptedInt = await contract.leResult()
+      //   expect(decryptedInt).to.equal(a <= b)
+      // })
+      // it(`edge case 64-bit gtTest(${a}, ${b})`, async function () {
+      //   const { contract } = deployment
+      //   await (await contract.gtTest(a, b)).wait()
+      //   const decryptedInt = await contract.gtResult()
+      //   expect(decryptedInt).to.equal(a > b)
+      // })
+      // it(`edge case 64-bit geTest(${a}, ${b})`, async function () {
+      //   const { contract } = deployment
+      //   await (await contract.geTest(a, b)).wait()
+      //   const decryptedInt = await contract.geResult()
+      //   expect(decryptedInt).to.equal(a >= b)
+      // })
+      // it(`edge case 64-bit eqTest(${a}, ${b})`, async function () {
+      //   const { contract } = deployment
+      //   await (await contract.eqTest(a, b)).wait()
+      //   const decryptedInt = await contract.eqResult()
+      //   expect(decryptedInt).to.equal(a === b)
+      // })
+      // it(`edge case 64-bit neTest(${a}, ${b})`, async function () {
+      //   const { contract } = deployment
+      //   await (await contract.neTest(a, b)).wait()
+      //   const decryptedInt = await contract.neResult()
+      //   expect(decryptedInt).to.equal(a !== b)
+      // })
+    }
+  })
 })
