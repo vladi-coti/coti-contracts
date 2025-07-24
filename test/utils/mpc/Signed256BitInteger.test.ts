@@ -1419,33 +1419,39 @@ describe("MPC Core - signed 256-bit integers", function () {
     ]
   
     for (const { a, b } of testCases) {
-      // it(`edge case 256-bit addTest(${a}, ${b})`, async function () {
-      //   const { arithmeticSigned256BitTestsContract } = deployment
-      //   await (await arithmeticSigned256BitTestsContract.addTest([a], [b])).wait()
-      //   const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
-      //   expect(decryptedInt).to.equal(BigInt.asIntN(256, a + b))
-      // })
-      // it(`edge case 256-bit subTest(${a}, ${b})`, async function () {
-      //   const { arithmeticSigned256BitTestsContract } = deployment
-      //   await (await arithmeticSigned256BitTestsContract.subTest([a], [b], gasOptions)).wait()
-      //   const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
-      //   expect(decryptedInt).to.equal(BigInt.asIntN(256, a - b))
-      // })
-      // it(`edge case 256-bit mulTest(${a}, ${b})`, async function () {
-      //   const { arithmeticSigned256BitTestsContract } = deployment
-      //   await (await arithmeticSigned256BitTestsContract.mulTest([a], [b])).wait()
-      //   const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
-      //   expect(decryptedInt).to.equal(BigInt.asIntN(256, a * b))
-      // })
+      it(`edge case 256-bit addTest(${a}, ${b})`, async function () {
+        const { arithmeticSigned256BitTestsContract } = deployment
+        await (await arithmeticSigned256BitTestsContract.addTest([a], [b])).wait()
+        const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a + b))
+      })
+      it(`edge case 256-bit subTest(${a}, ${b})`, async function () {
+        const { arithmeticSigned256BitTestsContract } = deployment
+        await (await arithmeticSigned256BitTestsContract.subTest([a], [b], gasOptions)).wait()
+        const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a - b))
+      })
+      it(`edge case 256-bit mulTest(${a}, ${b})`, async function () {
+        const { arithmeticSigned256BitTestsContract } = deployment
+        await (await arithmeticSigned256BitTestsContract.mulTest([a], [b])).wait()
+        const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a * b))
+      })
       it(`edge case 256-bit divTest(${a}, ${b})`, async function () {
         const { arithmeticSigned256BitTestsContract } = deployment
-        // Solidity/contract may return 0 for div by 0, so handle that
-        let expected: bigint
-        if (b === 0n) expected = 0n
-        else expected = BigInt.asIntN(256, a / b)
+        if(b === 0n) {
+          let revert = false
+          try {
+            await (await arithmeticSigned256BitTestsContract.divTest([a], [b], gasOptions)).wait()
+          } catch (error) {
+            revert = true
+          }
+          expect(revert).to.equal(true)
+          return
+        }
         await (await arithmeticSigned256BitTestsContract.divTest([a], [b], gasOptions)).wait()
         const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
-        expect(decryptedInt).to.equal(expected)
+        expect(decryptedInt).to.equal(BigInt.asIntN(256, a / b))
       })
       it(`edge case 256-bit eqTest(${a}, ${b})`, async function () {
         const { signedInt256TestsContract } = deployment
@@ -1524,8 +1530,16 @@ describe("MPC Core - signed 256-bit integers", function () {
       })
       it(`fuzz 256-bit divTest(${a}, ${b})`, async function () {
         const { arithmeticSigned256BitTestsContract } = deployment
-        // Avoid division by zero
-        if (b === 0n) return
+        if(b === 0n) {
+          let revert = false
+          try {
+            await (await arithmeticSigned256BitTestsContract.divTest([a], [b], gasOptions)).wait()
+          } catch (error) {
+            revert = true
+          }
+          expect(revert).to.equal(true)
+          return
+        }
         await (await arithmeticSigned256BitTestsContract.divTest([a], [b], gasOptions)).wait()
         const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
         expect(decryptedInt).to.equal(BigInt.asIntN(256, a / b))

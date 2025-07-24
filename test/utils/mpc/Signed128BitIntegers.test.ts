@@ -1438,13 +1438,19 @@ describe("MPC Core - signed 128-bit integers", function () {
       })
       it(`edge case 128-bit divTest(${a}, ${b})`, async function () {
         const { contract } = deployment
-        // Solidity/contract may return 0 for div by 0, so handle that
-        let expected: bigint
-        if (b === 0n) expected = 0n
-        else expected = BigInt.asIntN(128, a / b)
+        if(b === 0n) {
+          let revert = false
+          try {
+            await (await contract.divTest(a, b, gasOptions)).wait()
+          } catch (error) {
+            revert = true
+          }
+          expect(revert).to.equal(true)
+          return
+        }
         await (await contract.divTest(a, b, gasOptions)).wait()
         const decryptedInt = await contract.divResult()
-        expect(decryptedInt).to.equal(expected)
+        expect(decryptedInt).to.equal(BigInt.asIntN(128, a / b))
       })
       it(`edge case 128-bit eqTest(${a}, ${b})`, async function () {
         const { contract } = deployment
@@ -1526,9 +1532,17 @@ describe("MPC Core - signed 128-bit integers", function () {
       })
       it(`fuzz 128-bit divTest(${a}, ${b})`, async function () {
         const { contract } = deployment
-        // Avoid division by zero
-        if (b === 0n) return
-        await (await contract.divTest(a, b)).wait()
+        if(b === 0n) {
+          let revert = false
+          try {
+            await (await contract.divTest(a, b, gasOptions)).wait()
+          } catch (error) {
+            revert = true
+          }
+          expect(revert).to.equal(true)
+          return
+        }
+        await (await contract.divTest(a, b, gasOptions)).wait()
         const decryptedInt = await contract.divResult()
         expect(decryptedInt).to.equal(BigInt.asIntN(128, a / b))
       })

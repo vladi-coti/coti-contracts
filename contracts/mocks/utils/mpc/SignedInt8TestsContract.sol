@@ -4,18 +4,7 @@ pragma solidity ^0.8.19;
 
 import "../../../utils/mpc/MpcCore.sol";
 
-contract SignedIntegerTestsContract {
-    struct AllGTCastingValues {
-        gtInt8 a8_s;
-        gtInt8 b8_s;
-        // gtInt16 a16_s;
-        // gtInt16 b16_s;
-        // gtInt32 a32_s;
-        // gtInt32 b32_s;
-        // gtInt64 a64_s;
-        // gtInt64 b64_s;
-    }
-
+contract SignedInt8TestsContract {
     int8 public validateResult;
     int8 public addResult;
     int8 public subResult;
@@ -63,144 +52,108 @@ contract SignedIntegerTestsContract {
     }
 
     function addTest(int8 a, int8 b) public {
-        AllGTCastingValues memory castingValues;
-
-        castingValues.a8_s = MpcCore.setPublic8(a);
-        castingValues.b8_s = MpcCore.setPublic8(b);
-
+        addResult = 0;
         int8 result = MpcCore.decrypt(
-            MpcCore.add(castingValues.a8_s, castingValues.b8_s)
+            MpcCore.add(MpcCore.setPublic8(a), MpcCore.setPublic8(b))
         );
         addResult = result;
     }
 
     function subTest(int8 a, int8 b) public {
-        AllGTCastingValues memory castingValues;
-
-        castingValues.a8_s = MpcCore.setPublic8(a);
-        castingValues.b8_s = MpcCore.setPublic8(b);
-
+        subResult = 0;
         int8 result = MpcCore.decrypt(
-            MpcCore.sub(castingValues.a8_s, castingValues.b8_s)
+            MpcCore.sub(MpcCore.setPublic8(a), MpcCore.setPublic8(b))
         );
         subResult = result;
     }
 
     function mulTest(int8 a, int8 b) public {
-        AllGTCastingValues memory castingValues;
-
-        castingValues.a8_s = MpcCore.setPublic8(a);
-        castingValues.b8_s = MpcCore.setPublic8(b);
-
+        mulResult = 0;
         int8 result = MpcCore.decrypt(
-            MpcCore.mul(castingValues.a8_s, castingValues.b8_s)
+            MpcCore.mul(MpcCore.setPublic8(a), MpcCore.setPublic8(b))
         );
         mulResult = result;
     }
 
     function divTest(int8 a, int8 b) public {
-        AllGTCastingValues memory castingValues;
-
-        castingValues.a8_s = MpcCore.setPublic8(a);
-        castingValues.b8_s = MpcCore.setPublic8(b);
-
+        divResult = 0;
         int8 result = MpcCore.decrypt(
-            MpcCore.div(castingValues.a8_s, castingValues.b8_s)
+            MpcCore.div(MpcCore.setPublic8(a), MpcCore.setPublic8(b))
         );
         divResult = result;
     }
 
     function andTest(int8 a, int8 b) public {
-        AllGTCastingValues memory castingValues;
-
-        castingValues.a8_s = MpcCore.setPublic8(a);
-        castingValues.b8_s = MpcCore.setPublic8(b);
-
+        andResult = 0;
         int8 result = MpcCore.decrypt(
-            MpcCore.and(castingValues.a8_s, castingValues.b8_s)
+            MpcCore.and(MpcCore.setPublic8(a), MpcCore.setPublic8(b))
         );
         andResult = result;
     }
 
     function orTest(int8 a, int8 b) public {
-        AllGTCastingValues memory castingValues;
-
-        castingValues.a8_s = MpcCore.setPublic8(a);
-        castingValues.b8_s = MpcCore.setPublic8(b);
-
+        orResult = 0;
         int8 result = MpcCore.decrypt(
-            MpcCore.or(castingValues.a8_s, castingValues.b8_s)
+            MpcCore.or(MpcCore.setPublic8(a), MpcCore.setPublic8(b))
         );
         orResult = result;
     }
 
     function xorTest(int8 a, int8 b) public {
-        AllGTCastingValues memory castingValues;
-
-        castingValues.a8_s = MpcCore.setPublic8(a);
-        castingValues.b8_s = MpcCore.setPublic8(b);
-
+        xorResult = 0;
         int8 result = MpcCore.decrypt(
-            MpcCore.xor(castingValues.a8_s, castingValues.b8_s)
+            MpcCore.xor(MpcCore.setPublic8(a), MpcCore.setPublic8(b))
         );
         xorResult = result;
     }
 
     function eqTest(int8 a, int8 b) public {
-        AllGTCastingValues memory castingValues;
-
-        castingValues.a8_s = MpcCore.setPublic8(a);
-        castingValues.b8_s = MpcCore.setPublic8(b);
-
+        eqResult = false;
         bool result = MpcCore.decrypt(
-            MpcCore.eq(castingValues.a8_s, castingValues.b8_s)
+            MpcCore.eq(MpcCore.setPublic8(a), MpcCore.setPublic8(b))
         );
         eqResult = result;
     }
 
     function neTest(int8 a, int8 b) public {
-        AllGTCastingValues memory castingValues;
-
-        castingValues.a8_s = MpcCore.setPublic8(a);
-        castingValues.b8_s = MpcCore.setPublic8(b);
-
+        neResult = false;
         bool result = MpcCore.decrypt(
-            MpcCore.ne(castingValues.a8_s, castingValues.b8_s)
+            MpcCore.ne(MpcCore.setPublic8(a), MpcCore.setPublic8(b))
         );
         neResult = result;
     }
 
-    function gtTest(int64 a, int64 b) public {
+    function gtTest(int8 a, int8 b) public {
         gtResult = false;
-        gtInt64 gtA = MpcCore.setPublic64(a);
-        gtInt64 gtB = MpcCore.setPublic64(b);
+        gtInt8 gtA = MpcCore.setPublic8(a);
+        gtInt8 gtB = MpcCore.setPublic8(b);
 
         gtBool result = MpcCore.gt(gtA, gtB);
         gtResult = MpcCore.decrypt(result);
     }
 
-    function ltTest(int64 a, int64 b) public {
+    function ltTest(int8 a, int8 b) public {
         ltResult = false;
-        gtInt64 gtA = MpcCore.setPublic64(a);
-        gtInt64 gtB = MpcCore.setPublic64(b);
+        gtInt8 gtA = MpcCore.setPublic8(a);
+        gtInt8 gtB = MpcCore.setPublic8(b);
 
         gtBool result = MpcCore.lt(gtA, gtB);
         ltResult = MpcCore.decrypt(result);
     }
 
-    function geTest(int64 a, int64 b) public {
+    function geTest(int8 a, int8 b) public {
         geResult = false;
-        gtInt64 gtA = MpcCore.setPublic64(a);
-        gtInt64 gtB = MpcCore.setPublic64(b);
+        gtInt8 gtA = MpcCore.setPublic8(a);
+        gtInt8 gtB = MpcCore.setPublic8(b);
 
         gtBool result = MpcCore.ge(gtA, gtB);
         geResult = MpcCore.decrypt(result);
     }
 
-    function leTest(int64 a, int64 b) public {
+    function leTest(int8 a, int8 b) public {
         leResult = false;
-        gtInt64 gtA = MpcCore.setPublic64(a);
-        gtInt64 gtB = MpcCore.setPublic64(b);
+        gtInt8 gtA = MpcCore.setPublic8(a);
+        gtInt8 gtB = MpcCore.setPublic8(b);
 
         gtBool result = MpcCore.le(gtA, gtB);
         leResult = MpcCore.decrypt(result);

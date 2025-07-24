@@ -7,22 +7,6 @@ import "./MpcTypes.sol";
 import { MpcCore } from "./MpcCore.sol";
 
 library MpcSignedInt {
-    // Helper function for boolean XOR
-    function boolXor(gtBool a, gtBool b) internal returns (gtBool) {
-        return
-            gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Xor(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SBOOL_T,
-                        MPC_TYPE.SBOOL_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtBool.unwrap(a),
-                    gtBool.unwrap(b)
-                )
-            );
-    }
-
     // =========== signed 8 bit operations ==============
 
     function validateCiphertext(itInt8 memory input) internal returns (gtInt8) {
@@ -136,19 +120,47 @@ library MpcSignedInt {
     }
 
     function div(gtInt8 a, gtInt8 b) internal returns (gtInt8) {
-        // For now, implement simple direct division
-        // TODO: Implement proper signed division logic
+        // Explicit division by zero check
+        require(MpcCore.decrypt(ne(b, setPublic8(0))), "division by zero");
+        // Check if numbers are negative by testing the sign bit (bit 63 for int64)
+        gtBool aNegative = eq(
+            and(a, setPublic8(int8(type(int8).min))),
+            setPublic8(int8(type(int8).min))
+        );
+
+        gtBool bNegative = eq(
+            and(b, setPublic8(int8(type(int8).min))),
+            setPublic8(int8(type(int8).min))
+        );
+
+        // Get absolute values: if negative, use two's complement negation
+        gtInt8 aAbs = mux(
+            aNegative,
+            a,
+            sub(setPublic8(int8(0)), a) // 0 - a
+        );
+
+        gtInt8 bAbs = mux(
+            bNegative,
+            b,
+            sub(setPublic8(int8(0)), b) // 0 - b
+        );
+
+        // Perform unsigned division on absolute values
+        gtUint8 unsignedResult = MpcCore.div(gtUint8.wrap(gtInt8.unwrap(aAbs)), gtUint8.wrap(gtInt8.unwrap(bAbs)));
+
+    
+        // Result is negative if exactly one operand is negative
+        gtBool resultNegative = MpcCore.xor(aNegative, bNegative);
+
+        gtInt8 result = gtInt8.wrap(gtUint8.unwrap(unsignedResult));
+    
+        // Apply sign: if result should be negative, negate it
         return
-            gtInt8.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Div(
-                    combineEnumsToBytes3(
-                        MPC_TYPE.SUINT8_T,
-                        MPC_TYPE.SUINT8_T,
-                        ARGS.BOTH_SECRET
-                    ),
-                    gtInt8.unwrap(a),
-                    gtInt8.unwrap(b)
-                )
+            mux(
+                resultNegative,
+                result,
+                sub(setPublic8(int8(0)), result) // 0 - result
             );
     }
 
@@ -427,53 +439,39 @@ library MpcSignedInt {
     }
 
     function div(gtInt16 a, gtInt16 b) internal returns (gtInt16) {
-        // Check if numbers are negative by testing the sign bit (bit 15 for int16)
+        require(MpcCore.decrypt(ne(b, setPublic16(0))), "division by zero");
         gtBool aNegative = eq(
-            and(a, setPublic16(int16(-32768))), // -32768 = 0x8000 (sign bit set)
-            setPublic16(int16(-32768))
+            and(a, setPublic16(int16(type(int16).min))),
+            setPublic16(int16(type(int16).min))
         );
 
         gtBool bNegative = eq(
-            and(b, setPublic16(int16(-32768))), // -32768 = 0x8000 (sign bit set)
-            setPublic16(int16(-32768))
+            and(b, setPublic16(int16(type(int16).min))),
+            setPublic16(int16(type(int16).min))
         );
 
-        // Get absolute values: if negative, use two's complement negation
         gtInt16 aAbs = mux(
             aNegative,
-            sub(setPublic16(int16(0)), a), // 0 - a
-            a
+            a,
+            sub(setPublic16(int16(0)), a)
         );
 
         gtInt16 bAbs = mux(
             bNegative,
-            sub(setPublic16(int16(0)), b), // 0 - b
-            b
+            b,
+            sub(setPublic16(int16(0)), b)
         );
 
-        // Perform unsigned division on absolute values
-        gtInt16 unsignedResult = gtInt16.wrap(
-            ExtendedOperations(address(MPC_PRECOMPILE)).Div(
-                combineEnumsToBytes3(
-                    MPC_TYPE.SUINT16_T,
-                    MPC_TYPE.SUINT16_T,
-                    ARGS.BOTH_SECRET
-                ),
-                gtInt16.unwrap(aAbs),
-                gtInt16.unwrap(bAbs)
-            )
+        gtUint16 unsignedResult = MpcCore.div(gtUint16.wrap(gtInt16.unwrap(aAbs)), gtUint16.wrap(gtInt16.unwrap(bAbs)));
+
+        gtBool resultNegative = MpcCore.xor(aNegative, bNegative);
+        gtInt16 result = gtInt16.wrap(gtUint16.unwrap(unsignedResult));
+
+        return mux(
+            resultNegative,
+            result,
+            sub(setPublic16(int16(0)), result)
         );
-
-        // Result is negative if exactly one operand is negative
-        gtBool resultNegative = boolXor(aNegative, bNegative);
-
-        // Apply sign: if result should be negative, negate it
-        return
-            mux(
-                resultNegative,
-                sub(setPublic16(int16(0)), unsignedResult), // 0 - result
-                unsignedResult
-            );
     }
 
     function and(gtInt16 a, gtInt16 b) internal returns (gtInt16) {
@@ -751,53 +749,39 @@ library MpcSignedInt {
     }
 
     function div(gtInt32 a, gtInt32 b) internal returns (gtInt32) {
-        // Check if numbers are negative by testing the sign bit (bit 31 for int32)
+        require(MpcCore.decrypt(ne(b, setPublic32(0))), "division by zero");
         gtBool aNegative = eq(
-            and(a, setPublic32(int32(-2147483648))), // -2147483648 = 0x80000000 (sign bit set)
-            setPublic32(int32(-2147483648))
+            and(a, setPublic32(int32(type(int32).min))),
+            setPublic32(int32(type(int32).min))
         );
 
         gtBool bNegative = eq(
-            and(b, setPublic32(int32(-2147483648))), // -2147483648 = 0x80000000 (sign bit set)
-            setPublic32(int32(-2147483648))
+            and(b, setPublic32(int32(type(int32).min))),
+            setPublic32(int32(type(int32).min))
         );
 
-        // Get absolute values: if negative, use two's complement negation
         gtInt32 aAbs = mux(
             aNegative,
-            sub(setPublic32(int32(0)), a), // 0 - a
-            a
+            a,
+            sub(setPublic32(int32(0)), a)
         );
 
         gtInt32 bAbs = mux(
             bNegative,
-            sub(setPublic32(int32(0)), b), // 0 - b
-            b
+            b,
+            sub(setPublic32(int32(0)), b)
         );
 
-        // Perform unsigned division on absolute values
-        gtInt32 unsignedResult = gtInt32.wrap(
-            ExtendedOperations(address(MPC_PRECOMPILE)).Div(
-                combineEnumsToBytes3(
-                    MPC_TYPE.SUINT32_T,
-                    MPC_TYPE.SUINT32_T,
-                    ARGS.BOTH_SECRET
-                ),
-                gtInt32.unwrap(aAbs),
-                gtInt32.unwrap(bAbs)
-            )
+        gtUint32 unsignedResult = MpcCore.div(gtUint32.wrap(gtInt32.unwrap(aAbs)), gtUint32.wrap(gtInt32.unwrap(bAbs)));
+
+        gtBool resultNegative = MpcCore.xor(aNegative, bNegative);
+        gtInt32 result = gtInt32.wrap(gtUint32.unwrap(unsignedResult));
+
+        return mux(
+            resultNegative,
+            result,
+            sub(setPublic32(int32(0)), result)
         );
-
-        // Result is negative if exactly one operand is negative
-        gtBool resultNegative = boolXor(aNegative, bNegative);
-
-        // Apply sign: if result should be negative, negate it
-        return
-            mux(
-                resultNegative,
-                sub(setPublic32(int32(0)), unsignedResult), // 0 - result
-                unsignedResult
-            );
     }
 
     function and(gtInt32 a, gtInt32 b) internal returns (gtInt32) {
@@ -1070,53 +1054,39 @@ library MpcSignedInt {
     }
 
     function div(gtInt64 a, gtInt64 b) internal returns (gtInt64) {
-        // Check if numbers are negative by testing the sign bit (bit 63 for int64)
+        require(MpcCore.decrypt(ne(b, setPublic64(0))), "division by zero");
         gtBool aNegative = eq(
-            and(a, setPublic64(int64(-9223372036854775808))), // min int64 value (sign bit set)
-            setPublic64(int64(-9223372036854775808))
+            and(a, setPublic64(int64(type(int64).min))),
+            setPublic64(int64(type(int64).min))
         );
 
         gtBool bNegative = eq(
-            and(b, setPublic64(int64(-9223372036854775808))), // min int64 value (sign bit set)
-            setPublic64(int64(-9223372036854775808))
+            and(b, setPublic64(int64(type(int64).min))),
+            setPublic64(int64(type(int64).min))
         );
 
-        // Get absolute values: if negative, use two's complement negation
         gtInt64 aAbs = mux(
             aNegative,
-            sub(setPublic64(int64(0)), a), // 0 - a
-            a
+            a,
+            sub(setPublic64(int64(0)), a)
         );
 
         gtInt64 bAbs = mux(
             bNegative,
-            sub(setPublic64(int64(0)), b), // 0 - b
-            b
+            b,
+            sub(setPublic64(int64(0)), b)
         );
 
-        // Perform unsigned division on absolute values
-        gtInt64 unsignedResult = gtInt64.wrap(
-            ExtendedOperations(address(MPC_PRECOMPILE)).Div(
-                combineEnumsToBytes3(
-                    MPC_TYPE.SUINT64_T,
-                    MPC_TYPE.SUINT64_T,
-                    ARGS.BOTH_SECRET
-                ),
-                gtInt64.unwrap(aAbs),
-                gtInt64.unwrap(bAbs)
-            )
+        gtUint64 unsignedResult = MpcCore.div(gtUint64.wrap(gtInt64.unwrap(aAbs)), gtUint64.wrap(gtInt64.unwrap(bAbs)));
+
+        gtBool resultNegative = MpcCore.xor(aNegative, bNegative);
+        gtInt64 result = gtInt64.wrap(gtUint64.unwrap(unsignedResult));
+
+        return mux(
+            resultNegative,
+            result,
+            sub(setPublic64(int64(0)), result)
         );
-
-        // Result is negative if exactly one operand is negative
-        gtBool resultNegative = boolXor(aNegative, bNegative);
-
-        // Apply sign: if result should be negative, negate it
-        return
-            mux(
-                resultNegative,
-                sub(setPublic64(int64(0)), unsignedResult), // 0 - result
-                unsignedResult
-            );
     }
 
     function and(gtInt64 a, gtInt64 b) internal returns (gtInt64) {
@@ -1439,16 +1409,11 @@ library MpcSignedInt {
         return MpcCore.mux(resultNegative, unsignedResult, negate(unsignedResult));
     }
 
-    function div(
-        gtInt128 memory a,
-        gtInt128 memory b
-    ) internal returns (gtInt128 memory) {
-        // For now, use selective decryption for all cases to ensure correctness
+    function div(gtInt128 memory a, gtInt128 memory b) internal returns (gtInt128 memory) {
         int128 aValue = decrypt(a);
         int128 bValue = decrypt(b);
-        
         if (bValue == 0) {
-            return setPublic128(int128(0));
+            revert("division by zero");
         }
         
         // Handle the overflow case: MIN / -1 = -MIN, but -MIN overflows
@@ -1815,22 +1780,15 @@ library MpcSignedInt {
         return mux(resultNegative, unsignedResult, negate256(unsignedResult));
     }
 
-    function div(
-        gtInt256 memory a,
-        gtInt256 memory b
-    ) internal returns (gtInt256 memory) {
+    function div(gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
         int256 aValue = decrypt(a);
         int256 bValue = decrypt(b);
         if (bValue == 0) {
-            return setPublic256(int256(0));
+            revert("division by zero");
         }
-        
-        // Handle the overflow case: MIN / -1 = -MIN, but -MIN overflows
-        // In 2's complement arithmetic, this wraps around to MIN itself
         if (aValue == type(int256).min && bValue == -1) {
             return setPublic256(type(int256).min);
         }
-        
         int256 resultValue = aValue / bValue;
         return setPublic256(resultValue);
     }
