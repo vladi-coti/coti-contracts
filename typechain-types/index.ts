@@ -66,10 +66,16 @@ export type { ShiftTestsContract } from "./contracts/mocks/utils/mpc/ShiftTestsC
 export { ShiftTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/ShiftTestsContract__factory";
 export type { SignedInt128TestsContract } from "./contracts/mocks/utils/mpc/SignedInt128TestsContract";
 export { SignedInt128TestsContract__factory } from "./factories/contracts/mocks/utils/mpc/SignedInt128TestsContract__factory";
+export type { SignedInt16TestsContract } from "./contracts/mocks/utils/mpc/SignedInt16TestsContract";
+export { SignedInt16TestsContract__factory } from "./factories/contracts/mocks/utils/mpc/SignedInt16TestsContract__factory";
 export type { SignedInt256TestsContract } from "./contracts/mocks/utils/mpc/SignedInt256TestsContract";
 export { SignedInt256TestsContract__factory } from "./factories/contracts/mocks/utils/mpc/SignedInt256TestsContract__factory";
-export type { SignedIntegerTestsContract } from "./contracts/mocks/utils/mpc/SignedIntegerTestsContract";
-export { SignedIntegerTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/SignedIntegerTestsContract__factory";
+export type { SignedInt32TestsContract } from "./contracts/mocks/utils/mpc/SignedInt32TestsContract";
+export { SignedInt32TestsContract__factory } from "./factories/contracts/mocks/utils/mpc/SignedInt32TestsContract__factory";
+export type { SignedInt64TestsContract } from "./contracts/mocks/utils/mpc/SignedInt64TestsContract";
+export { SignedInt64TestsContract__factory } from "./factories/contracts/mocks/utils/mpc/SignedInt64TestsContract__factory";
+export type { SignedInt8TestsContract } from "./contracts/mocks/utils/mpc/SignedInt8TestsContract";
+export { SignedInt8TestsContract__factory } from "./factories/contracts/mocks/utils/mpc/SignedInt8TestsContract__factory";
 export type { StringTestsContract } from "./contracts/mocks/utils/mpc/StringTestsContract";
 export { StringTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/StringTestsContract__factory";
 export type { TransferScalarTestsContract } from "./contracts/mocks/utils/mpc/TransferScalarTestsContract";

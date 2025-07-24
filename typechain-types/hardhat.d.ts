@@ -134,13 +134,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SignedInt128TestsContract__factory>;
     getContractFactory(
+      name: "SignedInt16TestsContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SignedInt16TestsContract__factory>;
+    getContractFactory(
       name: "SignedInt256TestsContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.SignedInt256TestsContract__factory>;
     getContractFactory(
-      name: "SignedIntegerTestsContract",
+      name: "SignedInt32TestsContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
-    ): Promise<Contracts.SignedIntegerTestsContract__factory>;
+    ): Promise<Contracts.SignedInt32TestsContract__factory>;
+    getContractFactory(
+      name: "SignedInt64TestsContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SignedInt64TestsContract__factory>;
+    getContractFactory(
+      name: "SignedInt8TestsContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.SignedInt8TestsContract__factory>;
     getContractFactory(
       name: "StringTestsContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
@@ -369,15 +381,30 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.SignedInt128TestsContract>;
     getContractAt(
+      name: "SignedInt16TestsContract",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SignedInt16TestsContract>;
+    getContractAt(
       name: "SignedInt256TestsContract",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
     ): Promise<Contracts.SignedInt256TestsContract>;
     getContractAt(
-      name: "SignedIntegerTestsContract",
+      name: "SignedInt32TestsContract",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
-    ): Promise<Contracts.SignedIntegerTestsContract>;
+    ): Promise<Contracts.SignedInt32TestsContract>;
+    getContractAt(
+      name: "SignedInt64TestsContract",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SignedInt64TestsContract>;
+    getContractAt(
+      name: "SignedInt8TestsContract",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.SignedInt8TestsContract>;
     getContractAt(
       name: "StringTestsContract",
       address: string | ethers.Addressable,
@@ -595,13 +622,25 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SignedInt128TestsContract>;
     deployContract(
+      name: "SignedInt16TestsContract",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SignedInt16TestsContract>;
+    deployContract(
       name: "SignedInt256TestsContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SignedInt256TestsContract>;
     deployContract(
-      name: "SignedIntegerTestsContract",
+      name: "SignedInt32TestsContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.SignedIntegerTestsContract>;
+    ): Promise<Contracts.SignedInt32TestsContract>;
+    deployContract(
+      name: "SignedInt64TestsContract",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SignedInt64TestsContract>;
+    deployContract(
+      name: "SignedInt8TestsContract",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SignedInt8TestsContract>;
     deployContract(
       name: "StringTestsContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
@@ -830,15 +869,30 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SignedInt128TestsContract>;
     deployContract(
+      name: "SignedInt16TestsContract",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SignedInt16TestsContract>;
+    deployContract(
       name: "SignedInt256TestsContract",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.SignedInt256TestsContract>;
     deployContract(
-      name: "SignedIntegerTestsContract",
+      name: "SignedInt32TestsContract",
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
-    ): Promise<Contracts.SignedIntegerTestsContract>;
+    ): Promise<Contracts.SignedInt32TestsContract>;
+    deployContract(
+      name: "SignedInt64TestsContract",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SignedInt64TestsContract>;
+    deployContract(
+      name: "SignedInt8TestsContract",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.SignedInt8TestsContract>;
     deployContract(
       name: "StringTestsContract",
       args: any[],

@@ -21,8 +21,11 @@ export { MiscellaneousTestsContract__factory } from "./MiscellaneousTestsContrac
 export { OffboardToUserKeyTestContract__factory } from "./OffboardToUserKeyTestContract__factory";
 export { ShiftTestsContract__factory } from "./ShiftTestsContract__factory";
 export { SignedInt128TestsContract__factory } from "./SignedInt128TestsContract__factory";
+export { SignedInt16TestsContract__factory } from "./SignedInt16TestsContract__factory";
 export { SignedInt256TestsContract__factory } from "./SignedInt256TestsContract__factory";
-export { SignedIntegerTestsContract__factory } from "./SignedIntegerTestsContract__factory";
+export { SignedInt32TestsContract__factory } from "./SignedInt32TestsContract__factory";
+export { SignedInt64TestsContract__factory } from "./SignedInt64TestsContract__factory";
+export { SignedInt8TestsContract__factory } from "./SignedInt8TestsContract__factory";
 export { StringTestsContract__factory } from "./StringTestsContract__factory";
 export { TransferScalarTestsContract__factory } from "./TransferScalarTestsContract__factory";
 export { TransferTestsContract__factory } from "./TransferTestsContract__factory";
