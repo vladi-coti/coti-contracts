@@ -38,7 +38,7 @@ describe("MPC Core - signed 64-bit integers", function () {
     it("Should validate positive signed integers", async function () {
       const { contract, contractAddress, owner } = deployment
 
-      const itValue = await owner.encryptInt32(
+      const itValue = await owner.encryptInt64(
         123,
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
@@ -54,7 +54,7 @@ describe("MPC Core - signed 64-bit integers", function () {
     it("Should validate negative signed integers", async function () {
       const { contract, contractAddress, owner } = deployment
 
-      const itValue = await owner.encryptInt32(
+      const itValue = await owner.encryptInt64(
         -20,
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
@@ -480,7 +480,7 @@ describe("MPC Core - signed 64-bit integers", function () {
 
       const encryptedInt = await contract.offBoardToUserResult()
 
-      const decryptedInt = await owner.decryptInt32(encryptedInt)
+      const decryptedInt = await owner.decryptInt64(encryptedInt)
 
       expect(decryptedInt).to.equal(3)
     })
@@ -748,19 +748,19 @@ describe("MPC Core - signed 64-bit integers", function () {
         const { contract } = deployment
         await (await contract.addTest(a, b, gasOptions)).wait()
         const decryptedInt = await contract.addResult()
-        expect(decryptedInt).to.equal(a + b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(64, a + b))
       })
       it(`edge case 64-bit subTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.subTest(a, b, gasOptions)).wait()
         const decryptedInt = await contract.subResult()
-        expect(decryptedInt).to.equal(a - b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(64, a - b))
       })
       it(`edge case 64-bit mulTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.mulTest(a, b, gasOptions)).wait()
         const decryptedInt = await contract.mulResult()
-        expect(decryptedInt).to.equal(a * b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(64, a * b))
       })
       it(`edge case 64-bit divTest(${a}, ${b})`, async function () {
         const { contract } = deployment
@@ -868,13 +868,13 @@ describe("MPC Core - signed 64-bit integers", function () {
         const { contract } = deployment
         await (await contract.orTest(a, b, gasOptions)).wait()
         const decryptedInt = await contract.orResult()
-        expect(decryptedInt).to.equal(a | b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(64, a | b))
       })
       it(`fuzz 64-bit xorTest(${a}, ${b})`, async function () {
         const { contract } = deployment
         await (await contract.xorTest(a, b, gasOptions)).wait()
         const decryptedInt = await contract.xorResult()
-        expect(decryptedInt).to.equal(a ^ b)
+        expect(decryptedInt).to.equal(BigInt.asIntN(64, a ^ b))
       })
       it(`fuzz 64-bit eqTest(${a}, ${b})`, async function () {
         const { contract } = deployment
