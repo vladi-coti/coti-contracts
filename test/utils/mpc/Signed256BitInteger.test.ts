@@ -1536,6 +1536,68 @@ describe("MPC Core - signed 256-bit integers", function () {
         const decryptedInt = await signedInt256TestsContract.andResult()
         expect(decryptedInt).to.equal(BigInt.asIntN(256, a & b))
       })
+      it(`fuzz 256-bit orTest(${a}, ${b})`, async function () {
+        const { signedInt256TestsContract } = deployment
+        await (await signedInt256TestsContract.orTest(a, b)).wait()
+        const decryptedInt = await signedInt256TestsContract.orResult()
+        expect(decryptedInt).to.equal(a | b)
+      })
+      it(`fuzz 256-bit xorTest(${a}, ${b})`, async function () {
+        const { signedInt256TestsContract } = deployment
+        await (await signedInt256TestsContract.xorTest(a, b)).wait()
+        const decryptedInt = await signedInt256TestsContract.xorResult()
+        expect(decryptedInt).to.equal(a ^ b)
+      })
+      it(`fuzz 256-bit eqTest(${a}, ${b})`, async function () {
+        const { signedInt256TestsContract } = deployment
+        await (await signedInt256TestsContract.eqTest(a, b)).wait()
+        expect(await signedInt256TestsContract.eqResult()).to.equal(a === b)
+        await (await signedInt256TestsContract.eqTest(a, a)).wait()
+        expect(await signedInt256TestsContract.eqResult()).to.equal(true)
+      })
+      it(`fuzz 256-bit neTest(${a}, ${b})`, async function () {
+        const { signedInt256TestsContract } = deployment
+        await (await signedInt256TestsContract.neTest(a, b)).wait()
+        expect(await signedInt256TestsContract.neResult()).to.equal(a !== b)
+        await (await signedInt256TestsContract.neTest(a, a)).wait()
+        expect(await signedInt256TestsContract.neResult()).to.equal(false)
+      })
+      it(`fuzz 256-bit ltTest(${a}, ${b})`, async function () {
+        const { signedInt256TestsContract } = deployment
+          await (await signedInt256TestsContract.ltTest(a, b)).wait()
+          expect(await signedInt256TestsContract.ltResult()).to.equal(a < b)
+          await (await signedInt256TestsContract.ltTest(b, a)).wait()
+          expect(await signedInt256TestsContract.ltResult()).to.equal(b < a)
+          await (await signedInt256TestsContract.ltTest(a, a)).wait()
+          expect(await signedInt256TestsContract.ltResult()).to.equal(false)
+      })
+      it(`fuzz 256-bit leTest(${a}, ${b})`, async function () {
+        const { signedInt256TestsContract } = deployment
+        await (await signedInt256TestsContract.leTest(a, b)).wait()
+        expect(await signedInt256TestsContract.leResult()).to.equal(a <= b)
+        await (await signedInt256TestsContract.leTest(b, a)).wait()
+        expect(await signedInt256TestsContract.leResult()).to.equal(b <= a)
+        await (await signedInt256TestsContract.leTest(a, a)).wait()
+        expect(await signedInt256TestsContract.leResult()).to.equal(true)
+      })
+      it(`fuzz 256-bit gtTest(${a}, ${b})`, async function () {
+        const { signedInt256TestsContract } = deployment
+        await (await signedInt256TestsContract.gtTest(a, b)).wait()
+        expect(await signedInt256TestsContract.gtResult()).to.equal(a > b)
+        await (await signedInt256TestsContract.gtTest(b, a)).wait()
+        expect(await signedInt256TestsContract.gtResult()).to.equal(b > a)
+        await (await signedInt256TestsContract.gtTest(a, a)).wait()
+        expect(await signedInt256TestsContract.gtResult()).to.equal(false)
+      })
+      it(`fuzz 256-bit geTest(${a}, ${b})`, async function () {
+        const { signedInt256TestsContract } = deployment
+        await (await signedInt256TestsContract.geTest(a, b)).wait()
+        expect(await signedInt256TestsContract.geResult()).to.equal(a >= b)
+        await (await signedInt256TestsContract.geTest(b, a)).wait()
+        expect(await signedInt256TestsContract.geResult()).to.equal(b >= a)
+        await (await signedInt256TestsContract.geTest(a, a)).wait()
+        expect(await signedInt256TestsContract.geResult()).to.equal(true)
+      })
     }
   });
 })

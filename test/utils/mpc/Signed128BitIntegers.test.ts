@@ -1,7 +1,7 @@
 import hre from "hardhat"
 import { expect } from "chai"
 import { setupAccounts } from "../accounts"
-import { wrapContractWithGasOptions,gasOptions, generateRandomNumber } from "./helpers";
+import { gasOptions, generateRandomNumber } from "./helpers";
 
 function randomSigned128() {
   let unsigned = generateRandomNumber(16);
@@ -22,9 +22,7 @@ async function deploy() {
   const contract = await factory.connect(owner).deploy(gasOptions)
   await contract.waitForDeployment()
 
-  const wrappedContract = wrapContractWithGasOptions(contract)
-
-  return { contract: wrappedContract, contractAddress: await contract.getAddress(), owner, otherAccount }
+  return { contract, contractAddress: await contract.getAddress(), owner, otherAccount }
 }
 
 describe("MPC Core - signed 128-bit integers", function () {
@@ -1444,7 +1442,7 @@ describe("MPC Core - signed 128-bit integers", function () {
         let expected: bigint
         if (b === 0n) expected = 0n
         else expected = BigInt.asIntN(128, a / b)
-        await (await contract.divTest(a, b)).wait()
+        await (await contract.divTest(a, b, gasOptions)).wait()
         const decryptedInt = await contract.divResult()
         expect(decryptedInt).to.equal(expected)
       })
