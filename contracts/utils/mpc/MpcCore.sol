@@ -1344,6 +1344,10 @@ library MpcCore {
         return MpcSignedInt.fromUint128(a);
     }
 
+    function negate(gtInt128 memory a) internal pure returns (gtInt128 memory) {
+        return MpcSignedInt.negate(a);
+    }
+
     // =========== unsigned 128 bit operations ============
 
     function _splitUint128(uint128 number) private returns (uint64, uint64) {
@@ -1915,6 +1919,10 @@ library MpcCore {
 
     function toSigned(gtUint256 memory a) internal pure returns (gtInt256 memory) {
         return MpcSignedInt.fromUint256(a);
+    }
+
+    function negate(gtInt256 memory a) internal pure returns (gtInt256 memory) {
+        return MpcSignedInt.negate(a);
     }
 
     // =========== unsigned 256 bit operations ============
