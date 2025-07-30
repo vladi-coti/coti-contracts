@@ -1336,11 +1336,11 @@ library MpcCore {
         return MpcSignedInt.mux(bit, a, b);
     }
 
-    function toUint128(gtInt128 memory a) internal pure returns (gtUint128 memory) {
+    function fromSigned(gtInt128 memory a) internal pure returns (gtUint128 memory) {
         return MpcSignedInt.toUint128(a);
     }
     
-    function fromUint128(gtUint128 memory a) internal pure returns (gtInt128 memory) {
+    function toSigned(gtUint128 memory a) internal pure returns (gtInt128 memory) {
         return MpcSignedInt.fromUint128(a);
     }
 
@@ -1909,11 +1909,11 @@ library MpcCore {
         return MpcSignedInt.mux(bit, a, b);
     }
 
-    function toUint256(gtInt256 memory a) internal pure returns (gtUint256 memory) {
+    function fromSigned(gtInt256 memory a) internal pure returns (gtUint256 memory) {
         return MpcSignedInt.toUint256(a);
     }
 
-    function fromUint256(gtUint256 memory a) internal pure returns (gtInt256 memory) {
+    function toSigned(gtUint256 memory a) internal pure returns (gtInt256 memory) {
         return MpcSignedInt.fromUint256(a);
     }
 
