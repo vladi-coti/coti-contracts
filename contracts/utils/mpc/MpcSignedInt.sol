@@ -1715,7 +1715,7 @@ library MpcSignedInt {
         return result;
     }
 
-    function negate256(gtInt256 memory a) internal returns (gtInt256 memory) {
+    function negate(gtInt256 memory a) internal returns (gtInt256 memory) {
         gtInt256 memory result;
 
         // Two's complement negation: ~a + 1
@@ -1767,8 +1767,8 @@ library MpcSignedInt {
         gtBool aNegative = lt(a.high, setPublic128(int128(0)));
         gtBool bNegative = lt(b.high, setPublic128(int128(0)));
 
-        gtInt256 memory aAbs = mux(aNegative, a, negate256(a));
-        gtInt256 memory bAbs = mux(bNegative, b, negate256(b));
+        gtInt256 memory aAbs = mux(aNegative, a, negate(a));
+        gtInt256 memory bAbs = mux(bNegative, b, negate(b));
 
         gtUint256 memory aAbsU = toUint256(aAbs);
         gtUint256 memory bAbsU = toUint256(bAbs);
@@ -1777,7 +1777,7 @@ library MpcSignedInt {
         gtInt256 memory unsignedResult = fromUint256(unsignedResultU);
         
         gtBool resultNegative = MpcCore.xor(aNegative, bNegative);
-        return mux(resultNegative, unsignedResult, negate256(unsignedResult));
+        return mux(resultNegative, unsignedResult, negate(unsignedResult));
     }
 
     function div(gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
