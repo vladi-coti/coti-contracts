@@ -1336,6 +1336,14 @@ library MpcCore {
         return MpcSignedInt.mux(bit, a, b);
     }
 
+    function toUint128(gtInt128 memory a) internal pure returns (gtUint128 memory) {
+        return MpcSignedInt.toUint128(a);
+    }
+    
+    function fromUint128(gtUint128 memory a) internal pure returns (gtInt128 memory) {
+        return MpcSignedInt.fromUint128(a);
+    }
+
     // =========== unsigned 128 bit operations ============
 
     function _splitUint128(uint128 number) private returns (uint64, uint64) {
@@ -1899,6 +1907,14 @@ library MpcCore {
 
     function mux(gtBool bit, gtInt256 memory a, gtInt256 memory b) internal returns (gtInt256 memory) {
         return MpcSignedInt.mux(bit, a, b);
+    }
+
+    function toUint256(gtInt256 memory a) internal pure returns (gtUint256 memory) {
+        return MpcSignedInt.toUint256(a);
+    }
+
+    function fromUint256(gtUint256 memory a) internal pure returns (gtInt256 memory) {
+        return MpcSignedInt.fromUint256(a);
     }
 
     // =========== unsigned 256 bit operations ============
