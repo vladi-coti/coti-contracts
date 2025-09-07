@@ -14,8 +14,8 @@ contract ArithmeticSigned256BitTestsContract {
         _resetNumbers(a.length);
 
         for (uint256 i = 0; i < a.length; ++i) {
-            gtInt256 memory gtA = MpcCore.setPublic256(a[i]);
-            gtInt256 memory gtB = MpcCore.setPublic256(b[i]);
+            gtInt256 gtA = MpcCore.setPublic256(a[i]);
+            gtInt256 gtB = MpcCore.setPublic256(b[i]);
             
             numbers[i] = MpcCore.decrypt(MpcCore.add(gtA, gtB));
         }
@@ -27,8 +27,8 @@ contract ArithmeticSigned256BitTestsContract {
         _resetNumbers(a.length);
 
         for (uint256 i = 0; i < a.length; ++i) {
-            gtInt256 memory gtA = MpcCore.setPublic256(a[i]);
-            gtInt256 memory gtB = MpcCore.setPublic256(b[i]);
+            gtInt256 gtA = MpcCore.setPublic256(a[i]);
+            gtInt256 gtB = MpcCore.setPublic256(b[i]);
             
             numbers[i] = MpcCore.decrypt(MpcCore.sub(gtA, gtB));
         }
@@ -40,8 +40,8 @@ contract ArithmeticSigned256BitTestsContract {
         _resetNumbers(a.length);
 
         for (uint256 i = 0; i < a.length; ++i) {
-            gtInt256 memory gtA = MpcCore.setPublic256(a[i]);
-            gtInt256 memory gtB = MpcCore.setPublic256(b[i]);
+            gtInt256 gtA = MpcCore.setPublic256(a[i]);
+            gtInt256 gtB = MpcCore.setPublic256(b[i]);
             
             numbers[i] = MpcCore.decrypt(MpcCore.mul(gtA, gtB));
         }
@@ -53,8 +53,8 @@ contract ArithmeticSigned256BitTestsContract {
         _resetNumbers(a.length);
 
         for (uint256 i = 0; i < a.length; ++i) {
-            gtInt256 memory gtA = MpcCore.setPublic256(a[i]);
-            gtInt256 memory gtB = MpcCore.setPublic256(b[i]);
+            gtInt256 gtA = MpcCore.setPublic256(a[i]);
+            gtInt256 gtB = MpcCore.setPublic256(b[i]);
             
             numbers[i] = MpcCore.decrypt(MpcCore.div(gtA, gtB));
         }
