@@ -13,6 +13,10 @@ type gtInt32 is uint256;
 type gtUint32 is uint256;
 type gtInt64 is uint256;
 type gtUint64 is uint256;
+type gtInt128 is uint256;
+type gtUint128 is uint256;
+type gtInt256 is uint256;
+type gtUint256 is uint256;
 
 // =========== Ciphertext Types ===========
 
@@ -25,52 +29,19 @@ type ctInt32 is uint256;
 type ctUint32 is uint256;
 type ctInt64 is uint256;
 type ctUint64 is uint256;
-
-// =========== Struct Types for larger integers ===========
-
-// Unsigned struct types
-struct gtUint128 {
-    gtUint64 high;
-    gtUint64 low;
-}
-
-struct gtUint256 {
-    gtUint128 high;
-    gtUint128 low;
-}
-
-struct ctUint128 {
-    ctUint64 high;
-    ctUint64 low;
-}
-
-struct ctUint256 {
-    ctUint128 high;
-    ctUint128 low;
-}
-
-// Signed struct types
-struct gtInt128 {
-    gtInt64 high;
-    gtInt64 low;
-}
-
-struct gtInt256 {
-    gtInt128 high;
-    gtInt128 low;
-}
-
-struct ctInt128 {
-    ctInt64 high;
-    ctInt64 low;
-}
-
+type ctInt128 is uint256;
+type ctUint128 is uint256;
 struct ctInt256 {
-    ctInt128 high;
-    ctInt128 low;
+    ctInt128 ciphertextHigh;
+    ctInt128 ciphertextLow;
+}
+struct ctUint256 {
+    ctUint128 ciphertextHigh;
+    ctUint128 ciphertextLow;
 }
 
-// String types
+// =========== String Types ===========
+
 struct gtString {
     gtUint64[] value;
 }
@@ -128,22 +99,22 @@ struct itUint64 {
 
 struct itUint128 {
     ctUint128 ciphertext;
-    bytes[2] signature;
-}
-
-struct itUint256 {
-    ctUint256 ciphertext;
-    bytes[2][2] signature;
+    bytes signature;
 }
 
 struct itInt128 {
     ctInt128 ciphertext;
-    bytes[2] signature;
+    bytes signature;
+}
+
+struct itUint256 {
+    ctUint256 ciphertext;
+    bytes signature;
 }
 
 struct itInt256 {
     ctInt256 ciphertext;
-    bytes[2][2] signature;
+    bytes signature;
 }
 
 struct itString {
@@ -230,7 +201,9 @@ enum MPC_TYPE {
     SUINT8_T,
     SUINT16_T,
     SUINT32_T,
-    SUINT64_T
+    SUINT64_T,
+    SUINT128_T,
+    SUINT256_T
 }
 
 enum ARGS {
