@@ -55,64 +55,64 @@ contract SignedInt256TestsContract {
 
     function addTest(int256 a, int256 b) public {
         addResult = 0;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         int256 result = MpcCore.decrypt(MpcCore.add(gtA, gtB));
         addResult = result;
     }
 
     function subTest(int256 a, int256 b) public {
         subResult = 0;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         int256 result = MpcCore.decrypt(MpcCore.sub(gtA, gtB));
         subResult = result;
     }
 
     function mulTest(int256 a, int256 b) public {
         mulResult = 0;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         int256 result = MpcCore.decrypt(MpcCore.mul(gtA, gtB));
         mulResult = result;
     }
 
     function divTest(int256 a, int256 b) public {
         divResult = 0;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         int256 result = MpcCore.decrypt(MpcCore.div(gtA, gtB));
         divResult = result;
     }
 
     function andTest(int256 a, int256 b) public {
         andResult = 0;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         int256 result = MpcCore.decrypt(MpcCore.and(gtA, gtB));
         andResult = result;
     }
 
     function orTest(int256 a, int256 b) public {
         orResult = 0;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         int256 result = MpcCore.decrypt(MpcCore.or(gtA, gtB));
         orResult = result;
     }
 
     function xorTest(int256 a, int256 b) public {
         xorResult = 0;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         int256 result = MpcCore.decrypt(MpcCore.xor(gtA, gtB));
         xorResult = result;
     }
 
     function muxTest(bool bit, int256 a, int256 b) public {
         muxResult = 0;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         gtBool gtBit = MpcCore.setPublic(bit);
         int256 result = MpcCore.decrypt(MpcCore.mux(gtBit, gtA, gtB));
         muxResult = result;
@@ -120,48 +120,48 @@ contract SignedInt256TestsContract {
 
     function eqTest(int256 a, int256 b) public {
         eqResult = false;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         bool result = MpcCore.decrypt(MpcCore.eq(gtA, gtB));
         eqResult = result;
     }
 
     function neTest(int256 a, int256 b) public {
         neResult = false;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         bool result = MpcCore.decrypt(MpcCore.ne(gtA, gtB));
         neResult = result;
     }
 
     function gtTest(int256 a, int256 b) public {
         gtResult = false;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         bool result = MpcCore.decrypt(MpcCore.gt(gtA, gtB));
         gtResult = result;
     }
 
     function ltTest(int256 a, int256 b) public {
         ltResult = false;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         bool result = MpcCore.decrypt(MpcCore.lt(gtA, gtB));
         ltResult = result;
     }
 
     function geTest(int256 a, int256 b) public {
         geResult = false;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         bool result = MpcCore.decrypt(MpcCore.ge(gtA, gtB));
         geResult = result;
     }
 
     function leTest(int256 a, int256 b) public {
         leResult = false;
-        gtInt256 memory gtA = MpcCore.setPublic256(a);
-        gtInt256 memory gtB = MpcCore.setPublic256(b);
+        gtInt256 gtA = MpcCore.setPublic256(a);
+        gtInt256 gtB = MpcCore.setPublic256(b);
         bool result = MpcCore.decrypt(MpcCore.le(gtA, gtB));
         leResult = result;
     }
@@ -189,7 +189,7 @@ contract SignedInt256TestsContract {
 
     function setPublicTest(int256 value) public {
         setPublicResult = 0;
-        gtInt256 memory gt = MpcCore.setPublic256(value);
+        gtInt256 gt = MpcCore.setPublic256(value);
         setPublicResult = MpcCore.decrypt(gt);
     }
 } 
