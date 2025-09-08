@@ -139,7 +139,7 @@ contract Miscellaneous128BitTestsContract {
         
         // Resize the numbers array to match input length
         for(uint i = 0; i < length; i++) {
-            ctNumbers.push(ctUint128(ctUint64.wrap(0), ctUint64.wrap(0)));
+            ctNumbers.push(ctUint128.wrap(0));
         }
     }
 
