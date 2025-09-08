@@ -1317,94 +1317,81 @@ library MpcSignedInt {
     }
 
     function setPublic128(int128 pt) internal returns (gtInt128) {
-        gtInt128 result;
-
-        // Correctly split the 128-bit value into high and low 64-bit parts
-        uint64 low = uint64(uint128(pt));
-        int64 high = int64(pt >> 64);
-
-        result.high = setPublic64(high);
-        result.low = setPublic64(uint64ToInt64(low));
-
-        return result;
+        return
+            gtInt128.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).SetPublic(
+                    bytes1(uint8(MPC_TYPE.SUINT128_T)),
+                    uint256(uint128(pt))
+                )
+            );
     }
 
     function add(
         gtInt128 a,
         gtInt128 b
     ) internal returns (gtInt128) {
-        gtInt128 result;
-
-        // Add low parts using gtInt64 addition
-        result.low = add(a.low, b.low);
-
-        gtBool overflow = MpcCore.lt(gtUint64.wrap(gtInt64.unwrap(result.low)), gtUint64.wrap(gtInt64.unwrap(a.low)));
-
-        // Add high parts
-        result.high = add(a.high, b.high);
-
-        // Add carry to high part if needed
-        result.high = mux(
-            overflow,
-            result.high,
-            add(result.high, setPublic64(int64(1)))
-        );
-
-        return result;
+        return
+            gtInt128.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Add(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT128_T,
+                        MPC_TYPE.SUINT128_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtInt128.unwrap(a),
+                    gtInt128.unwrap(b)
+                )
+            );
     }
 
     function sub(
         gtInt128 a,
         gtInt128 b
     ) internal returns (gtInt128) {
-        gtInt128 result;
-
-        // Subtract low parts
-        result.low = sub(a.low, b.low);
-
-        // Simple borrow detection: if a.low < b.low, there was underflow
-        gtBool borrow = MpcCore.lt(gtUint64.wrap(gtInt64.unwrap(a.low)), gtUint64.wrap(gtInt64.unwrap(b.low)));
-
-        // Subtract high parts with borrow if needed
-        result.high = sub(a.high, b.high);
-
-        // Subtract borrow from high part if needed
-        result.high = mux(
-            borrow,
-            result.high,
-            sub(result.high, setPublic64(int64(1)))
-        );
-
-        return result;
+        return
+            gtInt128.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Sub(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT128_T,
+                        MPC_TYPE.SUINT128_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtInt128.unwrap(a),
+                    gtInt128.unwrap(b)
+                )
+            );
     }
 
     function mul(
         gtInt128 a,
         gtInt128 b
     ) internal returns (gtInt128) {
-        // Determine if a and b are negative (sign bit of high part)
-        gtBool aNegative = MpcCore.lt(a.high, MpcCore.setPublic64(int64(0)));
-        gtBool bNegative = MpcCore.lt(b.high, MpcCore.setPublic64(int64(0)));
+        // Determine if a and b are negative (check sign bit)
+        gtUint128 aU = gtUint128.wrap(gtInt128.unwrap(a));
+        gtUint128 bU = gtUint128.wrap(gtInt128.unwrap(b));
+        
+        gtBool aNegative = MpcCore.eq(MpcCore.shr(aU, 127), MpcCore.setPublic128(uint128(1)));
+        gtBool bNegative = MpcCore.eq(MpcCore.shr(bU, 127), MpcCore.setPublic128(uint128(1)));
 
         // Get absolute values
-        gtInt128 aAbs = MpcCore.mux(aNegative, negate(a), a);
-        gtInt128 bAbs = MpcCore.mux(bNegative, negate(b), b);
+        gtInt128 aAbs = mux(aNegative, negate(a), a);
+        gtInt128 bAbs = mux(bNegative, negate(b), b);
 
         // Convert to unsigned for multiplication
-        gtUint128 aAbsU = toUint128(aAbs);
-        gtUint128 bAbsU = toUint128(bAbs);
+        gtUint128 aAbsU = gtUint128.wrap(gtInt128.unwrap(aAbs));
+        gtUint128 bAbsU = gtUint128.wrap(gtInt128.unwrap(bAbs));
 
         // Use unsigned 128-bit multiplication
         gtUint128 unsignedResultU = MpcCore.mul(aAbsU, bAbsU);
 
         // Convert back to signed
-        gtInt128 unsignedResult = fromUint128(unsignedResultU);
+        gtInt128 unsignedResult = gtInt128.wrap(gtUint128.unwrap(unsignedResultU));
 
         // Result is negative if exactly one operand is negative
         gtBool resultNegative = MpcCore.xor(aNegative, bNegative);
 
         // Apply sign
-        return MpcCore.mux(resultNegative, unsignedResult, negate(unsignedResult));
+        return mux(resultNegative, unsignedResult, negate(unsignedResult));
     }
 
     function div(gtInt128 a, gtInt128 b) internal returns (gtInt128) {
@@ -1425,70 +1412,79 @@ library MpcSignedInt {
     }
 
     function negate(gtInt128 a) internal returns (gtInt128) {
-        gtInt128 result;
-
         // Two's complement negation: ~a + 1
-        result.low = xor(a.low, setPublic64(int64(-1)));
-        result.high = xor(a.high, setPublic64(int64(-1)));
-
-        // Add 1
-        result = add(result, setPublic128(int128(1)));
-
-        return result;
+        gtInt128 inverted = xor(a, setPublic128(int128(-1)));
+        return add(inverted, setPublic128(int128(1)));
     }
 
     function and(
         gtInt128 a,
         gtInt128 b
     ) internal returns (gtInt128) {
-        gtInt128 result;
-
-        result.low = and(a.low, b.low);
-        result.high = and(a.high, b.high);
-
-        return result;
+        return
+            gtInt128.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).And(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT128_T,
+                        MPC_TYPE.SUINT128_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtInt128.unwrap(a),
+                    gtInt128.unwrap(b)
+                )
+            );
     }
 
     function or(
         gtInt128 a,
         gtInt128 b
     ) internal returns (gtInt128) {
-        gtInt128 result;
-
-        result.low = or(a.low, b.low);
-        result.high = or(a.high, b.high);
-
-        return result;
+        return
+            gtInt128.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Or(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT128_T,
+                        MPC_TYPE.SUINT128_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtInt128.unwrap(a),
+                    gtInt128.unwrap(b)
+                )
+            );
     }
 
     function xor(
         gtInt128 a,
         gtInt128 b
     ) internal returns (gtInt128) {
-        gtInt128 result;
-
-        result.low = xor(a.low, b.low);
-        result.high = xor(a.high, b.high);
-
-        return result;
+        return
+            gtInt128.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Xor(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT128_T,
+                        MPC_TYPE.SUINT128_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtInt128.unwrap(a),
+                    gtInt128.unwrap(b)
+                )
+            );
     }
 
     function eq(
         gtInt128 a,
         gtInt128 b
     ) internal returns (gtBool) {
-        gtBool lowEqual = eq(a.low, b.low);
-        gtBool highEqual = eq(a.high, b.high);
         return
             gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).And(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Eq(
                     combineEnumsToBytes3(
-                        MPC_TYPE.SBOOL_T,
-                        MPC_TYPE.SBOOL_T,
+                        MPC_TYPE.SUINT128_T,
+                        MPC_TYPE.SUINT128_T,
                         ARGS.BOTH_SECRET
                     ),
-                    gtBool.unwrap(lowEqual),
-                    gtBool.unwrap(highEqual)
+                    gtInt128.unwrap(a),
+                    gtInt128.unwrap(b)
                 )
             );
     }
@@ -1497,61 +1493,66 @@ library MpcSignedInt {
         gtInt128 a,
         gtInt128 b
     ) internal returns (gtBool) {
-        gtBool lowNotEqual = ne(a.low, b.low);
-        gtBool highNotEqual = ne(a.high, b.high);
         return
             gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Or(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Ne(
                     combineEnumsToBytes3(
-                        MPC_TYPE.SBOOL_T,
-                        MPC_TYPE.SBOOL_T,
+                        MPC_TYPE.SUINT128_T,
+                        MPC_TYPE.SUINT128_T,
                         ARGS.BOTH_SECRET
                     ),
-                    gtBool.unwrap(lowNotEqual),
-                    gtBool.unwrap(highNotEqual)
+                    gtInt128.unwrap(a),
+                    gtInt128.unwrap(b)
                 )
             );
     }
 
     function ge(gtInt128 a, gtInt128 b) internal returns (gtBool) {
-        gtBool highEqual = eq(a.high, b.high);
-
-        return MpcCore.mux(highEqual, gt(a.high, b.high), ge(a.low, b.low));
+        gtBool isGt = gt(a, b);
+        gtBool isEq = eq(a, b);
+        return MpcCore.or(isGt, isEq);
     }
 
     function gt(gtInt128 a, gtInt128 b) internal returns (gtBool) {
-        // Compare high parts as signed 64-bit
-        gtBool highGt = gt(a.high, b.high);
-        gtBool highEq = eq(a.high, b.high);
-        // Compare low parts as unsigned 64-bit if high parts are equal
-        gtBool lowGt = MpcCore.gt(gtUint64.wrap(gtInt64.unwrap(a.low)), gtUint64.wrap(gtInt64.unwrap(b.low)));
-        return MpcCore.or(highGt, MpcCore.and(highEq, lowGt));
+        gtUint128 aU = gtUint128.wrap(gtInt128.unwrap(a));
+        gtUint128 bU = gtUint128.wrap(gtInt128.unwrap(b));
+        gtUint128 signA = MpcCore.shr(aU, 127);
+        gtUint128 signB = MpcCore.shr(bU, 127);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic128(uint128(1))), MpcCore.eq(signB, MpcCore.setPublic128(uint128(1))));
+        gtBool aPos_bNeg = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic128(uint128(0))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedGt = MpcCore.gt(aU, bU);
+        return MpcCore.or(aPos_bNeg, MpcCore.and(sameSign, unsignedGt));
     }
 
     function lt(gtInt128 a, gtInt128 b) internal returns (gtBool) {
-        // Compare high parts as signed 64-bit
-        gtBool highLt = lt(a.high, b.high);
-        gtBool highEq = eq(a.high, b.high);
-        // Compare low parts as unsigned 64-bit if high parts are equal
-        gtBool lowLt = MpcCore.lt(gtUint64.wrap(gtInt64.unwrap(a.low)), gtUint64.wrap(gtInt64.unwrap(b.low)));
-        return MpcCore.or(highLt, MpcCore.and(highEq, lowLt));
+        gtUint128 aU = gtUint128.wrap(gtInt128.unwrap(a));
+        gtUint128 bU = gtUint128.wrap(gtInt128.unwrap(b));
+        gtUint128 signA = MpcCore.shr(aU, 127);
+        gtUint128 signB = MpcCore.shr(bU, 127);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic128(uint128(1))), MpcCore.eq(signB, MpcCore.setPublic128(uint128(1))));
+        gtBool aNeg_bPos = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic128(uint128(1))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedLt = MpcCore.lt(aU, bU);
+        return MpcCore.or(aNeg_bPos, MpcCore.and(sameSign, unsignedLt));
     }
 
     function le(gtInt128 a, gtInt128 b) internal returns (gtBool) {
-        gtBool highLt = lt(a.high, b.high); // signed 64-bit
-        gtBool highEq = eq(a.high, b.high);
-        // Compare low as unsigned if high parts are equal
-        gtBool lowLe = MpcCore.le(gtUint64.wrap(gtInt64.unwrap(a.low)), gtUint64.wrap(gtInt64.unwrap(b.low)));
-        return MpcCore.or(highLt, MpcCore.and(highEq, lowLe));
+        gtBool isLt = lt(a, b);
+        gtBool isEq = eq(a, b);
+        return MpcCore.or(isLt, isEq);
     }
 
     function decrypt(gtInt128 ct) internal returns (int128) {
-        int64 highPart = decrypt(ct.high);
-        int64 lowPartSigned = decrypt(ct.low);
-        uint64 lowPart = int64ToUint64(lowPartSigned);
-
-        // Combine high and low parts properly
-        return (int128(highPart) << 64) | int128(int128(uint128(uint256(lowPart))));
+        return
+            int128(
+                uint128(
+                    ExtendedOperations(address(MPC_PRECOMPILE)).Decrypt(
+                        bytes1(uint8(MPC_TYPE.SUINT128_T)),
+                        gtInt128.unwrap(ct)
+                    )
+                )
+            );
     }
 
     function mux(
@@ -1559,61 +1560,37 @@ library MpcSignedInt {
         gtInt128 a,
         gtInt128 b
     ) internal returns (gtInt128) {
-        gtInt128 result;
-
-        result.low = mux(bit, a.low, b.low);
-        result.high = mux(bit, a.high, b.high);
-
-        return result;
+        return
+            gtInt128.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Mux(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT128_T,
+                        MPC_TYPE.SUINT128_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtBool.unwrap(bit),
+                    gtInt128.unwrap(a),
+                    gtInt128.unwrap(b)
+                )
+            );
     }
 
     function shl(gtInt128 a, uint8 b) internal returns (gtInt128) {
-        gtInt128 result;
-        result.low = shl(a.low, b);
-        result.high = shl(a.high, b);
-        return result;
+        gtUint128 unsignedResult = MpcCore.shl(gtUint128.wrap(gtInt128.unwrap(a)), b);
+        return gtInt128.wrap(gtUint128.unwrap(unsignedResult));
     }
     
     function shr(gtInt128 a, uint8 b) internal returns (gtInt128) {
-        gtInt128 result;
-        // If shifting by 128 or more, result is all sign bits
-        gtBool sign = eq(shr(a.high, 63), setPublic64(int64(1)));
-        if (b >= 128) {
-            if (MpcCore.decrypt(sign)) {
-                result.high = setPublic64(int64(type(uint64).max));
-                result.low = setPublic64(int64(type(uint64).max));
-            } else {
-                result.high = setPublic64(int64(0));
-                result.low = setPublic64(int64(0));
+        gtUint128 value = gtUint128.wrap(gtInt128.unwrap(a));
+        gtUint128 shifted = MpcCore.shr(value, b);
+        gtBool sign = MpcCore.eq(MpcCore.shr(value, 127), MpcCore.setPublic128(uint128(1)));
+        if (b > 0) {
+            if (MpcCore.decrypt(MpcCore.eq(sign, gtBool.wrap(1)))) {
+                uint128 mask = uint128(type(uint128).max << (128 - b));
+                shifted = MpcCore.or(shifted, MpcCore.setPublic128(mask));
             }
-        } else if (b >= 64) {
-            uint8 shift = b - 64;
-            if (MpcCore.decrypt(sign)) {
-                result.high = setPublic64(int64(type(uint64).max));
-            } else {
-                result.high = setPublic64(int64(0));
-            }
-            result.low = gtInt64.wrap(gtUint64.unwrap(MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a.high)), shift)));
-        } else if (b > 0) {
-            uint64 mask = uint64(type(uint64).max >> (64 - b));
-            result.low = gtInt64.wrap(gtUint64.unwrap(MpcCore.or(
-                MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a.low)), b),
-                MpcCore.shl(MpcCore.and(gtUint64.wrap(gtInt64.unwrap(a.high)), mask), 64 - b)
-            )));
-            if (MpcCore.decrypt(sign)) {
-                uint64 signMask = uint64(type(uint64).max << (64 - b));
-                result.high = or(
-                    gtInt64.wrap(gtUint64.unwrap(MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a.high)), b))),
-                    setPublic64(int64(signMask))
-                );
-            } else {
-                result.high = gtInt64.wrap(gtUint64.unwrap(MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a.high)), b)));
-            }
-        } else {
-            result.low = a.low;
-            result.high = a.high;
         }
-        return result;
+        return gtInt128.wrap(gtUint128.unwrap(shifted));
     } 
 
     // =========== signed 256 bit operations ==============
@@ -1623,16 +1600,14 @@ library MpcSignedInt {
     ) internal returns (gtInt256) {
         gtInt256 result;
 
-        itInt128 memory highInput;
-        highInput.ciphertext = input.ciphertext.high;
-        highInput.signature = input.signature[0];
-
-        itInt128 memory lowInput;
-        lowInput.ciphertext = input.ciphertext.low;
-        lowInput.signature = input.signature[1];
-
-        result.high = validateCiphertext(highInput);
-        result.low = validateCiphertext(lowInput);
+        return gtInt256.wrap(
+            ExtendedOperations(address(MPC_PRECOMPILE)).ValidateCiphertext(
+                bytes1(uint8(MPC_TYPE.SUINT256_T)),
+                ctInt128.unwrap(input.ciphertext.ciphertextHigh),
+                ctInt128.unwrap(input.ciphertext.ciphertextLow),
+                input.signature
+            )
+        );
 
         return result;
     }
@@ -1640,8 +1615,13 @@ library MpcSignedInt {
     function onBoard(ctInt256 memory ct) internal returns (gtInt256) {
         gtInt256 result;
 
-        result.high = onBoard(ct.high);
-        result.low = onBoard(ct.low);
+        return gtInt256.wrap(
+            ExtendedOperations(address(MPC_PRECOMPILE)).OnBoard(
+                bytes1(uint8(MPC_TYPE.SUINT256_T)),
+                ctInt128.unwrap(ct.ciphertextHigh),
+                ctInt128.unwrap(ct.ciphertextLow)
+            )
+        );
 
         return result;
     }
@@ -1649,8 +1629,11 @@ library MpcSignedInt {
     function offBoard(gtInt256 pt) internal returns (ctInt256 memory) {
         ctInt256 memory result;
 
-        result.high = offBoard(pt.high);
-        result.low = offBoard(pt.low);
+        (uint256 ctHigh, uint256 ctLow) = ExtendedOperations(address(MPC_PRECOMPILE)).OffBoard256(
+            bytes1(uint8(MPC_TYPE.SUINT256_T)),
+            gtInt256.unwrap(pt)
+        );
+        result = ctInt256({ciphertextHigh: ctInt128.wrap(ctHigh), ciphertextLow: ctInt128.wrap(ctLow)});
 
         return result;
     }
@@ -1661,8 +1644,12 @@ library MpcSignedInt {
     ) internal returns (ctInt256 memory) {
         ctInt256 memory result;
 
-        result.high = offBoardToUser(pt.high, addr);
-        result.low = offBoardToUser(pt.low, addr);
+        (uint256 ctHigh, uint256 ctLow) = ExtendedOperations(address(MPC_PRECOMPILE)).OffBoardToUser256(
+            bytes1(uint8(MPC_TYPE.SUINT256_T)),
+            gtInt256.unwrap(pt),
+            abi.encodePacked(addr)
+        );
+        result = ctInt256({ciphertextHigh: ctInt128.wrap(ctHigh), ciphertextLow: ctInt128.wrap(ctLow)});
 
         return result;
     }
@@ -1680,24 +1667,23 @@ library MpcSignedInt {
     }
 
     function setPublic256(int256 pt) internal returns (gtInt256) {
-        gtInt256 result;
-
-        // Correctly split the 256-bit value into high and low 128-bit parts
-        uint128 low = uint128(uint256(pt));
-        int128 high = int128(pt >> 128);
-
-        result.high = setPublic128(high);
-        result.low = setPublic128(uint128ToInt128(low));
-
-        return result;
+        return
+            gtInt256.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).SetPublic(
+                    bytes1(uint8(MPC_TYPE.SUINT256_T)),
+                    uint256(pt)
+                )
+            );
     }
 
     function decrypt(gtInt256 ct) internal returns (int256) {
-        int128 highPart = decrypt(ct.high);
-        int128 lowPartSigned = decrypt(ct.low);
-        uint128 lowPart = int128ToUint128(lowPartSigned);
-        // Combine high and low parts properly
-        return (int256(highPart) << 128) | int256(int256(uint256(uint128(lowPart))));
+        return
+            int256(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Decrypt(
+                    bytes1(uint8(MPC_TYPE.SUINT256_T)),
+                    gtInt256.unwrap(ct)
+                )
+            );
     }
 
     function mux(
@@ -1705,76 +1691,92 @@ library MpcSignedInt {
         gtInt256 a,
         gtInt256 b
     ) internal returns (gtInt256) {
-        gtInt256 result;
-
-        result.low = mux(bit, a.low, b.low);
-        result.high = mux(bit, a.high, b.high);
-
-        return result;
+        return
+            gtInt256.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Mux(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT256_T,
+                        MPC_TYPE.SUINT256_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtBool.unwrap(bit),
+                    gtInt256.unwrap(a),
+                    gtInt256.unwrap(b)
+                )
+            );
     }
 
     function negate(gtInt256 a) internal returns (gtInt256) {
-        gtInt256 result;
-
         // Two's complement negation: ~a + 1
-        result.low = xor(a.low, setPublic128(int128(-1)));
-        result.high = xor(a.high, setPublic128(int128(-1)));
-
-        // Add 1
-        result = add(result, setPublic256(int256(1)));
-
-        return result;
+        gtInt256 inverted = xor(a, setPublic256(int256(-1)));
+        return add(inverted, setPublic256(int256(1)));
     }
 
     function add(
         gtInt256 a,
         gtInt256 b
     ) internal returns (gtInt256) {
-        gtInt256 result;
-        result.low = add(a.low, b.low);
-        gtBool carry = MpcCore.lt(toUint128(result.low), toUint128(a.low));
-        result.high = add(a.high, b.high);
-        result.high = mux(
-            carry,
-            result.high,
-            add(result.high, setPublic128(int128(1)))
-        );
-        return result;
+        return
+            gtInt256.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Add(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT256_T,
+                        MPC_TYPE.SUINT256_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtInt256.unwrap(a),
+                    gtInt256.unwrap(b)
+                )
+            );
     }
 
     function sub(
         gtInt256 a,
         gtInt256 b
     ) internal returns (gtInt256) {
-        gtInt256 result;
-        result.low = sub(a.low, b.low);
-        gtBool borrow = MpcCore.lt(toUint128(a.low), toUint128(b.low));
-        result.high = sub(a.high, b.high);
-        result.high = mux(
-            borrow,
-            result.high,
-            sub(result.high, setPublic128(int128(1)))
-        );
-        return result;
+        return
+            gtInt256.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Sub(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT256_T,
+                        MPC_TYPE.SUINT256_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtInt256.unwrap(a),
+                    gtInt256.unwrap(b)
+                )
+            );
     }
 
     function mul(
         gtInt256 a,
         gtInt256 b
     ) internal returns (gtInt256) {
-        gtBool aNegative = lt(a.high, setPublic128(int128(0)));
-        gtBool bNegative = lt(b.high, setPublic128(int128(0)));
-
-        gtInt256 aAbs = mux(aNegative, a, negate(a));
-        gtInt256 bAbs = mux(bNegative, b, negate(b));
-
-        gtUint256 aAbsU = toUint256(aAbs);
-        gtUint256 bAbsU = toUint256(bAbs);
-
-        gtUint256 unsignedResultU = MpcCore.mul(aAbsU, bAbsU);
-        gtInt256 unsignedResult = fromUint256(unsignedResultU);
+        // Determine if a and b are negative (check sign bit)
+        gtUint256 aU = gtUint256.wrap(gtInt256.unwrap(a));
+        gtUint256 bU = gtUint256.wrap(gtInt256.unwrap(b));
         
+        gtBool aNegative = MpcCore.eq(MpcCore.shr(aU, 255), MpcCore.setPublic256(uint256(1)));
+        gtBool bNegative = MpcCore.eq(MpcCore.shr(bU, 255), MpcCore.setPublic256(uint256(1)));
+
+        // Get absolute values
+        gtInt256 aAbs = mux(aNegative, negate(a), a);
+        gtInt256 bAbs = mux(bNegative, negate(b), b);
+
+        // Convert to unsigned for multiplication
+        gtUint256 aAbsU = gtUint256.wrap(gtInt256.unwrap(aAbs));
+        gtUint256 bAbsU = gtUint256.wrap(gtInt256.unwrap(bAbs));
+
+        // Use unsigned 256-bit multiplication
+        gtUint256 unsignedResultU = MpcCore.mul(aAbsU, bAbsU);
+
+        // Convert back to signed
+        gtInt256 unsignedResult = gtInt256.wrap(gtUint256.unwrap(unsignedResultU));
+
+        // Result is negative if exactly one operand is negative
         gtBool resultNegative = MpcCore.xor(aNegative, bNegative);
+
+        // Apply sign
         return mux(resultNegative, unsignedResult, negate(unsignedResult));
     }
 
@@ -1795,48 +1797,70 @@ library MpcSignedInt {
         gtInt256 a,
         gtInt256 b
     ) internal returns (gtInt256) {
-        gtInt256 result;
-        result.low = and(a.low, b.low);
-        result.high = and(a.high, b.high);
-        return result;
+        return
+            gtInt256.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).And(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT256_T,
+                        MPC_TYPE.SUINT256_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtInt256.unwrap(a),
+                    gtInt256.unwrap(b)
+                )
+            );
     }
 
     function or(
         gtInt256 a,
         gtInt256 b
     ) internal returns (gtInt256) {
-        gtInt256 result;
-        result.low = or(a.low, b.low);
-        result.high = or(a.high, b.high);
-        return result;
+        return
+            gtInt256.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Or(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT256_T,
+                        MPC_TYPE.SUINT256_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtInt256.unwrap(a),
+                    gtInt256.unwrap(b)
+                )
+            );
     }
 
     function xor(
         gtInt256 a,
         gtInt256 b
     ) internal returns (gtInt256) {
-        gtInt256 result;
-        result.low = xor(a.low, b.low);
-        result.high = xor(a.high, b.high);
-        return result;
+        return
+            gtInt256.wrap(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Xor(
+                    combineEnumsToBytes3(
+                        MPC_TYPE.SUINT256_T,
+                        MPC_TYPE.SUINT256_T,
+                        ARGS.BOTH_SECRET
+                    ),
+                    gtInt256.unwrap(a),
+                    gtInt256.unwrap(b)
+                )
+            );
     }
 
     function eq(
         gtInt256 a,
         gtInt256 b
     ) internal returns (gtBool) {
-        gtBool lowEqual = eq(a.low, b.low);
-        gtBool highEqual = eq(a.high, b.high);
         return
             gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).And(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Eq(
                     combineEnumsToBytes3(
-                        MPC_TYPE.SBOOL_T,
-                        MPC_TYPE.SBOOL_T,
+                        MPC_TYPE.SUINT256_T,
+                        MPC_TYPE.SUINT256_T,
                         ARGS.BOTH_SECRET
                     ),
-                    gtBool.unwrap(lowEqual),
-                    gtBool.unwrap(highEqual)
+                    gtInt256.unwrap(a),
+                    gtInt256.unwrap(b)
                 )
             );
     }
@@ -1845,34 +1869,42 @@ library MpcSignedInt {
         gtInt256 a,
         gtInt256 b
     ) internal returns (gtBool) {
-        gtBool lowNotEqual = ne(a.low, b.low);
-        gtBool highNotEqual = ne(a.high, b.high);
         return
             gtBool.wrap(
-                ExtendedOperations(address(MPC_PRECOMPILE)).Or(
+                ExtendedOperations(address(MPC_PRECOMPILE)).Ne(
                     combineEnumsToBytes3(
-                        MPC_TYPE.SBOOL_T,
-                        MPC_TYPE.SBOOL_T,
+                        MPC_TYPE.SUINT256_T,
+                        MPC_TYPE.SUINT256_T,
                         ARGS.BOTH_SECRET
                     ),
-                    gtBool.unwrap(lowNotEqual),
-                    gtBool.unwrap(highNotEqual)
+                    gtInt256.unwrap(a),
+                    gtInt256.unwrap(b)
                 )
             );
     }
 
     function gt(gtInt256 a, gtInt256 b) internal returns (gtBool) {
-        gtBool highGt = gt(a.high, b.high);
-        gtBool highEq = eq(a.high, b.high);
-        gtBool lowGt = MpcCore.gt(toUint128(a.low), toUint128(b.low));
-        return MpcCore.or(highGt, MpcCore.and(highEq, lowGt));
+        gtUint256 aU = gtUint256.wrap(gtInt256.unwrap(a));
+        gtUint256 bU = gtUint256.wrap(gtInt256.unwrap(b));
+        gtUint256 signA = MpcCore.shr(aU, 255);
+        gtUint256 signB = MpcCore.shr(bU, 255);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic256(uint256(1))), MpcCore.eq(signB, MpcCore.setPublic256(uint256(1))));
+        gtBool aPos_bNeg = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic256(uint256(0))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedGt = MpcCore.gt(aU, bU);
+        return MpcCore.or(aPos_bNeg, MpcCore.and(sameSign, unsignedGt));
     }
 
     function lt(gtInt256 a, gtInt256 b) internal returns (gtBool) {
-        gtBool highLt = lt(a.high, b.high);
-        gtBool highEq = eq(a.high, b.high);
-        gtBool lowLt = MpcCore.lt(toUint128(a.low), toUint128(b.low));
-        return MpcCore.or(highLt, MpcCore.and(highEq, lowLt));
+        gtUint256 aU = gtUint256.wrap(gtInt256.unwrap(a));
+        gtUint256 bU = gtUint256.wrap(gtInt256.unwrap(b));
+        gtUint256 signA = MpcCore.shr(aU, 255);
+        gtUint256 signB = MpcCore.shr(bU, 255);
+        gtBool signDiff = MpcCore.ne(MpcCore.eq(signA, MpcCore.setPublic256(uint256(1))), MpcCore.eq(signB, MpcCore.setPublic256(uint256(1))));
+        gtBool aNeg_bPos = MpcCore.and(signDiff, MpcCore.eq(signA, MpcCore.setPublic256(uint256(1))));
+        gtBool sameSign = MpcCore.eq(signA, signB);
+        gtBool unsignedLt = MpcCore.lt(aU, bU);
+        return MpcCore.or(aNeg_bPos, MpcCore.and(sameSign, unsignedLt));
     }
 
     function ge(gtInt256 a, gtInt256 b) internal returns (gtBool) {
@@ -1887,34 +1919,22 @@ library MpcSignedInt {
 
     // Helper to convert gtInt128 to gtUint128 (for unsigned comparison)
     function toUint128(gtInt128 a) internal pure returns (gtUint128) {
-        return gtUint128({
-            high: gtUint64.wrap(gtInt64.unwrap(a.high)),
-            low: gtUint64.wrap(gtInt64.unwrap(a.low))
-        });
+        return gtUint128.wrap(gtInt128.unwrap(a));
     }
 
     // Helper to convert gtInt256 to gtUint256 (for unsigned comparison)
     function toUint256(gtInt256 a) internal pure returns (gtUint256) {
-        return gtUint256({
-            high: toUint128(a.high),
-            low: toUint128(a.low)
-        });
+        return gtUint256.wrap(gtInt256.unwrap(a));
     }
 
     // Helper to convert gtUint256 to gtInt256
     function fromUint256(gtUint256 a) internal pure returns (gtInt256) {
-        return gtInt256({
-            high: fromUint128(a.high),
-            low: fromUint128(a.low)
-        });
+        return gtInt256.wrap(gtUint256.unwrap(a));
     }
 
     // Helper to convert gtUint128 to gtInt128
     function fromUint128(gtUint128 a) internal pure returns (gtInt128) {
-        return gtInt128({
-            high: gtInt64.wrap(gtUint64.unwrap(a.high)),
-            low: gtInt64.wrap(gtUint64.unwrap(a.low))
-        });
+        return gtInt128.wrap(gtUint128.unwrap(a));
     }
 
     // Helper to reinterpret int128 as uint128 (preserve bits)
