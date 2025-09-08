@@ -20,22 +20,12 @@ import type {
   TypedContractMethod,
 } from "../../../../common";
 
-export type CtInt128Struct = { high: BigNumberish; low: BigNumberish };
+export type ItInt128Struct = { ciphertext: BigNumberish; signature: BytesLike };
 
-export type CtInt128StructOutput = [high: bigint, low: bigint] & {
-  high: bigint;
-  low: bigint;
+export type ItInt128StructOutput = [ciphertext: bigint, signature: string] & {
+  ciphertext: bigint;
+  signature: string;
 };
-
-export type ItInt128Struct = {
-  ciphertext: CtInt128Struct;
-  signature: [BytesLike, BytesLike];
-};
-
-export type ItInt128StructOutput = [
-  ciphertext: CtInt128StructOutput,
-  signature: [string, string]
-] & { ciphertext: CtInt128StructOutput; signature: [string, string] };
 
 export interface SignedInt128TestsContractInterface extends Interface {
   getFunction(
@@ -409,20 +399,11 @@ export interface SignedInt128TestsContract extends BaseContract {
 
   offBoardCombinedResult: TypedContractMethod<
     [],
-    [
-      [CtInt128StructOutput, CtInt128StructOutput] & {
-        ciphertext: CtInt128StructOutput;
-        userCiphertext: CtInt128StructOutput;
-      }
-    ],
+    [[bigint, bigint] & { ciphertext: bigint; userCiphertext: bigint }],
     "view"
   >;
 
-  offBoardResult: TypedContractMethod<
-    [],
-    [[bigint, bigint] & { high: bigint; low: bigint }],
-    "view"
-  >;
+  offBoardResult: TypedContractMethod<[], [bigint], "view">;
 
   offBoardTest: TypedContractMethod<
     [a: BigNumberish, b: BigNumberish, c: BigNumberish],
@@ -430,11 +411,7 @@ export interface SignedInt128TestsContract extends BaseContract {
     "nonpayable"
   >;
 
-  offBoardToUserResult: TypedContractMethod<
-    [],
-    [[bigint, bigint] & { high: bigint; low: bigint }],
-    "view"
-  >;
+  offBoardToUserResult: TypedContractMethod<[], [bigint], "view">;
 
   onBoardResult1: TypedContractMethod<[], [bigint], "view">;
 
@@ -602,21 +579,12 @@ export interface SignedInt128TestsContract extends BaseContract {
     nameOrSignature: "offBoardCombinedResult"
   ): TypedContractMethod<
     [],
-    [
-      [CtInt128StructOutput, CtInt128StructOutput] & {
-        ciphertext: CtInt128StructOutput;
-        userCiphertext: CtInt128StructOutput;
-      }
-    ],
+    [[bigint, bigint] & { ciphertext: bigint; userCiphertext: bigint }],
     "view"
   >;
   getFunction(
     nameOrSignature: "offBoardResult"
-  ): TypedContractMethod<
-    [],
-    [[bigint, bigint] & { high: bigint; low: bigint }],
-    "view"
-  >;
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "offBoardTest"
   ): TypedContractMethod<
@@ -626,11 +594,7 @@ export interface SignedInt128TestsContract extends BaseContract {
   >;
   getFunction(
     nameOrSignature: "offBoardToUserResult"
-  ): TypedContractMethod<
-    [],
-    [[bigint, bigint] & { high: bigint; low: bigint }],
-    "view"
-  >;
+  ): TypedContractMethod<[], [bigint], "view">;
   getFunction(
     nameOrSignature: "onBoardResult1"
   ): TypedContractMethod<[], [bigint], "view">;

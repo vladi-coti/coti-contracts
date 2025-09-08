@@ -20,32 +20,25 @@ import type {
   TypedContractMethod,
 } from "../../../../common";
 
-export type CtInt128Struct = { high: BigNumberish; low: BigNumberish };
-
-export type CtInt128StructOutput = [high: bigint, low: bigint] & {
-  high: bigint;
-  low: bigint;
+export type CtInt256Struct = {
+  ciphertextHigh: BigNumberish;
+  ciphertextLow: BigNumberish;
 };
 
-export type CtInt256Struct = { high: CtInt128Struct; low: CtInt128Struct };
-
 export type CtInt256StructOutput = [
-  high: CtInt128StructOutput,
-  low: CtInt128StructOutput
-] & { high: CtInt128StructOutput; low: CtInt128StructOutput };
+  ciphertextHigh: bigint,
+  ciphertextLow: bigint
+] & { ciphertextHigh: bigint; ciphertextLow: bigint };
 
 export type ItInt256Struct = {
   ciphertext: CtInt256Struct;
-  signature: [[BytesLike, BytesLike], [BytesLike, BytesLike]];
+  signature: BytesLike;
 };
 
 export type ItInt256StructOutput = [
   ciphertext: CtInt256StructOutput,
-  signature: [[string, string], [string, string]]
-] & {
-  ciphertext: CtInt256StructOutput;
-  signature: [[string, string], [string, string]];
-};
+  signature: string
+] & { ciphertext: CtInt256StructOutput; signature: string };
 
 export interface SignedInt256TestsContractInterface extends Interface {
   getFunction(
@@ -430,12 +423,7 @@ export interface SignedInt256TestsContract extends BaseContract {
 
   offBoardResult: TypedContractMethod<
     [],
-    [
-      [CtInt128StructOutput, CtInt128StructOutput] & {
-        high: CtInt128StructOutput;
-        low: CtInt128StructOutput;
-      }
-    ],
+    [[bigint, bigint] & { ciphertextHigh: bigint; ciphertextLow: bigint }],
     "view"
   >;
 
@@ -447,12 +435,7 @@ export interface SignedInt256TestsContract extends BaseContract {
 
   offBoardToUserResult: TypedContractMethod<
     [],
-    [
-      [CtInt128StructOutput, CtInt128StructOutput] & {
-        high: CtInt128StructOutput;
-        low: CtInt128StructOutput;
-      }
-    ],
+    [[bigint, bigint] & { ciphertextHigh: bigint; ciphertextLow: bigint }],
     "view"
   >;
 
@@ -634,12 +617,7 @@ export interface SignedInt256TestsContract extends BaseContract {
     nameOrSignature: "offBoardResult"
   ): TypedContractMethod<
     [],
-    [
-      [CtInt128StructOutput, CtInt128StructOutput] & {
-        high: CtInt128StructOutput;
-        low: CtInt128StructOutput;
-      }
-    ],
+    [[bigint, bigint] & { ciphertextHigh: bigint; ciphertextLow: bigint }],
     "view"
   >;
   getFunction(
@@ -653,12 +631,7 @@ export interface SignedInt256TestsContract extends BaseContract {
     nameOrSignature: "offBoardToUserResult"
   ): TypedContractMethod<
     [],
-    [
-      [CtInt128StructOutput, CtInt128StructOutput] & {
-        high: CtInt128StructOutput;
-        low: CtInt128StructOutput;
-      }
-    ],
+    [[bigint, bigint] & { ciphertextHigh: bigint; ciphertextLow: bigint }],
     "view"
   >;
   getFunction(
