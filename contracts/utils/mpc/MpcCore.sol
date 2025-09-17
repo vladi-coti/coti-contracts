@@ -14395,11 +14395,11 @@ library MpcCore {
         return MpcSignedInt.mux(bit, a, b);
     }
 
-    function fromSigned(gtInt256 a) internal returns (gtUint256) {
+    function fromSigned(gtInt256 a) internal pure returns (gtUint256) {
         return MpcSignedInt.toUint256(a);
     }
 
-    function toSigned(gtUint256 a) internal returns (gtInt256) {
+    function toSigned(gtUint256 a) internal pure returns (gtInt256) {
         return MpcSignedInt.fromUint256(a);
     }
 
