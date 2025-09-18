@@ -1,11 +1,20 @@
 import fs from "fs"
-import { CotiNetwork, getDefaultProvider, JsonRpcProvider, parseEther, Wallet } from "@coti-io/coti-ethers"
+import hre from "hardhat"
+import { JsonRpcProvider, parseEther, Wallet } from "@coti-io/coti-ethers"
 
 let pks = process.env.SIGNING_KEYS ? process.env.SIGNING_KEYS.split(",") : []
 
 export async function setupAccounts() {
-  // const provider = getDefaultProvider(CotiNetwork.Testnet);
-  const provider = new JsonRpcProvider('http://3.88.141.22:7000');
+  // Get the network configuration from hardhat config
+  const networkName = hre.network.name
+  const networkConfig = hre.config.networks[networkName]
+  console.log(`networkConfig`, networkConfig)
+  
+  if (!networkConfig || typeof networkConfig !== 'object' || !('url' in networkConfig)) {
+    throw new Error(`Network configuration not found for ${networkName}`)
+  }
+  
+  const provider = new JsonRpcProvider(networkConfig.url);
 
   if (pks.length == 0) {
     const key1 = Wallet.createRandom(provider)

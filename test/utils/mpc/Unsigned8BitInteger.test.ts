@@ -25,19 +25,6 @@ describe("MPC Core - unsigned 8-bit integers", function () {
   const MIN = 0n;
 
   describe("Validating encrypted unsigned 8-bit integers", function () {
-    it("Should validate positive unsigned integers (js crypto)", async function () {
-      const { contract, contractAddress, owner } = deployment
-      const itValue = await owner.encryptUint8(
-        42,
-        contractAddress,
-        contract.validateCiphertextTest.fragment.selector
-      )
-
-      console.log("itValue", itValue)
-      await (await contract.validateCiphertextTest(itValue)).wait()
-      const decryptedInt = await contract.validateResult()
-      expect(decryptedInt).to.equal(42n)
-    })
     it("Should validate positive unsigned integers", async function () {
       const { contract, contractAddress, owner } = deployment
       const itValue = await owner.encryptUint8(
@@ -45,8 +32,6 @@ describe("MPC Core - unsigned 8-bit integers", function () {
         contractAddress,
         contract.validateCiphertextTest.fragment.selector
       )
-      console.log("itValue", itValue)
-
       await (await contract.validateCiphertextTest(itValue)).wait()
       const decryptedInt = await contract.validateResult()
       expect(decryptedInt).to.equal(42n)
@@ -74,6 +59,42 @@ describe("MPC Core - unsigned 8-bit integers", function () {
       await (await contract.validateCiphertextTest(itValue)).wait()
       const decryptedInt = await contract.validateResult()
       expect(decryptedInt).to.equal(0n)
+    })
+  })
+
+  describe("Offboard unsigned 8-bit integers", function () {
+    it("Should offboard small unsigned integers", async function () {
+      const { contract } = deployment
+      await (await contract.offBoardTest(2, 3, 4)).wait()
+      await (await contract.onBoardTest()).wait()
+      const decryptedInt1 = await contract.onBoardResult1()
+      const decryptedInt2 = await contract.onBoardResult2()
+      expect(decryptedInt1).to.equal(2)
+      expect(decryptedInt2).to.equal(4)
+    })
+    it("Should decrypt the small unsigned integers", async function () {
+      const { contract, owner } = deployment
+      const encryptedInt = await contract.offBoardToUserResult()
+      const decryptedInt = await owner.decryptUint8(encryptedInt)
+      expect(decryptedInt).to.equal(3)
+    })
+    it("Should offboard large unsigned integers", async function () {
+      const { contract } = deployment
+      await (await contract.offBoardTest(200, 201, 202)).wait()
+      await (await contract.onBoardTest()).wait()
+      const decryptedInt1 = await contract.onBoardResult1()
+      const decryptedInt2 = await contract.onBoardResult2()
+      expect(decryptedInt1).to.equal(200)
+      expect(decryptedInt2).to.equal(202)
+    })
+    it("Should decrypt the large unsigned integers", async function () {
+      const { contract, owner } = deployment
+
+      const encryptedInt = await contract.offBoardToUserResult()
+
+      const decryptedInt = await owner.decryptUint8(encryptedInt)
+      
+      expect(decryptedInt).to.equal(201n)
     })
   })
 
