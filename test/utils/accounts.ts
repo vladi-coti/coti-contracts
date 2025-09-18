@@ -8,7 +8,6 @@ export async function setupAccounts() {
   // Get the network configuration from hardhat config
   const networkName = hre.network.name
   const networkConfig = hre.config.networks[networkName]
-  console.log(`networkConfig`, networkConfig)
   
   if (!networkConfig || typeof networkConfig !== 'object' || !('url' in networkConfig)) {
     throw new Error(`Network configuration not found for ${networkName}`)
