@@ -4,7 +4,7 @@ import { CotiNetwork, getDefaultProvider, JsonRpcProvider, parseEther, Wallet } 
 let pks = process.env.SIGNING_KEYS ? process.env.SIGNING_KEYS.split(",") : []
 
 export async function setupAccounts() {
-  // const provider = getDefaultProvider(CotiNetwork.SodaTestnet);
+  // const provider = getDefaultProvider(CotiNetwork.Testnet);
   const provider = new JsonRpcProvider('http://3.88.141.22:7000');
 
   if (pks.length == 0) {
