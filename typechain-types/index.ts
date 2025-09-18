@@ -94,6 +94,8 @@ export type { TransferWithAllowanceScalarTestsContract } from "./contracts/mocks
 export { TransferWithAllowanceScalarTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/TransferWithAllowanceScalarTestsContract__factory";
 export type { TransferWithAllowanceTestsContract } from "./contracts/mocks/utils/mpc/TransferWithAllowanceTestsContract";
 export { TransferWithAllowanceTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/TransferWithAllowanceTestsContract__factory";
+export type { UnsignedInt8TestsContract } from "./contracts/mocks/utils/mpc/UnsignedInt8TestsContract";
+export { UnsignedInt8TestsContract__factory } from "./factories/contracts/mocks/utils/mpc/UnsignedInt8TestsContract__factory";
 export type { PrivateERC20WalletMock } from "./contracts/mocks/wallet/PrivateERC20Wallet/PrivateERC20WalletMock";
 export { PrivateERC20WalletMock__factory } from "./factories/contracts/mocks/wallet/PrivateERC20Wallet/PrivateERC20WalletMock__factory";
 export type { AccountOnboard } from "./contracts/onboard/AccountOnboard";

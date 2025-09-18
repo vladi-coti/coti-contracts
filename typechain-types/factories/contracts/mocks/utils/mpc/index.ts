@@ -35,3 +35,4 @@ export { TransferWithAllowance64_64TestsContract__factory } from "./TransferWith
 export { TransferWithAllowance64_8TestsContract__factory } from "./TransferWithAllowance64_8TestsContract__factory";
 export { TransferWithAllowanceScalarTestsContract__factory } from "./TransferWithAllowanceScalarTestsContract__factory";
 export { TransferWithAllowanceTestsContract__factory } from "./TransferWithAllowanceTestsContract__factory";
+export { UnsignedInt8TestsContract__factory } from "./UnsignedInt8TestsContract__factory";
