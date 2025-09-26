@@ -1,8 +1,8 @@
 import crypto from "crypto"
 
 export const gasOptions = {
-	gasLimit: 12000000,
-	// gasPrice: 1000000000,
+	gasLimit: 15000000,
+	gasPrice: 1000000000,
 }
 
 export function generateRandomNumber(numBytes: number): bigint {

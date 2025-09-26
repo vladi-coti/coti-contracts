@@ -36,4 +36,5 @@ export type { TransferWithAllowance64_64TestsContract } from "./TransferWithAllo
 export type { TransferWithAllowance64_8TestsContract } from "./TransferWithAllowance64_8TestsContract";
 export type { TransferWithAllowanceScalarTestsContract } from "./TransferWithAllowanceScalarTestsContract";
 export type { TransferWithAllowanceTestsContract } from "./TransferWithAllowanceTestsContract";
+export type { UnsignedInt256TestsContract } from "./UnsignedInt256TestsContract";
 export type { UnsignedInt8TestsContract } from "./UnsignedInt8TestsContract";

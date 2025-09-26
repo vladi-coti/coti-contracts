@@ -47,7 +47,7 @@ describe("MPC Core - signed 256-bit integers", function () {
         signedInt256TestsContract.validateCiphertextTest.fragment.selector
       )
 
-      await (await signedInt256TestsContract.validateCiphertextTest(itValue)).wait()
+      await (await signedInt256TestsContract.validateCiphertextTest(itValue, gasOptions)).wait()
 
       const decryptedInt = await signedInt256TestsContract.validateResult()
 
@@ -1300,9 +1300,9 @@ describe("MPC Core - signed 256-bit integers", function () {
     it("Should offboard positive signed 256-bit integers", async function () {
       const { signedInt256TestsContract } = deployment
 
-      await (await signedInt256TestsContract.offBoardTest(10000000000000000000000000000000000n, 20000000000000000000000000000000000n, 30000000000000000000000000000000000n)).wait()
+      await (await signedInt256TestsContract.offBoardTest(10000000000000000000000000000000000n, 20000000000000000000000000000000000n, 30000000000000000000000000000000000n, gasOptions)).wait()
 
-      await (await signedInt256TestsContract.onBoardTest()).wait()
+      await (await signedInt256TestsContract.onBoardTest(gasOptions)).wait()
 
       const decryptedInt1 = await signedInt256TestsContract.onBoardResult1()
       const decryptedInt2 = await signedInt256TestsContract.onBoardResult2()
@@ -1324,9 +1324,9 @@ describe("MPC Core - signed 256-bit integers", function () {
     it("Should offboard negative signed 256-bit integers", async function () {
       const { signedInt256TestsContract } = deployment
 
-      await (await signedInt256TestsContract.offBoardTest(-10000000000000000000000000000000000n, -20000000000000000000000000000000000n, -30000000000000000000000000000000000n)).wait()
+      await (await signedInt256TestsContract.offBoardTest(-10000000000000000000000000000000000n, -20000000000000000000000000000000000n, -30000000000000000000000000000000000n, gasOptions)).wait()
 
-      await (await signedInt256TestsContract.onBoardTest()).wait()
+      await (await signedInt256TestsContract.onBoardTest(gasOptions)).wait()
 
       const decryptedInt1 = await signedInt256TestsContract.onBoardResult1()
       const decryptedInt2 = await signedInt256TestsContract.onBoardResult2()

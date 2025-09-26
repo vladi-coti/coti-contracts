@@ -190,6 +190,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.TransferWithAllowanceTestsContract__factory>;
     getContractFactory(
+      name: "UnsignedInt256TestsContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.UnsignedInt256TestsContract__factory>;
+    getContractFactory(
       name: "UnsignedInt8TestsContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.UnsignedInt8TestsContract__factory>;
@@ -455,6 +459,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.TransferWithAllowanceTestsContract>;
     getContractAt(
+      name: "UnsignedInt256TestsContract",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.UnsignedInt256TestsContract>;
+    getContractAt(
       name: "UnsignedInt8TestsContract",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -687,6 +696,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TransferWithAllowanceTestsContract>;
     deployContract(
+      name: "UnsignedInt256TestsContract",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.UnsignedInt256TestsContract>;
+    deployContract(
       name: "UnsignedInt8TestsContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.UnsignedInt8TestsContract>;
@@ -951,6 +964,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.TransferWithAllowanceTestsContract>;
+    deployContract(
+      name: "UnsignedInt256TestsContract",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.UnsignedInt256TestsContract>;
     deployContract(
       name: "UnsignedInt8TestsContract",
       args: any[],
