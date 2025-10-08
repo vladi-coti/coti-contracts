@@ -1598,8 +1598,6 @@ library MpcSignedInt {
     function validateCiphertext(
         itInt256 memory input
     ) internal returns (gtInt256) {
-        gtInt256 result;
-
         return gtInt256.wrap(
             ExtendedOperations(address(MPC_PRECOMPILE)).ValidateCiphertext(
                 bytes1(uint8(MPC_TYPE.SUINT256_T)),
@@ -1608,13 +1606,9 @@ library MpcSignedInt {
                 input.signature
             )
         );
-
-        return result;
     }
 
     function onBoard(ctInt256 memory ct) internal returns (gtInt256) {
-        gtInt256 result;
-
         return gtInt256.wrap(
             ExtendedOperations(address(MPC_PRECOMPILE)).OnBoard(
                 bytes1(uint8(MPC_TYPE.SUINT256_T)),
@@ -1622,8 +1616,6 @@ library MpcSignedInt {
                 ctInt128.unwrap(ct.ciphertextLow)
             )
         );
-
-        return result;
     }
 
     function offBoard(gtInt256 pt) internal returns (ctInt256 memory) {
