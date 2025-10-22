@@ -20,6 +20,7 @@ export type { Miscellaneous1TestsContract } from "./Miscellaneous1TestsContract"
 export type { Miscellaneous256BitTestsContract } from "./Miscellaneous256BitTestsContract";
 export type { MiscellaneousTestsContract } from "./MiscellaneousTestsContract";
 export type { OffboardToUserKeyTestContract } from "./OffboardToUserKeyTestContract";
+export type { RevertTestsContract } from "./RevertTestsContract";
 export type { ShiftTestsContract } from "./ShiftTestsContract";
 export type { SignedInt128TestsContract } from "./SignedInt128TestsContract";
 export type { SignedInt16TestsContract } from "./SignedInt16TestsContract";

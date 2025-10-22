@@ -19,6 +19,7 @@ export { Miscellaneous1TestsContract__factory } from "./Miscellaneous1TestsContr
 export { Miscellaneous256BitTestsContract__factory } from "./Miscellaneous256BitTestsContract__factory";
 export { MiscellaneousTestsContract__factory } from "./MiscellaneousTestsContract__factory";
 export { OffboardToUserKeyTestContract__factory } from "./OffboardToUserKeyTestContract__factory";
+export { RevertTestsContract__factory } from "./RevertTestsContract__factory";
 export { ShiftTestsContract__factory } from "./ShiftTestsContract__factory";
 export { SignedInt128TestsContract__factory } from "./SignedInt128TestsContract__factory";
 export { SignedInt16TestsContract__factory } from "./SignedInt16TestsContract__factory";

@@ -4,7 +4,7 @@ import { JsonRpcProvider, parseEther, Wallet } from "@coti-io/coti-ethers"
 
 let pks = process.env.SIGNING_KEYS ? process.env.SIGNING_KEYS.split(",") : []
 
-export async function setupAccounts() {
+export async function setupAccounts(skipOnboard: boolean = false) {
   // Get the network configuration from hardhat config
   const networkName = hre.network.name
   const networkConfig = hre.config.networks[networkName]
@@ -39,8 +39,12 @@ export async function setupAccounts() {
       return wallet
     }
 
+    if (skipOnboard) {
+      return wallet
+    }
+
     console.log("************* Onboarding user ", wallet.address, " *************")
-    await wallet.generateOrRecoverAes()
+    await wallet.generateOrRecoverAes('0xc615c06c620b3Ccf863812CCb42Fb274F9BEcB93')
     console.log("************* Onboarded! created user key and saved into .env file *************")
 
     return wallet
@@ -48,10 +52,22 @@ export async function setupAccounts() {
 
   let accounts: Wallet[] = []
   if (userKeys.length !== wallets.length) {
-    await (await wallets[0].sendTransaction({ to: wallets[1].address, value: parseEther("1.0") })).wait()
+    console.log("************* Funding accounts *************")
+    for (let i = 0; i < wallets.length; i++) {
+      const balance = await provider.getBalance(wallets[i].address)
+      if(balance > parseEther("1.0")) {
+        console.log("Account ", wallets[i].address, " already has 1.0 ETH, skipping")
+        continue
+      }
+      console.log("Sending 100.0 ETH to ", wallets[i].address)
+      await (await wallets[0].sendTransaction({ to: wallets[i].address, value: parseEther("100.0") })).wait()
+    }
+    console.log("************* Funded accounts *************")
 
     accounts = await Promise.all(wallets.map(async (account, i) => await toAccount(account)))
-    setEnvValue("USER_KEYS", accounts.map((a) => a.getUserOnboardInfo()?.aesKey).join(","))
+    if (!skipOnboard) {
+      setEnvValue("USER_KEYS", accounts.map((a) => a.getUserOnboardInfo()?.aesKey).join(","))
+    }
   } else {
     accounts = await Promise.all(wallets.map(async (account, i) => await toAccount(account, userKeys[i])))
   }

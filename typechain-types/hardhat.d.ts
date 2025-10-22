@@ -126,6 +126,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.OffboardToUserKeyTestContract__factory>;
     getContractFactory(
+      name: "RevertTestsContract",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.RevertTestsContract__factory>;
+    getContractFactory(
       name: "ShiftTestsContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.ShiftTestsContract__factory>;
@@ -379,6 +383,11 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.OffboardToUserKeyTestContract>;
     getContractAt(
+      name: "RevertTestsContract",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.RevertTestsContract>;
+    getContractAt(
       name: "ShiftTestsContract",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -632,6 +641,10 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.OffboardToUserKeyTestContract>;
     deployContract(
+      name: "RevertTestsContract",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.RevertTestsContract>;
+    deployContract(
       name: "ShiftTestsContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.ShiftTestsContract>;
@@ -884,6 +897,11 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.OffboardToUserKeyTestContract>;
+    deployContract(
+      name: "RevertTestsContract",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.RevertTestsContract>;
     deployContract(
       name: "ShiftTestsContract",
       args: any[],
