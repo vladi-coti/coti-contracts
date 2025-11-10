@@ -26,188 +26,104 @@ describe("Encryption Flow Test", function () {
         await encryptionTest.connect(user).setEncryptionAddress(userAddress, userAddress, gasOptions)
 	})
 
-	describe("Encryption Flow Test - Run 10 times", function () {
-		it("Should test encryption flow 10 times to reproduce bug", async function () {
-			const testValue = 100000000000000000000n // 100 tokens
-			const iterations = 10
-			const mismatches: Array<{ iteration: number; original: bigint; decrypted: bigint; storage: bigint }> = []
+	it("Should test multiple encryption flow 100 times (like sendQuote)", async function () {
+		const priceValue = 1600000000000000000n // 1.6 tokens
+		const quantityValue = 100000000000000000000n // 100 tokens
+		const iterations = 100
+		const mismatches: Array<{
+			iteration: number
+			type: string
+			original: bigint
+			decrypted: bigint
+			storage: bigint
+		}> = []
 
-			for (let i = 0; i < iterations; i++) {
-				console.log(`\n=== Iteration ${i + 1}/${iterations} ===`)
+		for (let i = 0; i < iterations; i++) {
+			console.log(`\n=== Multiple Encryption Iteration ${i + 1}/${iterations} ===`)
 
-				// Encrypt the value
-				const contractAddress = await encryptionTest.getAddress()
-				const selector = encryptionTest.interface.getFunction("testEncryptionFlow").selector
-				const encryptedValue = await user.encryptUint256(testValue, contractAddress, selector)
+			// Encrypt both values
+			const contractAddress = await encryptionTest.getAddress()
+			const selector = encryptionTest.interface.getFunction("testMultipleEncryptionFlow").selector
+			const encryptedPrice = await user.encryptUint256(priceValue, contractAddress, selector)
+			const encryptedQuantity = await user.encryptUint256(quantityValue, contractAddress, selector)
 
-				// Call the test function
-				const tx = await encryptionTest.connect(user).testEncryptionFlow(encryptedValue, testValue, gasOptions)
-				const receipt = await tx.wait()
+			// Call the test function
+			const tx = await encryptionTest
+				.connect(user)
+				.testMultipleEncryptionFlow(encryptedPrice, encryptedQuantity, priceValue, quantityValue, gasOptions)
+			const receipt = await tx.wait()
 
-				if (!receipt) {
-					throw new Error("Transaction receipt is null")
-				}
+			if (!receipt) {
+				throw new Error("Transaction receipt is null")
+			}
 
-				// Parse the event
-				const event = receipt.logs.find((log: any) => {
+			// Parse all events
+			const events = receipt.logs
+				.map((log: any) => {
 					try {
 						const parsed = encryptionTest.interface.parseLog(log)
-						return parsed && parsed.name === "TestEncryptionEvent"
+						return parsed && parsed.name === "TestEncryptionEvent" ? parsed : null
 					} catch {
-						return false
+						return null
 					}
 				})
+				.filter((e: any) => e !== null)
 
-				if (!event) {
-					throw new Error("Event not found")
-				}
-
-				const parsedEvent = encryptionTest.interface.parseLog(event)
-				const eventArgs = parsedEvent.args
-
-				// Decrypt the encrypted value from the event
-				const decryptedEventValue = await user.decryptUint256(eventArgs.encryptedValue as ctUint256)
-				const originalValue = BigInt(eventArgs.originalValue.toString())
-				const storageValue = BigInt(eventArgs.storageValue.toString())
-
-				console.log(`Original value: ${originalValue}`)
-				console.log(`Decrypted from event: ${decryptedEventValue}`)
-				console.log(`Storage value: ${storageValue}`)
-
-				// Check for mismatches
-				if (decryptedEventValue !== originalValue) {
-					console.log(`❌ MISMATCH DETECTED in iteration ${i + 1}!`)
-					console.log(`   Original: ${originalValue}`)
-					console.log(`   Decrypted from event: ${decryptedEventValue}`)
-					console.log(`   Storage: ${storageValue}`)
-					mismatches.push({
-						iteration: i + 1,
-						original: originalValue,
-						decrypted: decryptedEventValue,
-						storage: storageValue,
-					})
-				} else {
-					console.log(`✓ Match in iteration ${i + 1}`)
-				}
-
-				// Verify storage matches original
-				if (storageValue !== originalValue) {
-					console.log(`⚠️  Storage mismatch in iteration ${i + 1}!`)
-				}
+			if (events.length < 2) {
+				throw new Error(`Expected 2 events, got ${events.length}`)
 			}
 
-			// Report results
-			console.log(`\n=== Test Results ===`)
-			console.log(`Total iterations: ${iterations}`)
-			console.log(`Mismatches found: ${mismatches.length}`)
+			// Check price event
+			const priceEvent = events[0]
+			const priceDecrypted = await user.decryptUint256(priceEvent.args.encryptedValue as ctUint256)
+			const priceOriginal = BigInt(priceEvent.args.originalValue.toString())
+			const priceStorage = BigInt(priceEvent.args.storageValue.toString())
 
-			if (mismatches.length > 0) {
-				console.log(`\nMismatch details:`)
-				mismatches.forEach((m) => {
-					console.log(`  Iteration ${m.iteration}: Original=${m.original}, Decrypted=${m.decrypted}, Storage=${m.storage}`)
+			console.log(`Price - Original: ${priceOriginal}, Decrypted: ${priceDecrypted}, Storage: ${priceStorage}`)
+
+			if (priceDecrypted !== priceOriginal) {
+				console.log(`❌ PRICE MISMATCH in iteration ${i + 1}!`)
+				mismatches.push({
+					iteration: i + 1,
+					type: "price",
+					original: priceOriginal,
+					decrypted: priceDecrypted,
+					storage: priceStorage,
 				})
 			}
-		})
 
-		it("Should test multiple encryption flow 100 times (like sendQuote)", async function () {
-			const priceValue = 1600000000000000000n // 1.6 tokens
-			const quantityValue = 100000000000000000000n // 100 tokens
-			const iterations = 100
-			const mismatches: Array<{
-				iteration: number
-				type: string
-				original: bigint
-				decrypted: bigint
-				storage: bigint
-			}> = []
+			// Check quantity event
+			const quantityEvent = events[1]
+			const quantityDecrypted = await user.decryptUint256(quantityEvent.args.encryptedValue as ctUint256)
+			const quantityOriginal = BigInt(quantityEvent.args.originalValue.toString())
+			const quantityStorage = BigInt(quantityEvent.args.storageValue.toString())
 
-			for (let i = 0; i < iterations; i++) {
-				console.log(`\n=== Multiple Encryption Iteration ${i + 1}/${iterations} ===`)
+			console.log(`Quantity - Original: ${quantityOriginal}, Decrypted: ${quantityDecrypted}, Storage: ${quantityStorage}`)
 
-				// Encrypt both values
-				const contractAddress = await encryptionTest.getAddress()
-				const selector = encryptionTest.interface.getFunction("testMultipleEncryptionFlow").selector
-				const encryptedPrice = await user.encryptUint256(priceValue, contractAddress, selector)
-				const encryptedQuantity = await user.encryptUint256(quantityValue, contractAddress, selector)
-
-				// Call the test function
-				const tx = await encryptionTest
-					.connect(user)
-					.testMultipleEncryptionFlow(encryptedPrice, encryptedQuantity, priceValue, quantityValue, gasOptions)
-				const receipt = await tx.wait()
-
-				if (!receipt) {
-					throw new Error("Transaction receipt is null")
-				}
-
-				// Parse all events
-				const events = receipt.logs
-					.map((log: any) => {
-						try {
-							const parsed = encryptionTest.interface.parseLog(log)
-							return parsed && parsed.name === "TestEncryptionEvent" ? parsed : null
-						} catch {
-							return null
-						}
-					})
-					.filter((e: any) => e !== null)
-
-				if (events.length < 2) {
-					throw new Error(`Expected 2 events, got ${events.length}`)
-				}
-
-				// Check price event
-				const priceEvent = events[0]
-				const priceDecrypted = await user.decryptUint256(priceEvent.args.encryptedValue as ctUint256)
-				const priceOriginal = BigInt(priceEvent.args.originalValue.toString())
-				const priceStorage = BigInt(priceEvent.args.storageValue.toString())
-
-				console.log(`Price - Original: ${priceOriginal}, Decrypted: ${priceDecrypted}, Storage: ${priceStorage}`)
-
-				if (priceDecrypted !== priceOriginal) {
-					console.log(`❌ PRICE MISMATCH in iteration ${i + 1}!`)
-					mismatches.push({
-						iteration: i + 1,
-						type: "price",
-						original: priceOriginal,
-						decrypted: priceDecrypted,
-						storage: priceStorage,
-					})
-				}
-
-				// Check quantity event
-				const quantityEvent = events[1]
-				const quantityDecrypted = await user.decryptUint256(quantityEvent.args.encryptedValue as ctUint256)
-				const quantityOriginal = BigInt(quantityEvent.args.originalValue.toString())
-				const quantityStorage = BigInt(quantityEvent.args.storageValue.toString())
-
-				console.log(`Quantity - Original: ${quantityOriginal}, Decrypted: ${quantityDecrypted}, Storage: ${quantityStorage}`)
-
-				if (quantityDecrypted !== quantityOriginal) {
-					console.log(`❌ QUANTITY MISMATCH in iteration ${i + 1}!`)
-					mismatches.push({
-						iteration: i + 1,
-						type: "quantity",
-						original: quantityOriginal,
-						decrypted: quantityDecrypted,
-						storage: quantityStorage,
-					})
-				}
-			}
-
-			// Report results
-			console.log(`\n=== Multiple Encryption Test Results ===`)
-			console.log(`Total iterations: ${iterations}`)
-			console.log(`Mismatches found: ${mismatches.length}`)
-
-			if (mismatches.length > 0) {
-				console.log(`\nMismatch details:`)
-				mismatches.forEach((m) => {
-					console.log(
-						`  Iteration ${m.iteration} (${m.type}): Original=${m.original}, Decrypted=${m.decrypted}, Storage=${m.storage}`,
-					)
+			if (quantityDecrypted !== quantityOriginal) {
+				console.log(`❌ QUANTITY MISMATCH in iteration ${i + 1}!`)
+				mismatches.push({
+					iteration: i + 1,
+					type: "quantity",
+					original: quantityOriginal,
+					decrypted: quantityDecrypted,
+					storage: quantityStorage,
 				})
 			}
-		})
+		}
+
+		// Report results
+		console.log(`\n=== Multiple Encryption Test Results ===`)
+		console.log(`Total iterations: ${iterations}`)
+		console.log(`Mismatches found: ${mismatches.length}`)
+
+		if (mismatches.length > 0) {
+			console.log(`\nMismatch details:`)
+			mismatches.forEach((m) => {
+				console.log(
+					`  Iteration ${m.iteration} (${m.type}): Original=${m.original}, Decrypted=${m.decrypted}, Storage=${m.storage}`,
+				)
+			})
+		}
 	})
 })

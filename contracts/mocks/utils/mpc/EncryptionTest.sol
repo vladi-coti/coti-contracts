@@ -55,41 +55,6 @@ contract EncryptionTest is IEncryptionTestEvents {
     }
     
     /**
-     * @notice Test function that mimics the sendQuote encryption flow:
-     * 1. Validate encrypted input
-     * 2. Store the value
-     * 3. Offboard to user and emit event
-     * @param encryptedValue The encrypted input value to test
-     * @param originalValue The original plaintext value (for comparison)
-     */
-    function testEncryptionFlow(
-        itUint256 memory encryptedValue,
-        uint256 originalValue
-    ) external {
-        // Step 1: Validate ciphertext (like in sendQuote)
-        gtUint256 gtValue = MpcCore.validateCiphertext(encryptedValue);
-        
-        // Step 2: Store the value (simulating storage operations)
-        address userEncryptionAddress = getUserEncryptionAddress(msg.sender);
-        storedValues[msg.sender] = MpcCore.offBoardCombined(gtValue, userEncryptionAddress);
-        
-        // Step 3: Offboard to user and emit event (like in sendQuote)
-        address partyAEncryptionAddress = getUserEncryptionAddress(msg.sender);
-        ctUint256 memory ctValue = MpcCore.offBoardToUser(gtValue, partyAEncryptionAddress);
-        
-        // Get the stored value for comparison
-        gtUint256 gtStoredValue = safeOnboard(storedValues[msg.sender].ciphertext);
-        uint256 storageValue = MpcCore.decrypt(gtStoredValue);
-        
-        emit TestEncryptionEvent(
-            msg.sender,
-            ctValue,
-            originalValue,
-            storageValue
-        );
-    }
-    
-    /**
      * @notice Test function that mimics the exact sendQuote pattern with multiple values
      * This simulates the issue: validate -> use in operations -> store -> then offboard for events
      * The key issue: gtPrice and gtQuantity are used AFTER many MPC operations that might corrupt garbled table state
