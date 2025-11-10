@@ -44,7 +44,7 @@ export async function setupAccounts(skipOnboard: boolean = false) {
     }
 
     console.log("************* Onboarding user ", wallet.address, " *************")
-    await wallet.generateOrRecoverAes('0xc615c06c620b3Ccf863812CCb42Fb274F9BEcB93')
+    await wallet.generateOrRecoverAes('0x9bB7CEE67F31e47CBdd530DaE5746Fef2420E0E3')
     console.log("************* Onboarded! created user key and saved into .env file *************")
 
     return wallet
