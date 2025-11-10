@@ -50,6 +50,10 @@ export type { Comparison256BitTestsContract } from "./contracts/mocks/utils/mpc/
 export { Comparison256BitTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/Comparison256BitTestsContract__factory";
 export type { Comparison2TestsContract } from "./contracts/mocks/utils/mpc/Comparison2TestsContract";
 export { Comparison2TestsContract__factory } from "./factories/contracts/mocks/utils/mpc/Comparison2TestsContract__factory";
+export type { EncryptionTest } from "./contracts/mocks/utils/mpc/EncryptionTest.sol/EncryptionTest";
+export { EncryptionTest__factory } from "./factories/contracts/mocks/utils/mpc/EncryptionTest.sol/EncryptionTest__factory";
+export type { IEncryptionTestEvents } from "./contracts/mocks/utils/mpc/EncryptionTest.sol/IEncryptionTestEvents";
+export { IEncryptionTestEvents__factory } from "./factories/contracts/mocks/utils/mpc/EncryptionTest.sol/IEncryptionTestEvents__factory";
 export type { MinMaxTestsContract } from "./contracts/mocks/utils/mpc/MinMaxTestsContract";
 export { MinMaxTestsContract__factory } from "./factories/contracts/mocks/utils/mpc/MinMaxTestsContract__factory";
 export type { Miscellaneous128BitTestsContract } from "./contracts/mocks/utils/mpc/Miscellaneous128BitTestsContract";

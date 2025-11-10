@@ -102,6 +102,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.Comparison2TestsContract__factory>;
     getContractFactory(
+      name: "EncryptionTest",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.EncryptionTest__factory>;
+    getContractFactory(
+      name: "IEncryptionTestEvents",
+      signerOrOptions?: ethers.Signer | FactoryOptions
+    ): Promise<Contracts.IEncryptionTestEvents__factory>;
+    getContractFactory(
       name: "MinMaxTestsContract",
       signerOrOptions?: ethers.Signer | FactoryOptions
     ): Promise<Contracts.MinMaxTestsContract__factory>;
@@ -353,6 +361,16 @@ declare module "hardhat/types/runtime" {
       signer?: ethers.Signer
     ): Promise<Contracts.Comparison2TestsContract>;
     getContractAt(
+      name: "EncryptionTest",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.EncryptionTest>;
+    getContractAt(
+      name: "IEncryptionTestEvents",
+      address: string | ethers.Addressable,
+      signer?: ethers.Signer
+    ): Promise<Contracts.IEncryptionTestEvents>;
+    getContractAt(
       name: "MinMaxTestsContract",
       address: string | ethers.Addressable,
       signer?: ethers.Signer
@@ -617,6 +635,14 @@ declare module "hardhat/types/runtime" {
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Comparison2TestsContract>;
     deployContract(
+      name: "EncryptionTest",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.EncryptionTest>;
+    deployContract(
+      name: "IEncryptionTestEvents",
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IEncryptionTestEvents>;
+    deployContract(
       name: "MinMaxTestsContract",
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.MinMaxTestsContract>;
@@ -867,6 +893,16 @@ declare module "hardhat/types/runtime" {
       args: any[],
       signerOrOptions?: ethers.Signer | DeployContractOptions
     ): Promise<Contracts.Comparison2TestsContract>;
+    deployContract(
+      name: "EncryptionTest",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.EncryptionTest>;
+    deployContract(
+      name: "IEncryptionTestEvents",
+      args: any[],
+      signerOrOptions?: ethers.Signer | DeployContractOptions
+    ): Promise<Contracts.IEncryptionTestEvents>;
     deployContract(
       name: "MinMaxTestsContract",
       args: any[],

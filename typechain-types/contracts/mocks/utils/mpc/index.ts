@@ -3,6 +3,8 @@
 /* eslint-disable */
 import type * as checkedArithmeticWIthOverflowBitTestsContractSol from "./CheckedArithmeticWIthOverflowBitTestsContract.sol";
 export type { checkedArithmeticWIthOverflowBitTestsContractSol };
+import type * as encryptionTestSol from "./EncryptionTest.sol";
+export type { encryptionTestSol };
 export type { Arithmetic128BitTestsContract } from "./Arithmetic128BitTestsContract";
 export type { Arithmetic256BitTestsContract } from "./Arithmetic256BitTestsContract";
 export type { ArithmeticSigned256BitTestsContract } from "./ArithmeticSigned256BitTestsContract";

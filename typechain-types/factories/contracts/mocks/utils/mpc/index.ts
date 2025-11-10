@@ -2,6 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 export * as checkedArithmeticWIthOverflowBitTestsContractSol from "./CheckedArithmeticWIthOverflowBitTestsContract.sol";
+export * as encryptionTestSol from "./EncryptionTest.sol";
 export { Arithmetic128BitTestsContract__factory } from "./Arithmetic128BitTestsContract__factory";
 export { Arithmetic256BitTestsContract__factory } from "./Arithmetic256BitTestsContract__factory";
 export { ArithmeticSigned256BitTestsContract__factory } from "./ArithmeticSigned256BitTestsContract__factory";
