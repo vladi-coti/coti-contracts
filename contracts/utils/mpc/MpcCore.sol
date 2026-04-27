@@ -14406,4 +14406,148 @@ library MpcCore {
     function negate(gtInt256 a) internal returns (gtInt256) {
         return MpcSignedInt.negate(a);
     }
+
+    function checkedAdd(gtInt8 a, gtInt8 b) internal returns (gtInt8) {
+        return MpcSignedInt.checkedAdd(a, b);
+    }
+
+    function checkedAddWithOverflowBit(gtInt8 a, gtInt8 b) internal returns (gtBool, gtInt8) {
+        return MpcSignedInt.checkedAddWithOverflowBit(a, b);
+    }
+
+    function checkedSub(gtInt8 a, gtInt8 b) internal returns (gtInt8) {
+        return MpcSignedInt.checkedSub(a, b);
+    }
+
+    function checkedSubWithOverflowBit(gtInt8 a, gtInt8 b) internal returns (gtBool, gtInt8) {
+        return MpcSignedInt.checkedSubWithOverflowBit(a, b);
+    }
+
+    function checkedMul(gtInt8 a, gtInt8 b) internal returns (gtInt8) {
+        return MpcSignedInt.checkedMul(a, b);
+    }
+
+    function checkedMulWithOverflowBit(gtInt8 a, gtInt8 b) internal returns (gtBool, gtInt8) {
+        return MpcSignedInt.checkedMulWithOverflowBit(a, b);
+    }
+
+    function checkedAdd(gtInt16 a, gtInt16 b) internal returns (gtInt16) {
+        return MpcSignedInt.checkedAdd(a, b);
+    }
+
+    function checkedAddWithOverflowBit(gtInt16 a, gtInt16 b) internal returns (gtBool, gtInt16) {
+        return MpcSignedInt.checkedAddWithOverflowBit(a, b);
+    }
+
+    function checkedSub(gtInt16 a, gtInt16 b) internal returns (gtInt16) {
+        return MpcSignedInt.checkedSub(a, b);
+    }
+
+    function checkedSubWithOverflowBit(gtInt16 a, gtInt16 b) internal returns (gtBool, gtInt16) {
+        return MpcSignedInt.checkedSubWithOverflowBit(a, b);
+    }
+
+    function checkedMul(gtInt16 a, gtInt16 b) internal returns (gtInt16) {
+        return MpcSignedInt.checkedMul(a, b);
+    }
+
+    function checkedMulWithOverflowBit(gtInt16 a, gtInt16 b) internal returns (gtBool, gtInt16) {
+        return MpcSignedInt.checkedMulWithOverflowBit(a, b);
+    }
+
+    function checkedAdd(gtInt32 a, gtInt32 b) internal returns (gtInt32) {
+        return MpcSignedInt.checkedAdd(a, b);
+    }
+
+    function checkedAddWithOverflowBit(gtInt32 a, gtInt32 b) internal returns (gtBool, gtInt32) {
+        return MpcSignedInt.checkedAddWithOverflowBit(a, b);
+    }
+
+    function checkedSub(gtInt32 a, gtInt32 b) internal returns (gtInt32) {
+        return MpcSignedInt.checkedSub(a, b);
+    }
+
+    function checkedSubWithOverflowBit(gtInt32 a, gtInt32 b) internal returns (gtBool, gtInt32) {
+        return MpcSignedInt.checkedSubWithOverflowBit(a, b);
+    }
+
+    function checkedMul(gtInt32 a, gtInt32 b) internal returns (gtInt32) {
+        return MpcSignedInt.checkedMul(a, b);
+    }
+
+    function checkedMulWithOverflowBit(gtInt32 a, gtInt32 b) internal returns (gtBool, gtInt32) {
+        return MpcSignedInt.checkedMulWithOverflowBit(a, b);
+    }
+
+    function checkedAdd(gtInt64 a, gtInt64 b) internal returns (gtInt64) {
+        return MpcSignedInt.checkedAdd(a, b);
+    }
+
+    function checkedAddWithOverflowBit(gtInt64 a, gtInt64 b) internal returns (gtBool, gtInt64) {
+        return MpcSignedInt.checkedAddWithOverflowBit(a, b);
+    }
+
+    function checkedSub(gtInt64 a, gtInt64 b) internal returns (gtInt64) {
+        return MpcSignedInt.checkedSub(a, b);
+    }
+
+    function checkedSubWithOverflowBit(gtInt64 a, gtInt64 b) internal returns (gtBool, gtInt64) {
+        return MpcSignedInt.checkedSubWithOverflowBit(a, b);
+    }
+
+    function checkedMul(gtInt64 a, gtInt64 b) internal returns (gtInt64) {
+        return MpcSignedInt.checkedMul(a, b);
+    }
+
+    function checkedMulWithOverflowBit(gtInt64 a, gtInt64 b) internal returns (gtBool, gtInt64) {
+        return MpcSignedInt.checkedMulWithOverflowBit(a, b);
+    }
+
+    function checkedAdd(gtInt128 a, gtInt128 b) internal returns (gtInt128) {
+        return MpcSignedInt.checkedAdd(a, b);
+    }
+
+    function checkedAddWithOverflowBit(gtInt128 a, gtInt128 b) internal returns (gtBool, gtInt128) {
+        return MpcSignedInt.checkedAddWithOverflowBit(a, b);
+    }
+
+    function checkedSub(gtInt128 a, gtInt128 b) internal returns (gtInt128) {
+        return MpcSignedInt.checkedSub(a, b);
+    }
+
+    function checkedSubWithOverflowBit(gtInt128 a, gtInt128 b) internal returns (gtBool, gtInt128) {
+        return MpcSignedInt.checkedSubWithOverflowBit(a, b);
+    }
+
+    function checkedMul(gtInt128 a, gtInt128 b) internal returns (gtInt128) {
+        return MpcSignedInt.checkedMul(a, b);
+    }
+
+    function checkedMulWithOverflowBit(gtInt128 a, gtInt128 b) internal returns (gtBool, gtInt128) {
+        return MpcSignedInt.checkedMulWithOverflowBit(a, b);
+    }
+
+    function checkedAdd(gtInt256 a, gtInt256 b) internal returns (gtInt256) {
+        return MpcSignedInt.checkedAdd(a, b);
+    }
+
+    function checkedAddWithOverflowBit(gtInt256 a, gtInt256 b) internal returns (gtBool, gtInt256) {
+        return MpcSignedInt.checkedAddWithOverflowBit(a, b);
+    }
+
+    function checkedSub(gtInt256 a, gtInt256 b) internal returns (gtInt256) {
+        return MpcSignedInt.checkedSub(a, b);
+    }
+
+    function checkedSubWithOverflowBit(gtInt256 a, gtInt256 b) internal returns (gtBool, gtInt256) {
+        return MpcSignedInt.checkedSubWithOverflowBit(a, b);
+    }
+
+    function checkedMul(gtInt256 a, gtInt256 b) internal returns (gtInt256) {
+        return MpcSignedInt.checkedMul(a, b);
+    }
+
+    function checkedMulWithOverflowBit(gtInt256 a, gtInt256 b) internal returns (gtBool, gtInt256) {
+        return MpcSignedInt.checkedMulWithOverflowBit(a, b);
+    }
 }

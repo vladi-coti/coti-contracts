@@ -21,6 +21,19 @@ contract ArithmeticSigned256BitTestsContract {
         }
     }   
 
+    function checkedAddTest(int256[] calldata a, int256[] calldata b) public {
+        require(a.length == b.length, "Input length mismatch");
+        
+        _resetNumbers(a.length);
+
+        for (uint256 i = 0; i < a.length; ++i) {
+            gtInt256 gtA = MpcCore.setPublic256(a[i]);
+            gtInt256 gtB = MpcCore.setPublic256(b[i]);
+            
+            numbers[i] = MpcCore.decrypt(MpcCore.checkedAdd(gtA, gtB));
+        }
+    }   
+
     function subTest(int256[] calldata a, int256[] calldata b) public {
         require(a.length == b.length, "Input length mismatch");
         
@@ -34,6 +47,19 @@ contract ArithmeticSigned256BitTestsContract {
         }
     }
 
+    function checkedSubTest(int256[] calldata a, int256[] calldata b) public {
+        require(a.length == b.length, "Input length mismatch");
+        
+        _resetNumbers(a.length);
+
+        for (uint256 i = 0; i < a.length; ++i) {
+            gtInt256 gtA = MpcCore.setPublic256(a[i]);
+            gtInt256 gtB = MpcCore.setPublic256(b[i]);
+            
+            numbers[i] = MpcCore.decrypt(MpcCore.checkedSub(gtA, gtB));
+        }
+    }
+
     function mulTest(int256[] calldata a, int256[] calldata b) public {
         require(a.length == b.length, "Input length mismatch");
         
@@ -44,6 +70,19 @@ contract ArithmeticSigned256BitTestsContract {
             gtInt256 gtB = MpcCore.setPublic256(b[i]);
             
             numbers[i] = MpcCore.decrypt(MpcCore.mul(gtA, gtB));
+        }
+    }
+
+    function checkedMulTest(int256[] calldata a, int256[] calldata b) public {
+        require(a.length == b.length, "Input length mismatch");
+        
+        _resetNumbers(a.length);
+
+        for (uint256 i = 0; i < a.length; ++i) {
+            gtInt256 gtA = MpcCore.setPublic256(a[i]);
+            gtInt256 gtB = MpcCore.setPublic256(b[i]);
+            
+            numbers[i] = MpcCore.decrypt(MpcCore.checkedMul(gtA, gtB));
         }
     }
 

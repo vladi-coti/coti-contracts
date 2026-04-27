@@ -1909,6 +1909,356 @@ library MpcSignedInt {
         return MpcCore.not(isGt);
     }
 
+    // =========== signed checked arithmetic ===========
+
+    function checkOverflow(gtBool bit) private {
+        require(MpcCore.decrypt(MpcCore.not(bit)), "overflow error");
+    }
+
+    function checkRes(gtBool bit, gtInt8 res) private returns (gtInt8) {
+        checkOverflow(bit);
+        return res;
+    }
+
+    function checkRes(gtBool bit, gtInt16 res) private returns (gtInt16) {
+        checkOverflow(bit);
+        return res;
+    }
+
+    function checkRes(gtBool bit, gtInt32 res) private returns (gtInt32) {
+        checkOverflow(bit);
+        return res;
+    }
+
+    function checkRes(gtBool bit, gtInt64 res) private returns (gtInt64) {
+        checkOverflow(bit);
+        return res;
+    }
+
+    function checkRes(gtBool bit, gtInt128 res) private returns (gtInt128) {
+        checkOverflow(bit);
+        return res;
+    }
+
+    function checkRes(gtBool bit, gtInt256 res) private returns (gtInt256) {
+        checkOverflow(bit);
+        return res;
+    }
+
+    function checkedAdd(gtInt8 a, gtInt8 b) internal returns (gtInt8) {
+        (gtBool overflow, gtInt8 result) = checkedAddWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedAddWithOverflowBit(gtInt8 a, gtInt8 b) internal returns (gtBool, gtInt8) {
+        gtInt8 result = add(a, b);
+        return (signedAddOverflow(a, b, result), result);
+    }
+
+    function checkedSub(gtInt8 a, gtInt8 b) internal returns (gtInt8) {
+        (gtBool overflow, gtInt8 result) = checkedSubWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedSubWithOverflowBit(gtInt8 a, gtInt8 b) internal returns (gtBool, gtInt8) {
+        gtInt8 result = sub(a, b);
+        return (signedSubOverflow(a, b, result), result);
+    }
+
+    function checkedMul(gtInt8 a, gtInt8 b) internal returns (gtInt8) {
+        (gtBool overflow, gtInt8 result) = checkedMulWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedMulWithOverflowBit(gtInt8 a, gtInt8 b) internal returns (gtBool, gtInt8) {
+        (gtBool unsignedOverflow, gtUint8 product) = MpcCore.checkedMulWithOverflowBit(absUnsigned(a), absUnsigned(b));
+        gtBool negative = MpcCore.xor(signBit(a), signBit(b));
+        gtBool positiveOverflow = MpcCore.and(MpcCore.not(negative), MpcCore.gt(product, MpcCore.setPublic8(uint8(type(int8).max))));
+        gtBool negativeOverflow = MpcCore.and(negative, MpcCore.gt(product, MpcCore.setPublic8(uint8(1) << 7)));
+        gtBool overflow = MpcCore.or(unsignedOverflow, MpcCore.or(positiveOverflow, negativeOverflow));
+        gtInt8 unsignedResult = gtInt8.wrap(gtUint8.unwrap(product));
+        return (overflow, mux(negative, unsignedResult, sub(setPublic8(0), unsignedResult)));
+    }
+
+    function checkedAdd(gtInt16 a, gtInt16 b) internal returns (gtInt16) {
+        (gtBool overflow, gtInt16 result) = checkedAddWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedAddWithOverflowBit(gtInt16 a, gtInt16 b) internal returns (gtBool, gtInt16) {
+        gtInt16 result = add(a, b);
+        return (signedAddOverflow(a, b, result), result);
+    }
+
+    function checkedSub(gtInt16 a, gtInt16 b) internal returns (gtInt16) {
+        (gtBool overflow, gtInt16 result) = checkedSubWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedSubWithOverflowBit(gtInt16 a, gtInt16 b) internal returns (gtBool, gtInt16) {
+        gtInt16 result = sub(a, b);
+        return (signedSubOverflow(a, b, result), result);
+    }
+
+    function checkedMul(gtInt16 a, gtInt16 b) internal returns (gtInt16) {
+        (gtBool overflow, gtInt16 result) = checkedMulWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedMulWithOverflowBit(gtInt16 a, gtInt16 b) internal returns (gtBool, gtInt16) {
+        (gtBool unsignedOverflow, gtUint16 product) = MpcCore.checkedMulWithOverflowBit(absUnsigned(a), absUnsigned(b));
+        gtBool negative = MpcCore.xor(signBit(a), signBit(b));
+        gtBool positiveOverflow = MpcCore.and(MpcCore.not(negative), MpcCore.gt(product, MpcCore.setPublic16(uint16(type(int16).max))));
+        gtBool negativeOverflow = MpcCore.and(negative, MpcCore.gt(product, MpcCore.setPublic16(uint16(1) << 15)));
+        gtBool overflow = MpcCore.or(unsignedOverflow, MpcCore.or(positiveOverflow, negativeOverflow));
+        gtInt16 unsignedResult = gtInt16.wrap(gtUint16.unwrap(product));
+        return (overflow, mux(negative, unsignedResult, sub(setPublic16(0), unsignedResult)));
+    }
+
+    function checkedAdd(gtInt32 a, gtInt32 b) internal returns (gtInt32) {
+        (gtBool overflow, gtInt32 result) = checkedAddWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedAddWithOverflowBit(gtInt32 a, gtInt32 b) internal returns (gtBool, gtInt32) {
+        gtInt32 result = add(a, b);
+        return (signedAddOverflow(a, b, result), result);
+    }
+
+    function checkedSub(gtInt32 a, gtInt32 b) internal returns (gtInt32) {
+        (gtBool overflow, gtInt32 result) = checkedSubWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedSubWithOverflowBit(gtInt32 a, gtInt32 b) internal returns (gtBool, gtInt32) {
+        gtInt32 result = sub(a, b);
+        return (signedSubOverflow(a, b, result), result);
+    }
+
+    function checkedMul(gtInt32 a, gtInt32 b) internal returns (gtInt32) {
+        (gtBool overflow, gtInt32 result) = checkedMulWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedMulWithOverflowBit(gtInt32 a, gtInt32 b) internal returns (gtBool, gtInt32) {
+        (gtBool unsignedOverflow, gtUint32 product) = MpcCore.checkedMulWithOverflowBit(absUnsigned(a), absUnsigned(b));
+        gtBool negative = MpcCore.xor(signBit(a), signBit(b));
+        gtBool positiveOverflow = MpcCore.and(MpcCore.not(negative), MpcCore.gt(product, MpcCore.setPublic32(uint32(type(int32).max))));
+        gtBool negativeOverflow = MpcCore.and(negative, MpcCore.gt(product, MpcCore.setPublic32(uint32(1) << 31)));
+        gtBool overflow = MpcCore.or(unsignedOverflow, MpcCore.or(positiveOverflow, negativeOverflow));
+        gtInt32 unsignedResult = gtInt32.wrap(gtUint32.unwrap(product));
+        return (overflow, mux(negative, unsignedResult, sub(setPublic32(0), unsignedResult)));
+    }
+
+    function checkedAdd(gtInt64 a, gtInt64 b) internal returns (gtInt64) {
+        (gtBool overflow, gtInt64 result) = checkedAddWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedAddWithOverflowBit(gtInt64 a, gtInt64 b) internal returns (gtBool, gtInt64) {
+        gtInt64 result = add(a, b);
+        return (signedAddOverflow(a, b, result), result);
+    }
+
+    function checkedSub(gtInt64 a, gtInt64 b) internal returns (gtInt64) {
+        (gtBool overflow, gtInt64 result) = checkedSubWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedSubWithOverflowBit(gtInt64 a, gtInt64 b) internal returns (gtBool, gtInt64) {
+        gtInt64 result = sub(a, b);
+        return (signedSubOverflow(a, b, result), result);
+    }
+
+    function checkedMul(gtInt64 a, gtInt64 b) internal returns (gtInt64) {
+        (gtBool overflow, gtInt64 result) = checkedMulWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedMulWithOverflowBit(gtInt64 a, gtInt64 b) internal returns (gtBool, gtInt64) {
+        (gtBool unsignedOverflow, gtUint64 product) = MpcCore.checkedMulWithOverflowBit(absUnsigned(a), absUnsigned(b));
+        gtBool negative = MpcCore.xor(signBit(a), signBit(b));
+        gtBool positiveOverflow = MpcCore.and(MpcCore.not(negative), MpcCore.gt(product, MpcCore.setPublic64(uint64(type(int64).max))));
+        gtBool negativeOverflow = MpcCore.and(negative, MpcCore.gt(product, MpcCore.setPublic64(uint64(1) << 63)));
+        gtBool overflow = MpcCore.or(unsignedOverflow, MpcCore.or(positiveOverflow, negativeOverflow));
+        gtInt64 unsignedResult = gtInt64.wrap(gtUint64.unwrap(product));
+        return (overflow, mux(negative, unsignedResult, sub(setPublic64(0), unsignedResult)));
+    }
+
+    function checkedAdd(gtInt128 a, gtInt128 b) internal returns (gtInt128) {
+        (gtBool overflow, gtInt128 result) = checkedAddWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedAddWithOverflowBit(gtInt128 a, gtInt128 b) internal returns (gtBool, gtInt128) {
+        gtInt128 result = add(a, b);
+        return (signedAddOverflow(a, b, result), result);
+    }
+
+    function checkedSub(gtInt128 a, gtInt128 b) internal returns (gtInt128) {
+        (gtBool overflow, gtInt128 result) = checkedSubWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedSubWithOverflowBit(gtInt128 a, gtInt128 b) internal returns (gtBool, gtInt128) {
+        gtInt128 result = sub(a, b);
+        return (signedSubOverflow(a, b, result), result);
+    }
+
+    function checkedMul(gtInt128 a, gtInt128 b) internal returns (gtInt128) {
+        (gtBool overflow, gtInt128 result) = checkedMulWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedMulWithOverflowBit(gtInt128 a, gtInt128 b) internal returns (gtBool, gtInt128) {
+        (gtBool unsignedOverflow, gtUint128 product) = MpcCore.checkedMulWithOverflowBit(absUnsigned(a), absUnsigned(b));
+        gtBool negative = MpcCore.xor(signBit(a), signBit(b));
+        gtBool positiveOverflow = MpcCore.and(MpcCore.not(negative), MpcCore.gt(product, MpcCore.setPublic128(uint128(type(int128).max))));
+        gtBool negativeOverflow = MpcCore.and(negative, MpcCore.gt(product, MpcCore.setPublic128(uint128(1) << 127)));
+        gtBool overflow = MpcCore.or(unsignedOverflow, MpcCore.or(positiveOverflow, negativeOverflow));
+        gtInt128 unsignedResult = gtInt128.wrap(gtUint128.unwrap(product));
+        return (overflow, mux(negative, unsignedResult, sub(setPublic128(0), unsignedResult)));
+    }
+
+    function checkedAdd(gtInt256 a, gtInt256 b) internal returns (gtInt256) {
+        (gtBool overflow, gtInt256 result) = checkedAddWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedAddWithOverflowBit(gtInt256 a, gtInt256 b) internal returns (gtBool, gtInt256) {
+        gtInt256 result = add(a, b);
+        return (signedAddOverflow(a, b, result), result);
+    }
+
+    function checkedSub(gtInt256 a, gtInt256 b) internal returns (gtInt256) {
+        (gtBool overflow, gtInt256 result) = checkedSubWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedSubWithOverflowBit(gtInt256 a, gtInt256 b) internal returns (gtBool, gtInt256) {
+        gtInt256 result = sub(a, b);
+        return (signedSubOverflow(a, b, result), result);
+    }
+
+    function checkedMul(gtInt256 a, gtInt256 b) internal returns (gtInt256) {
+        (gtBool overflow, gtInt256 result) = checkedMulWithOverflowBit(a, b);
+        return checkRes(overflow, result);
+    }
+
+    function checkedMulWithOverflowBit(gtInt256 a, gtInt256 b) internal returns (gtBool, gtInt256) {
+        (gtBool unsignedOverflow, gtUint256 product) = MpcCore.checkedMulWithOverflowBit(absUnsigned(a), absUnsigned(b));
+        gtBool negative = MpcCore.xor(signBit(a), signBit(b));
+        gtBool positiveOverflow = MpcCore.and(MpcCore.not(negative), MpcCore.gt(product, MpcCore.setPublic256(uint256(type(int256).max))));
+        gtBool negativeOverflow = MpcCore.and(negative, MpcCore.gt(product, MpcCore.setPublic256(uint256(1) << 255)));
+        gtBool overflow = MpcCore.or(unsignedOverflow, MpcCore.or(positiveOverflow, negativeOverflow));
+        gtInt256 unsignedResult = gtInt256.wrap(gtUint256.unwrap(product));
+        return (overflow, mux(negative, unsignedResult, sub(setPublic256(0), unsignedResult)));
+    }
+
+    function signedAddOverflow(gtInt8 a, gtInt8 b, gtInt8 result) private returns (gtBool) {
+        return signedAddOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedAddOverflow(gtInt16 a, gtInt16 b, gtInt16 result) private returns (gtBool) {
+        return signedAddOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedAddOverflow(gtInt32 a, gtInt32 b, gtInt32 result) private returns (gtBool) {
+        return signedAddOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedAddOverflow(gtInt64 a, gtInt64 b, gtInt64 result) private returns (gtBool) {
+        return signedAddOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedAddOverflow(gtInt128 a, gtInt128 b, gtInt128 result) private returns (gtBool) {
+        return signedAddOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedAddOverflow(gtInt256 a, gtInt256 b, gtInt256 result) private returns (gtBool) {
+        return signedAddOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedSubOverflow(gtInt8 a, gtInt8 b, gtInt8 result) private returns (gtBool) {
+        return signedSubOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedSubOverflow(gtInt16 a, gtInt16 b, gtInt16 result) private returns (gtBool) {
+        return signedSubOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedSubOverflow(gtInt32 a, gtInt32 b, gtInt32 result) private returns (gtBool) {
+        return signedSubOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedSubOverflow(gtInt64 a, gtInt64 b, gtInt64 result) private returns (gtBool) {
+        return signedSubOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedSubOverflow(gtInt128 a, gtInt128 b, gtInt128 result) private returns (gtBool) {
+        return signedSubOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedSubOverflow(gtInt256 a, gtInt256 b, gtInt256 result) private returns (gtBool) {
+        return signedSubOverflowBits(signBit(a), signBit(b), signBit(result));
+    }
+
+    function signedAddOverflowBits(gtBool signA, gtBool signB, gtBool signResult) private returns (gtBool) {
+        return MpcCore.and(MpcCore.eq(signA, signB), MpcCore.ne(signResult, signA));
+    }
+
+    function signedSubOverflowBits(gtBool signA, gtBool signB, gtBool signResult) private returns (gtBool) {
+        return MpcCore.and(MpcCore.ne(signA, signB), MpcCore.ne(signResult, signA));
+    }
+
+    function absUnsigned(gtInt8 a) private returns (gtUint8) {
+        return gtUint8.wrap(gtInt8.unwrap(mux(signBit(a), a, sub(setPublic8(0), a))));
+    }
+
+    function absUnsigned(gtInt16 a) private returns (gtUint16) {
+        return gtUint16.wrap(gtInt16.unwrap(mux(signBit(a), a, sub(setPublic16(0), a))));
+    }
+
+    function absUnsigned(gtInt32 a) private returns (gtUint32) {
+        return gtUint32.wrap(gtInt32.unwrap(mux(signBit(a), a, sub(setPublic32(0), a))));
+    }
+
+    function absUnsigned(gtInt64 a) private returns (gtUint64) {
+        return gtUint64.wrap(gtInt64.unwrap(mux(signBit(a), a, sub(setPublic64(0), a))));
+    }
+
+    function absUnsigned(gtInt128 a) private returns (gtUint128) {
+        return gtUint128.wrap(gtInt128.unwrap(mux(signBit(a), a, sub(setPublic128(0), a))));
+    }
+
+    function absUnsigned(gtInt256 a) private returns (gtUint256) {
+        return gtUint256.wrap(gtInt256.unwrap(mux(signBit(a), a, sub(setPublic256(0), a))));
+    }
+
+    function signBit(gtInt8 a) private returns (gtBool) {
+        return MpcCore.eq(MpcCore.shr(gtUint8.wrap(gtInt8.unwrap(a)), 7), MpcCore.setPublic8(uint8(1)));
+    }
+
+    function signBit(gtInt16 a) private returns (gtBool) {
+        return MpcCore.eq(MpcCore.shr(gtUint16.wrap(gtInt16.unwrap(a)), 15), MpcCore.setPublic16(uint16(1)));
+    }
+
+    function signBit(gtInt32 a) private returns (gtBool) {
+        return MpcCore.eq(MpcCore.shr(gtUint32.wrap(gtInt32.unwrap(a)), 31), MpcCore.setPublic32(uint32(1)));
+    }
+
+    function signBit(gtInt64 a) private returns (gtBool) {
+        return MpcCore.eq(MpcCore.shr(gtUint64.wrap(gtInt64.unwrap(a)), 63), MpcCore.setPublic64(uint64(1)));
+    }
+
+    function signBit(gtInt128 a) private returns (gtBool) {
+        return MpcCore.eq(MpcCore.shr(gtUint128.wrap(gtInt128.unwrap(a)), 127), MpcCore.setPublic128(uint128(1)));
+    }
+
+    function signBit(gtInt256 a) private returns (gtBool) {
+        return MpcCore.eq(MpcCore.shr(gtUint256.wrap(gtInt256.unwrap(a)), 255), MpcCore.setPublic256(uint256(1)));
+    }
+
     // Helper to convert gtInt128 to gtUint128 (for unsigned comparison)
     function toUint128(gtInt128 a) internal pure returns (gtUint128) {
         return gtUint128.wrap(gtInt128.unwrap(a));

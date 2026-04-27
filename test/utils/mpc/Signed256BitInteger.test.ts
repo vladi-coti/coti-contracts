@@ -204,6 +204,97 @@ describe("MPC Core - signed 256-bit integers", function () {
     })
   })
 
+  describe("Checked signed 256-bit arithmetic", function () {
+    const MAX_INT256 = (1n << 255n) - 1n
+    const MIN_INT256 = -(1n << 255n)
+
+    it("Should check add without reverting when result is in range", async function () {
+      const { arithmeticSigned256BitTestsContract } = deployment
+      const arithmetic = arithmeticSigned256BitTestsContract as any
+
+      await (await arithmetic.checkedAddTest([100n], [-40n])).wait()
+
+      const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
+      expect(decryptedInt).to.equal(60n)
+    })
+
+    it("Should revert checked add on signed overflow", async function () {
+      const { arithmeticSigned256BitTestsContract, owner } = deployment
+      const arithmetic = arithmeticSigned256BitTestsContract as any
+
+      const tx = await arithmetic.checkedAddTest([MAX_INT256], [1n], gasOptions)
+      try {
+        await tx.wait()
+        expect.fail("expected transaction to revert")
+      } catch (e) {
+        const receipt = await owner.provider?.getTransactionReceipt(tx.hash)
+        expect(receipt?.status).to.equal(0)
+      }
+    })
+
+    it("Should check sub without reverting when result is in range", async function () {
+      const { arithmeticSigned256BitTestsContract } = deployment
+      const arithmetic = arithmeticSigned256BitTestsContract as any
+
+      await (await arithmetic.checkedSubTest([-100n], [-40n])).wait()
+
+      const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
+      expect(decryptedInt).to.equal(-60n)
+    })
+
+    it("Should revert checked sub on signed underflow", async function () {
+      const { arithmeticSigned256BitTestsContract, owner } = deployment
+      const arithmetic = arithmeticSigned256BitTestsContract as any
+
+      const tx = await arithmetic.checkedSubTest([MIN_INT256], [1n], gasOptions)
+      try {
+        await tx.wait()
+        expect.fail("expected transaction to revert")
+      } catch (e) {
+        const receipt = await owner.provider?.getTransactionReceipt(tx.hash)
+        expect(receipt?.status).to.equal(0)
+      }
+    })
+
+    it("Should check mul without reverting when result is in range", async function () {
+      const { arithmeticSigned256BitTestsContract } = deployment
+      const arithmetic = arithmeticSigned256BitTestsContract as any
+
+      await (await arithmetic.checkedMulTest([-12n], [9n])).wait()
+
+      const decryptedInt = await arithmeticSigned256BitTestsContract.numbers(0)
+      expect(decryptedInt).to.equal(-108n)
+    })
+
+    it("Should revert checked mul on positive signed overflow", async function () {
+      const { arithmeticSigned256BitTestsContract, owner } = deployment
+      const arithmetic = arithmeticSigned256BitTestsContract as any
+
+      const tx = await arithmetic.checkedMulTest([1n << 128n], [1n << 128n], gasOptions)
+      try {
+        await tx.wait()
+        expect.fail("expected transaction to revert")
+      } catch (e) {
+        const receipt = await owner.provider?.getTransactionReceipt(tx.hash)
+        expect(receipt?.status).to.equal(0)
+      }
+    })
+
+    it("Should revert checked mul on min-int negation overflow", async function () {
+      const { arithmeticSigned256BitTestsContract, owner } = deployment
+      const arithmetic = arithmeticSigned256BitTestsContract as any
+
+      const tx = await arithmetic.checkedMulTest([MIN_INT256], [-1n], gasOptions)
+      try {
+        await tx.wait()
+        expect.fail("expected transaction to revert")
+      } catch (e) {
+        const receipt = await owner.provider?.getTransactionReceipt(tx.hash)
+        expect(receipt?.status).to.equal(0)
+      }
+    })
+  })
+
   describe("Dividing signed 256-bit integers", function () {
     it("Should encrypt, divide and decrypt two positive signed 256-bit integers", async function () {
       const { arithmeticSigned256BitTestsContract } = deployment
