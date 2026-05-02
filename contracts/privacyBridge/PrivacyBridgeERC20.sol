@@ -112,8 +112,9 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
      * @notice Collect the dynamic native COTI fee from msg.value and refund any excess
      * @param fee The computed fee in native COTI
      * @dev Reverts with {InsufficientCotiFee} if msg.value < fee.
-     *      Excess above fee is refunded best-effort; if the refund fails, the excess is
-     *      added to accumulatedCotiFees so it remains recoverable via {withdrawCotiFees}.
+     *      Excess above fee is refunded best-effort; if the push-refund fails, the excess is credited to
+     *      {refundableNativeExcess} for `msg.sender` and can be pulled via {claimRefundableNativeExcess}
+     *      (it is not mixed into {accumulatedCotiFees} so it cannot be swept as protocol fees).
      */
     function _collectDynamicNativeFee(uint256 fee) internal {
         if (msg.value < fee) revert InsufficientCotiFee();
@@ -124,7 +125,7 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
             uint256 excess = msg.value - fee;
             (bool ok, ) = msg.sender.call{value: excess}("");
             if (!ok) {
-                accumulatedCotiFees += excess;
+                _creditRefundableNativeExcess(msg.sender, excess);
             }
         }
     }

@@ -135,8 +135,13 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     /// @notice Addresses blocked from depositing or withdrawing
     mapping(address => bool) public blacklisted;
 
+    /// @notice Native COTI excess from `msg.value` after dynamic fees when the push-refund to `msg.sender` failed (ERC20 bridges).
+    mapping(address => uint256) public refundableNativeExcess;
+
     event Blacklisted(address indexed account, address indexed by);
     event UnBlacklisted(address indexed account, address indexed by);
+    event NativeRefundExcessPushFailed(address indexed user, uint256 amount);
+    event RefundableNativeExcessClaimed(address indexed user, uint256 amount);
 
     // Limits errors
     error InvalidLimitConfiguration();
@@ -395,6 +400,32 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
 
     function _requirePositiveOracleRate(uint256 rate) internal pure {
         if (rate == 0) revert InvalidOraclePrice();
+    }
+
+    /**
+     * @dev Credits a user when a push-style native refund failed (e.g. smart wallet rejects ETH).
+     *      Funds stay in the contract until {claimRefundableNativeExcess}.
+     */
+    function _creditRefundableNativeExcess(address user, uint256 amount) internal {
+        refundableNativeExcess[user] += amount;
+        emit NativeRefundExcessPushFailed(user, amount);
+    }
+
+    /**
+     * @notice Pull native COTI previously credited after a failed excess refund during ERC20 bridge fee collection.
+     * @dev Not gated by {whenPaused} so users can recover; still {notBlacklisted}. Restores credit if the send fails.
+     */
+    function claimRefundableNativeExcess() external nonReentrant notBlacklisted {
+        uint256 amount = refundableNativeExcess[msg.sender];
+        if (amount == 0) revert AmountZero();
+        refundableNativeExcess[msg.sender] = 0;
+        if (address(this).balance < amount) revert InsufficientEthBalance();
+        (bool success, ) = msg.sender.call{value: amount}("");
+        if (!success) {
+            refundableNativeExcess[msg.sender] = amount;
+            revert EthTransferFailed();
+        }
+        emit RefundableNativeExcessClaimed(msg.sender, amount);
     }
 
     /**
