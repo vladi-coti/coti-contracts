@@ -108,6 +108,8 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     error InsufficientCotiFee();
     error BridgePaused();
     error OracleTimestampMismatch(uint256 expected, uint256 actual);
+    error PriceOracleNotSet();
+    error InvalidOraclePrice();
     error FeeRecipientNotSet();
     error AddressBlacklisted(address account);
 
@@ -374,11 +376,20 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
      * @param expectedTokenTimestamp The token lastUpdated from the estimate call.
      * @param tokenSymbol The Band oracle symbol for the bridged token.
      */
+    function _requirePriceOracle() internal view {
+        if (priceOracle == address(0)) revert PriceOracleNotSet();
+    }
+
+    function _requirePositiveOracleRate(uint256 rate) internal pure {
+        if (rate == 0) revert InvalidOraclePrice();
+    }
+
     function _validateOracleTimestamps(
         uint256 expectedCotiTimestamp,
         uint256 expectedTokenTimestamp,
         string memory tokenSymbol
     ) internal view {
+        _requirePriceOracle();
         (, uint256 cotiLastUpdated,) = ICotiPriceConsumer(priceOracle).getPriceWithMeta("COTI");
         if (cotiLastUpdated != expectedCotiTimestamp) revert OracleTimestampMismatch(expectedCotiTimestamp, cotiLastUpdated);
         (, uint256 tokenLastUpdated,) = ICotiPriceConsumer(priceOracle).getPriceWithMeta(tokenSymbol);
