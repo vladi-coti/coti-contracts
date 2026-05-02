@@ -15,6 +15,7 @@ import "../oracle/ICotiPriceConsumer.sol";
  *      (2) Private token implementation is trusted and only authorized minters can mint.
  *      (3) Owner operations (limits, fees, pause, withdraw fees, rescue) are centralized; 
  *      (4) Any new derived bridge must override withdrawFees to perform the actual transfer; base implementation reverts.
+ *      (5) Oracle prices are trusted; {maxOracleAge} bounds staleness of `lastUpdated` when set (does not remove oracle trust).
  */
 abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessControlEnumerable {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
@@ -25,6 +26,7 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     event NativeCotiFeeUpdated(uint256 fee, address indexed by);
     event DynamicFeeUpdated(string feeType, uint256 fixedFee, uint256 percentageBps, uint256 maxFee);
     event PriceOracleUpdated(address indexed oldOracle, address indexed newOracle);
+    event MaxOracleAgeUpdated(uint256 maxOracleAge, address indexed by);
 
     /// @notice Maximum amount that can be deposited in a single transaction
     uint256 public maxDepositAmount;
@@ -94,6 +96,12 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     /// @notice CotiPriceConsumer contract address
     address public priceOracle;
 
+    /// @notice Default max oracle age (30 minutes), matching the production oracle update interval.
+    uint256 public constant DEFAULT_MAX_ORACLE_AGE = 30 minutes;
+
+    /// @notice Maximum allowed `block.timestamp - oracle lastUpdated` (seconds). Initialized to {DEFAULT_MAX_ORACLE_AGE}; set to 0 to disable.
+    uint256 public maxOracleAge;
+
     /// @notice Address where collected fees are sent
     address public feeRecipient;
 
@@ -110,6 +118,8 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     error OracleTimestampMismatch(uint256 expected, uint256 actual);
     error PriceOracleNotSet();
     error InvalidOraclePrice();
+    error OraclePriceStale();
+    error OracleLastUpdatedInFuture(uint256 lastUpdated);
     error FeeRecipientNotSet();
     error AddressBlacklisted(address account);
 
@@ -165,6 +175,7 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
         minWithdrawAmount = 1;
         feeRecipient = _feeRecipient;
         rescueRecipient = _rescueRecipient;
+        maxOracleAge = DEFAULT_MAX_ORACLE_AGE;
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(OPERATOR_ROLE, msg.sender);
@@ -369,13 +380,6 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
         emit NativeCotiFeeUpdated(_fee, msg.sender);
     }
 
-    /**
-     * @notice Validate oracle timestamps for both COTI and a bridged token.
-     * @dev Used by ERC20 bridges where the fee depends on two oracle prices.
-     * @param expectedCotiTimestamp The COTI lastUpdated from the estimate call.
-     * @param expectedTokenTimestamp The token lastUpdated from the estimate call.
-     * @param tokenSymbol The Band oracle symbol for the bridged token.
-     */
     function _requirePriceOracle() internal view {
         if (priceOracle == address(0)) revert PriceOracleNotSet();
     }
@@ -384,6 +388,24 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
         if (rate == 0) revert InvalidOraclePrice();
     }
 
+    /**
+     * @notice Reject oracle rows that are too old vs `block.timestamp` when {maxOracleAge} is set.
+     * @dev `maxOracleAge == 0` disables this check (e.g. for tests). Default is {DEFAULT_MAX_ORACLE_AGE} from the constructor.
+     */
+    function _requireOracleFreshness(uint256 lastUpdated) internal view {
+        uint256 maxAge = maxOracleAge;
+        if (maxAge == 0) return;
+        if (lastUpdated > block.timestamp) revert OracleLastUpdatedInFuture(lastUpdated);
+        if (block.timestamp - lastUpdated > maxAge) revert OraclePriceStale();
+    }
+
+    /**
+     * @notice Validate oracle timestamps for both COTI and a bridged token.
+     * @dev Used by ERC20 bridges where the fee depends on two oracle prices.
+     * @param expectedCotiTimestamp The COTI lastUpdated from the estimate call.
+     * @param expectedTokenTimestamp The token lastUpdated from the estimate call.
+     * @param tokenSymbol The Band oracle symbol for the bridged token.
+     */
     function _validateOracleTimestamps(
         uint256 expectedCotiTimestamp,
         uint256 expectedTokenTimestamp,
@@ -392,8 +414,10 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
         _requirePriceOracle();
         (, uint256 cotiLastUpdated,) = ICotiPriceConsumer(priceOracle).getPriceWithMeta("COTI");
         if (cotiLastUpdated != expectedCotiTimestamp) revert OracleTimestampMismatch(expectedCotiTimestamp, cotiLastUpdated);
+        _requireOracleFreshness(cotiLastUpdated);
         (, uint256 tokenLastUpdated,) = ICotiPriceConsumer(priceOracle).getPriceWithMeta(tokenSymbol);
         if (tokenLastUpdated != expectedTokenTimestamp) revert OracleTimestampMismatch(expectedTokenTimestamp, tokenLastUpdated);
+        _requireOracleFreshness(tokenLastUpdated);
     }
 
     /**
@@ -473,6 +497,14 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
         emit PriceOracleUpdated(oldOracle, _oracle);
     }
 
+    /**
+     * @notice Set the maximum allowed age of oracle `lastUpdated` (seconds) relative to `block.timestamp`.
+     * @param _maxOracleAge Use 0 to disable staleness checks; default after deploy is 30 minutes ({DEFAULT_MAX_ORACLE_AGE}).
+     */
+    function setMaxOracleAge(uint256 _maxOracleAge) external onlyOwner {
+        maxOracleAge = _maxOracleAge;
+        emit MaxOracleAgeUpdated(_maxOracleAge, msg.sender);
+    }
 
     /**
      * @notice Calculate fee amount based on the input amount and fee basis points

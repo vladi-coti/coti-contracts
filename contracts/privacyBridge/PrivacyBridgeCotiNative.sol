@@ -41,8 +41,9 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
         uint256 maxFee
     ) internal view returns (uint256) {
         _requirePriceOracle();
-        uint256 cotiUsdRate = ICotiPriceConsumer(priceOracle).getPrice("COTI");
+        (uint256 cotiUsdRate, uint256 cotiLastUpdated,) = ICotiPriceConsumer(priceOracle).getPriceWithMeta("COTI");
         _requirePositiveOracleRate(cotiUsdRate);
+        _requireOracleFreshness(cotiLastUpdated);
         uint256 txValueUsd = (cotiAmount * cotiUsdRate) / 1e18;
         uint256 percentageFeeUsd = (txValueUsd * percentageBps) / FEE_DIVISOR;
         uint256 percentageFeeCoti = (percentageFeeUsd * 1e18) / cotiUsdRate;

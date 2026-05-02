@@ -66,10 +66,12 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
     ) internal view returns (uint256) {
         _requirePriceOracle();
         ICotiPriceConsumer oracle = ICotiPriceConsumer(priceOracle);
-        uint256 tokenUsdRate = oracle.getPrice(tokenSymbol);
-        uint256 cotiUsdRate = oracle.getPrice("COTI");
+        (uint256 tokenUsdRate, uint256 tokenLastUpdated,) = oracle.getPriceWithMeta(tokenSymbol);
+        (uint256 cotiUsdRate, uint256 cotiLastUpdated,) = oracle.getPriceWithMeta("COTI");
         _requirePositiveOracleRate(tokenUsdRate);
         _requirePositiveOracleRate(cotiUsdRate);
+        _requireOracleFreshness(tokenLastUpdated);
+        _requireOracleFreshness(cotiLastUpdated);
         uint8 tokenDecimals = IHasDecimals(address(token)).decimals();
         uint256 txValueUsd = (tokenAmount * tokenUsdRate) / (10 ** tokenDecimals);
         uint256 percentageFeeUsd = (txValueUsd * percentageBps) / FEE_DIVISOR;
