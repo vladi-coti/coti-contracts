@@ -19,6 +19,9 @@ import "../oracle/ICotiPriceConsumer.sol";
  *      (6) {totalUserLiability} is bridge bookkeeping for transparency: it tracks net user obligations from mint/burn
  *          paths in this contract. It helps depositors/observers reason about exposure on-chain; it is not a
  *          cryptographic proof of MPC/private-token balances and can diverge if the token layer misbehaves.
+ *      (7) For COTI-operated deployments, residual trust in MPC/private-token behavior beyond (2)(6) and in oracle
+ *          *market* correctness beyond (5) is an accepted operational assumption; the on-chain mitigations above
+ *          are the intended scope for those concerns in this module.
  */
 abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessControlEnumerable {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
@@ -406,9 +409,13 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
 
     /**
      * @notice Validate oracle timestamps for both COTI and a bridged token.
-     * @dev Used by ERC20 bridges where the fee depends on two oracle prices.
-     * @param expectedCotiTimestamp The COTI lastUpdated from the estimate call.
-     * @param expectedTokenTimestamp The token lastUpdated from the estimate call.
+     * @dev Requires `lastUpdated == expected*` so execution uses the same oracle row the user saw when
+     *      quoting (otherwise a refresh between estimate and inclusion could change price without the user
+     *      having agreed to it on-screen). Production oracle cadence is ~30 minutes; the COTI UI blocks
+     *      submission for ~10 seconds before a scheduled refresh to reduce races inside that window.
+     *      Third-party integrators should mirror that pattern. {_requireOracleFreshness} still caps row age.
+     * @param expectedCotiTimestamp COTI `lastUpdated` from the user's estimate (must match on-chain).
+     * @param expectedTokenTimestamp Token `lastUpdated` from the user's estimate (must match on-chain).
      * @param tokenSymbol The Band oracle symbol for the bridged token.
      */
     function _validateOracleTimestamps(

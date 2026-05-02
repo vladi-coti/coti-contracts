@@ -101,8 +101,8 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
 
     /**
      * @notice Deposit native COTI to receive private COTI (COTI.p)
-     * @param cotiOracleTimestamp The COTI oracle lastUpdated timestamp from estimateDepositFee
-     * @param tokenOracleTimestamp The token oracle lastUpdated timestamp (same as cotiOracleTimestamp for native bridge)
+     * @param cotiOracleTimestamp COTI `lastUpdated` from estimate (must equal on-chain at execution; COTI UI avoids submit near refresh).
+     * @param tokenOracleTimestamp Same as `cotiOracleTimestamp` for native bridge (both feeds use `"COTI"`).
      * @dev User sends native COTI with the transaction
      */
     function deposit(uint256 cotiOracleTimestamp, uint256 tokenOracleTimestamp) external payable nonReentrant whenNotPaused notBlacklisted {
@@ -112,8 +112,8 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
     /**
      * @notice Withdraw native COTI by burning private COTI
      * @param amount Amount of private COTI to burn
-     * @param cotiOracleTimestamp The COTI oracle lastUpdated timestamp from estimateWithdrawFee
-     * @param tokenOracleTimestamp The token oracle lastUpdated timestamp (same as cotiOracleTimestamp for native bridge)
+     * @param cotiOracleTimestamp COTI `lastUpdated` from estimate (must equal on-chain at execution; COTI UI avoids submit near refresh).
+     * @param tokenOracleTimestamp Same as `cotiOracleTimestamp` for native bridge.
      * @dev User must have approved the bridge to spend their private tokens.
      */
     function withdraw(uint256 amount, uint256 cotiOracleTimestamp, uint256 tokenOracleTimestamp) external nonReentrant whenNotPaused notBlacklisted {
@@ -186,7 +186,7 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
     /**
      * @notice Fallback for plain native transfers: same fee path as {_directDeposit}.
      * @dev See {_directDeposit}: zero/stale oracle rates are rejected via {_computeCotiFee}; use {deposit}
-     *      when you must pin the oracle row to the same `lastUpdated` values as {estimateDepositFee}.
+     *      when you must match `lastUpdated` from {estimateDepositFee} to the on-chain row (see {_validateOracleTimestamps}).
      */
     receive() external payable nonReentrant whenNotPaused notBlacklisted {
         _directDeposit(msg.sender);
