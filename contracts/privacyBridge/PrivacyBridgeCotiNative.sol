@@ -158,9 +158,12 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
     }
 
     /**
-     * @notice Internal deposit without oracle timestamp validation.
-     * @dev Used by receive() for direct COTI transfers. Fee is computed at current oracle price
-     *      without checking that the price hasn't changed since an estimate call.
+     * @notice Internal deposit without binding to a prior estimate’s oracle `lastUpdated` snapshot.
+     * @dev Used by {receive}. Fee uses {_computeCotiFee}, which still enforces: oracle configured
+     *      ({PriceOracleNotSet}), non-zero COTI/USD rate ({InvalidOraclePrice}), and max age of
+     *      `lastUpdated` when {PrivacyBridge.maxOracleAge} is set ({OraclePriceStale} /
+     *      {OracleLastUpdatedInFuture}). What plain sends do **not** do is equality to timestamps
+     *      passed into {deposit} from an off-chain estimate—users who need that binding should call {deposit}.
      */
     function _directDeposit(address sender) internal {
         if (!isDepositEnabled) revert DepositDisabled();
@@ -181,9 +184,9 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
     }
 
     /**
-     * @notice Fallback function to handle direct COTI transfers as deposits.
-     * @dev Mints private tokens at current oracle price without timestamp validation.
-     *      For fee-protected deposits, use deposit(cotiOracleTimestamp, tokenOracleTimestamp) instead.
+     * @notice Fallback for plain native transfers: same fee path as {_directDeposit}.
+     * @dev See {_directDeposit}: zero/stale oracle rates are rejected via {_computeCotiFee}; use {deposit}
+     *      when you must pin the oracle row to the same `lastUpdated` values as {estimateDepositFee}.
      */
     receive() external payable nonReentrant whenNotPaused notBlacklisted {
         _directDeposit(msg.sender);
