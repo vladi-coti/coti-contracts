@@ -46,9 +46,16 @@ describe("PrivacyBridge Fees", function () {
         await privateToken.waitForDeployment()
         privateTokenAddress = await privateToken.getAddress()
 
-        // Deploy bridge
+        // Deploy bridge (must match PrivacyBridgeERC20 constructor)
         const BridgeFactory = await hre.ethers.getContractFactory("PrivacyBridgeERC20Mock")
-        bridge = await BridgeFactory.connect(owner).deploy(publicTokenAddress, privateTokenAddress, txOpts)
+        bridge = await BridgeFactory.connect(owner).deploy(
+            publicTokenAddress,
+            privateTokenAddress,
+            "USDC",
+            feeRecipient.address,
+            feeRecipient.address,
+            txOpts
+        )
         await bridge.waitForDeployment()
         bridgeAddress = await bridge.getAddress()
 

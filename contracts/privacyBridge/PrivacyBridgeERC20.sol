@@ -29,6 +29,9 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
     /// @notice Band oracle symbol for the bridged token (e.g., "ETH", "WBTC", "ADA", "USDC", "USDT")
     string public tokenSymbol;
 
+    /// @notice Cached ERC20 decimals (matches private token; set in constructor).
+    uint8 internal immutable bridgedTokenDecimals;
+
     error InvalidTokenAddress();
     error InvalidPrivateTokenAddress();
     error CannotRescueBridgeToken();
@@ -73,8 +76,7 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
         _requirePositiveOracleRate(cotiUsdRate);
         _requireOracleFreshness(tokenLastUpdated);
         _requireOracleFreshness(cotiLastUpdated);
-        uint8 tokenDecimals = IHasDecimals(address(token)).decimals();
-        uint256 txValueUsd = Math.mulDiv(tokenAmount, tokenUsdRate, 10 ** tokenDecimals);
+        uint256 txValueUsd = Math.mulDiv(tokenAmount, tokenUsdRate, 10 ** uint256(bridgedTokenDecimals));
         uint256 percentageFeeUsd = Math.mulDiv(txValueUsd, percentageBps, FEE_DIVISOR);
         uint256 percentageFeeCoti = Math.mulDiv(percentageFeeUsd, 1e18, cotiUsdRate);
         return _calculateDynamicFee(percentageFeeCoti, fixedFee, maxFee);
@@ -140,9 +142,9 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
         if (_token == address(0)) revert InvalidTokenAddress();
         if (_privateToken == address(0)) revert InvalidPrivateTokenAddress();
 
-        // Verify decimal parity to prevent silent exchange rate corruption
-        if (IHasDecimals(_token).decimals() != IHasDecimals(_privateToken).decimals())
-            revert DecimalsMismatch();
+        uint8 pubDecimals = IHasDecimals(_token).decimals();
+        if (pubDecimals != IHasDecimals(_privateToken).decimals()) revert DecimalsMismatch();
+        bridgedTokenDecimals = pubDecimals;
 
         token = IERC20(_token);
         privateToken = IPrivateERC20(_privateToken);
@@ -172,8 +174,6 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
     function _deposit(uint256 amount, uint256 cotiOracleTimestamp, uint256 tokenOracleTimestamp) internal {
         if (!isDepositEnabled) revert DepositDisabled();
         if (amount == 0) revert AmountZero();
-        if (IHasDecimals(address(token)).decimals() != IHasDecimals(address(privateToken)).decimals())
-            revert DecimalsMismatch();
         _checkDepositLimits(amount);
         _validateOracleTimestamps(cotiOracleTimestamp, tokenOracleTimestamp, tokenSymbol);
 
@@ -212,8 +212,6 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
 
     function _withdraw(uint256 amount, uint256 cotiOracleTimestamp, uint256 tokenOracleTimestamp) internal {
         if (amount == 0) revert AmountZero();
-        if (IHasDecimals(address(token)).decimals() != IHasDecimals(address(privateToken)).decimals())
-            revert DecimalsMismatch();
         _checkWithdrawLimits(amount);
         _validateOracleTimestamps(cotiOracleTimestamp, tokenOracleTimestamp, tokenSymbol);
 
