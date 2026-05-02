@@ -12,8 +12,6 @@ import "../token/PrivateERC20/tokens/PrivateCOTI.sol";
 contract PrivacyBridgeCotiNative is PrivacyBridge {
     PrivateCOTI public privateCoti;
 
-    error NativeCotiFeeNotApplicable();
-
     event NativeRescued(address indexed to, uint256 amount);
 
     // Scaling factor removed (using native 18 decimals due to uint256 upgrade)
@@ -246,10 +244,4 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
         emit NativeRescued(rescueRecipient, amount);
     }
 
-    /**
-     * @notice Native bridge does not use nativeCotiFee; always reverts.
-     */
-    function setNativeCotiFee(uint256) external pure override {
-        revert NativeCotiFeeNotApplicable();
-    }
 }

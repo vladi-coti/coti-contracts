@@ -27,7 +27,6 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     event OperatorAdded(address indexed account, address indexed by);
     event OperatorRemoved(address indexed account, address indexed by);
     event DepositEnabledUpdated(bool enabled, address indexed by);
-    event NativeCotiFeeUpdated(uint256 fee, address indexed by);
     event DynamicFeeUpdated(string feeType, uint256 fixedFee, uint256 percentageBps, uint256 maxFee);
     event PriceOracleUpdated(address indexed oldOracle, address indexed newOracle);
     event MaxOracleAgeUpdated(uint256 maxOracleAge, address indexed by);
@@ -61,10 +60,6 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
 
     /// @notice Flag to enable/disable deposits
     bool public isDepositEnabled = true;
-
-    /// @notice Fee in native COTI for bridge operations
-    uint256 public nativeCotiFee;
-
 
     // Privacy Bridge defines default Fees
     // those fees can be overwritten using
@@ -343,18 +338,6 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     function setIsDepositEnabled(bool _enabled) external onlyOperator {
         isDepositEnabled = _enabled;
         emit DepositEnabledUpdated(_enabled, msg.sender);
-    }
-
-    /**
-     * @notice Set the native COTI fee
-     * @param _fee Amount in native tokens (wei-equivalent)
-     * @dev Used by ERC20 bridges: they require msg.value >= this value and refund excess to the caller (best-effort).
-     *      Only the operator can call this function. Operators are responsible for setting reasonable fees
-     *      and can change fees back whenever needed.
-     */
-    function setNativeCotiFee(uint256 _fee) external virtual onlyOperator {
-        nativeCotiFee = _fee;
-        emit NativeCotiFeeUpdated(_fee, msg.sender);
     }
 
     function _requirePriceOracle() internal view {
