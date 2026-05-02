@@ -43,7 +43,6 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
     error InvalidTokenSender();
     error NativeFeeRequiredForTransferAndCallWithdraw();
     error DecimalsMismatch();
-
     event ERC20Rescued(address indexed token, address indexed to, uint256 amount);
 
     /// @dev Rescuing the live public bridged `token` uses the same pause gate as {PrivacyBridgeCotiNative.rescueNative}.
@@ -236,7 +235,6 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
 
         emit Withdraw(msg.sender, amount, amount);
     }
-
 
     /**
      * @dev Rescue ERC20 tokens sent to the contract (excluding private tokens).

@@ -208,7 +208,7 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
      */
     function withdrawFees(
         uint256 amount
-    ) external override onlyOwner nonReentrant {
+    ) external onlyOwner nonReentrant {
         if (feeRecipient == address(0)) revert FeeRecipientNotSet();
         if (amount == 0) revert AmountZero();
         if (amount > accumulatedCotiFees) revert InsufficientAccumulatedFees();

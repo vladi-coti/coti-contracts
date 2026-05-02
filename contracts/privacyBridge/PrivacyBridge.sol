@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
-import "@openzeppelin/contracts/utils/math/Math.sol";
 import "../oracle/ICotiPriceConsumer.sol";
 
 /**
@@ -14,13 +13,12 @@ import "../oracle/ICotiPriceConsumer.sol";
  * @dev Trust assumptions: (1) MPC precompile at expected address is correct and non-malicious.
  *      (2) Private token implementation is trusted and only authorized minters can mint.
  *      (3) Owner operations (limits, fees, pause, withdraw fees, rescue) are centralized; 
- *      (4) Any new derived bridge must override withdrawFees to perform the actual transfer; base implementation reverts.
- *      (5) Oracle prices are trusted; {maxOracleAge} bounds staleness of `lastUpdated` when set (does not remove oracle trust).
- *      (6) {totalUserLiability} is bridge bookkeeping for transparency: it tracks net user obligations from mint/burn
+ *      (4) Oracle prices are trusted; {maxOracleAge} bounds staleness of `lastUpdated` when set (does not remove oracle trust).
+ *      (5) {totalUserLiability} is bridge bookkeeping for transparency: it tracks net user obligations from mint/burn
  *          paths in this contract. It helps depositors/observers reason about exposure on-chain; it is not a
  *          cryptographic proof of MPC/private-token balances and can diverge if the token layer misbehaves.
- *      (7) For COTI-operated deployments, residual trust in MPC/private-token behavior beyond (2)(6) and in oracle
- *          *market* correctness beyond (5) is an accepted operational assumption; the on-chain mitigations above
+ *      (6) For COTI-operated deployments, residual trust in MPC/private-token behavior beyond (2) and (5), and in oracle
+ *          *market* correctness beyond (4), is an accepted operational assumption; the on-chain mitigations above
  *          are the intended scope for those concerns in this module.
  */
 abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessControlEnumerable {
@@ -45,15 +43,6 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
 
     /// @notice Minimum amount required for a withdrawal
     uint256 public minWithdrawAmount;
-
-    /// @notice Deposit fee in basis points (1 bp = 0.0001%, 1,000,000 = 100%)
-    uint256 public depositFeeBasisPoints;
-
-    /// @notice Withdrawal fee in basis points (1 bp = 0.0001%, 1,000,000 = 100%)
-    uint256 public withdrawFeeBasisPoints;
-
-    /// @notice Accumulated fees collected by the bridge (in bridged asset units)
-    uint256 public accumulatedFees;
 
     /// @notice Accumulated native COTI fees (used only by ERC20 bridges for per-operation native fee; not used by native bridge)
     uint256 public accumulatedCotiFees;
@@ -152,7 +141,6 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     error InvalidFee();
     error InvalidFeeConfiguration();
     error InsufficientAccumulatedFees();
-    error WithdrawFeesMustBeOverridden();
 
     /// @notice Emitted when a user deposits tokens
     /// @param user        Address of the user
@@ -173,9 +161,6 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
         uint256 minWithdraw,
         uint256 maxWithdraw
     );
-
-    /// @notice Emitted when fees are updated
-    event FeeUpdated(string feeType, uint256 newFeeBasisPoints);
 
     /// @notice Emitted when accumulated fees are withdrawn
     event FeesWithdrawn(address indexed to, uint256 amount);
@@ -348,28 +333,6 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     function _checkWithdrawLimits(uint256 amount) internal view {
         if (amount < minWithdrawAmount) revert WithdrawBelowMinimum();
         if (amount > maxWithdrawAmount) revert WithdrawExceedsMaximum();
-    }
-
-    /**
-     * @notice Set the deposit fee
-     * @param _feeBasisPoints New deposit fee in fee units (max 100,000 = 10%)
-     * @dev Only the operator can call this function
-     */
-    function setDepositFee(uint256 _feeBasisPoints) external onlyOperator {
-        if (_feeBasisPoints > MAX_FEE_UNITS) revert InvalidFee();
-        depositFeeBasisPoints = _feeBasisPoints;
-        emit FeeUpdated("deposit", _feeBasisPoints);
-    }
-
-    /**
-     * @notice Set the withdrawal fee
-     * @param _feeBasisPoints New withdrawal fee in fee units (max 100,000 = 10%)
-     * @dev Only the operator can call this function
-     */
-    function setWithdrawFee(uint256 _feeBasisPoints) external onlyOperator {
-        if (_feeBasisPoints > MAX_FEE_UNITS) revert InvalidFee();
-        withdrawFeeBasisPoints = _feeBasisPoints;
-        emit FeeUpdated("withdraw", _feeBasisPoints);
     }
 
     /**
@@ -549,52 +512,6 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     function setMaxOracleAge(uint256 _maxOracleAge) external onlyOwner {
         maxOracleAge = _maxOracleAge;
         emit MaxOracleAgeUpdated(_maxOracleAge, msg.sender);
-    }
-
-    /**
-     * @notice Calculate fee amount based on the input amount and fee basis points
-     * @param amount The amount to calculate fee for
-     * @param feeBasisPoints Fee in basis points (100 bp = 1%)
-     * @return The fee amount
-     */
-    function _calculateFeeAmount(
-        uint256 amount,
-        uint256 feeBasisPoints
-    ) internal pure returns (uint256) {
-        if (feeBasisPoints == 0) return 0;
-        return Math.mulDiv(amount, feeBasisPoints, FEE_DIVISOR);
-    }
-
-    /**
-     * @notice Deducts the bridged-asset fee from `grossAmount`, accumulates it, and returns the net amount.
-     * @dev Reverts with {AmountZero} if the net amount after fee is zero.
-     * @param grossAmount The gross token amount before fee deduction.
-     * @param feeBasisPoints The fee rate to apply (deposit or withdraw basis points).
-     * @return net The amount the user receives / the bridge releases after fee.
-     */
-    function _collectTokenFee(
-        uint256 grossAmount,
-        uint256 feeBasisPoints
-    ) internal returns (uint256 net) {
-        uint256 fee = _calculateFeeAmount(grossAmount, feeBasisPoints);
-        net = grossAmount - fee;
-        if (net == 0) revert AmountZero();
-        accumulatedFees += fee;
-    }
-
-    /**
-     * @notice Withdraw accumulated fees to the predefined feeRecipient
-     * @param amount Amount of fees to withdraw
-     * @dev Only the owner can call this function. Must be overridden in derived contracts
-     *      to perform the actual token/native transfer; base implementation reverts.
-     */
-    function withdrawFees(
-        uint256 amount
-    ) external virtual onlyOwner {
-        if (feeRecipient == address(0)) revert FeeRecipientNotSet();
-        if (amount == 0) revert AmountZero();
-        if (amount > accumulatedFees) revert InsufficientAccumulatedFees();
-        revert WithdrawFeesMustBeOverridden();
     }
 
     event CotiFeesWithdrawn(address indexed to, uint256 amount);
