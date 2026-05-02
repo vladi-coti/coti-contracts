@@ -239,8 +239,9 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
     /**
      * @dev Rescue ERC20 tokens sent to the contract (excluding private tokens).
      *      Sends to the predefined rescueRecipient address.
-     *      For the live public bridged `token`, the bridge must be {paused} first so this path is
-     *      reserved for controlled operations (e.g. migrating liquidity to a new bridge deployment).
+     *      For the live public bridged `token`, the bridge must be {paused} first: this is the
+     *      emergency gate to move **all** bridged liquidity (including TVL backing users) to a new
+     *      deployment after a bug, alongside operational controls on {pause} and ownership.
      *      Other ERC20s can still be rescued while unpaused (airdrops / mistaken sends).
      */
     function rescueERC20(

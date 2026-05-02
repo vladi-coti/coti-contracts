@@ -12,7 +12,9 @@ import "../oracle/ICotiPriceConsumer.sol";
  * @notice Base contract for Privacy Bridge contracts containing common logic
  * @dev Trust assumptions: (1) MPC precompile at expected address is correct and non-malicious.
  *      (2) Private token implementation is trusted and only authorized minters can mint.
- *      (3) Owner operations (limits, fees, pause, withdraw fees, rescue) are centralized; 
+ *      (3) Owner operations (limits, fees, pause, withdraw fees, rescue) are centralized; {pause} plus
+ *          rescue on derived bridges is the intentional emergency gate to move **full** balances
+ *          (including TVL) to a replacement deployment after a bug — mitigate with multisig/timelock on owner. 
  *      (4) Oracle prices are trusted; {maxOracleAge} bounds staleness of `lastUpdated` when set (does not remove oracle trust).
  *      (5) {totalUserLiability} is bridge bookkeeping for transparency: it tracks net user obligations from mint/burn
  *          paths in this contract. It helps depositors/observers reason about exposure on-chain; it is not a

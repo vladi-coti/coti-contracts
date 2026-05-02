@@ -222,12 +222,13 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
     }
 
     /**
-     * @dev Rescue native COTI held by the contract to {rescueRecipient} (e.g. a new bridge deployment).
-     *      The bridge must be {paused} first, matching the policy on {PrivacyBridgeERC20.rescueERC20}
-     *      for the live bridged token: no rescue of principal balance during normal operation.
+     * @dev Emergency path when the bridge is {paused}: send native COTI to {rescueRecipient} (e.g. a
+     *      newly deployed bridge after a contract bug). Can move the **full** contract balance,
+     *      including balances that back user obligations and fee accounting, so operations can
+     *      migrate TVL off this deployment. Trust is on owner + pause governance (multisig/timelock recommended).
      *      After a partial rescue, {accumulatedCotiFees} is capped to the remaining balance so fee
-     *      accounting cannot exceed what is still on the contract (full migration zeros both).
-     * @param amount Amount of native currency to send (typically full balance for migration).
+     *      accounting cannot exceed what is still on the contract.
+     * @param amount Amount of native currency to send (often the full balance for migration).
      */
     function rescueNative(uint256 amount) external onlyOwner nonReentrant whenPaused {
         if (amount == 0) revert AmountZero();
