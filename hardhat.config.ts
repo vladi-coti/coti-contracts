@@ -12,6 +12,7 @@ const accounts = process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [];
 
 const config: HardhatUserConfig = {
   defaultNetwork: "coti-testnet",
+  // Pinned compiler versions for reproducible bytecode; bump only alongside contract pragma / CI review.
   solidity: {
     compilers: [
       {

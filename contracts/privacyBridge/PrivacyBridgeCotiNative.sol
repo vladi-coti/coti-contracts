@@ -8,6 +8,10 @@ import "../token/PrivateERC20/tokens/PrivateCOTI.sol";
 /**
  * @title PrivacyBridgeCotiNative
  * @notice Bridge contract for converting between native COTI and privacy-preserving COTI.p tokens
+ * @dev Withdraw pulls private balance via `IPrivateERC20(address(privateCoti)).transferFrom` so the call matches
+ *      the canonical {IPrivateERC20} surface (`contracts/token/PrivateERC20/IPrivateERC20.sol`) while `privateCoti`
+ *      remains the concrete {PrivateCOTI} type for mint/burn. Deploy `_privateCoti` as that implementation (or a
+ *      fully ABI-compatible successor); do not point at arbitrary ERC-20s.
  */
 contract PrivacyBridgeCotiNative is PrivacyBridge {
     PrivateCOTI public privateCoti;
@@ -27,17 +31,17 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
     }
 
     /**
-     * @notice Compute the dynamic fee in native COTI
-     * @param cotiAmount The COTI amount to compute fee for
-     * @param fixedFee The minimum fee floor in COTI wei
-     * @param percentageBps The percentage in basis points (relative to FEE_DIVISOR)
-     * @param maxFee The maximum fee cap in COTI wei
-     * @return The computed fee in COTI wei
-     */
-    /**
      * @dev Native COTI fee math + one {getPriceWithMeta("COTI")} read. Used by {_computeCotiFee} and
-     *      {estimateDepositFee}/{estimateWithdrawFee}. Extreme `cotiAmount`×`cotiUsdRate` values can make
-     *      {Math.mulDiv} revert—keep amounts within configured max deposit/withdraw limits.
+     *      {estimateDepositFee}/{estimateWithdrawFee}. Each {Math.mulDiv} truncates toward zero (see
+     *      {PrivacyBridge.FEE_DIVISOR} NatSpec). Extreme `cotiAmount`×`cotiUsdRate` values can make {Math.mulDiv}
+     *      revert—keep amounts within configured max deposit/withdraw limits.
+     * @param cotiAmount Amount in COTI wei the fee is computed for
+     * @param fixedFee Minimum fee floor in COTI wei
+     * @param percentageBps Percentage parameter scaled by {PrivacyBridge.FEE_DIVISOR}
+     * @param maxFee Maximum fee cap in COTI wei
+     * @return fee Computed fee in COTI wei
+     * @return cotiLastUpdated COTI oracle row `lastUpdated`
+     * @return blockTimestamp Third field from the COTI oracle row
      */
     function _computeCotiFeeAndMeta(
         uint256 cotiAmount,

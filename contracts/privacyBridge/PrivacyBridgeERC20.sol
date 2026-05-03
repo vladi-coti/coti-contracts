@@ -19,6 +19,10 @@ interface IHasDecimals {
  *      increase the bridge balance by exactly `amount` ({UnexpectedTransferBalance} otherwise). This
  *      rejects common fee-on-transfer / deflationary patterns. Rebasing, blacklist hooks, and other
  *      non-standard behavior remain unsupported—deployment must still use a suitable asset.
+ * @dev **Private token:** The constructor stores `_privateToken` as {IPrivateERC20} from
+ *      `contracts/token/PrivateERC20/IPrivateERC20.sol` (same `pragma` family as this contract). Integrators should
+ *      bind ABIs/codegen to that canonical interface in this repo; alternate compiler pipelines (e.g. via-IR-only)
+ *      should still target the same ABI, not ad-hoc casts to incompatible shapes.
  */
 abstract contract PrivacyBridgeERC20 is PrivacyBridge {
     using SafeERC20 for IERC20;
@@ -52,8 +56,9 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
 
     /**
      * @dev ERC20 fee math + two {getPriceWithMeta} reads (token then COTI). Used by {_computeErc20Fee}
-     *      and {estimateDepositFee}/{estimateWithdrawFee}. Extreme `tokenAmount`×`tokenUsdRate` values
-     *      can make {Math.mulDiv} revert—keep amounts within configured max deposit/withdraw limits.
+     *      and {estimateDepositFee}/{estimateWithdrawFee}. Each {Math.mulDiv} step truncates toward zero
+     *      (see {PrivacyBridge.FEE_DIVISOR} NatSpec). Extreme `tokenAmount`×`tokenUsdRate` values can make
+     *      {Math.mulDiv} revert—keep amounts within configured max deposit/withdraw limits.
      */
     function _computeErc20FeeAndMeta(
         uint256 tokenAmount,

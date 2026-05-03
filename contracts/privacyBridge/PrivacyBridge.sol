@@ -28,6 +28,10 @@ import "../oracle/ICotiPriceConsumer.sol";
  *      (6) For COTI-operated deployments, residual trust in MPC/private-token behavior beyond (2) and (5), and in oracle
  *          *market* correctness beyond (4), is an accepted operational assumption; the on-chain mitigations above
  *          are the intended scope for those concerns in this module.
+ *      (7) **Centralized control:** A single `Ownable` owner and any `OPERATOR_ROLE` grantees can configure pause,
+ *          oracle rotation, deposit/withdraw limits, blacklist, rescue recipient, and fee parameters exposed in
+ *          this module. The contracts are not upgradeable via delegatecall within this package. Operational
+ *          mitigations are off-chain: multisig or timelock on ownership, least-privilege operators, and monitoring.
  */
 abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessControlEnumerable {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
@@ -65,9 +69,11 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     ///      treat it as a solvency proof or substitute for off-chain audits of the private ledger.
     uint256 public totalUserLiability;
 
-    /// @notice Fee divisor (1,000,000). Fee math uses {Math.mulDiv}; pathological combinations of
-    ///         amount × oracle rate can still cause reverts (panic) on overflow—operators should set
-    ///         deposit/withdraw limits accordingly.
+    /// @notice Fee divisor (1,000,000). Fee math uses {Math.mulDiv} (OpenZeppelin): integer division **rounds down**
+    ///         (toward zero) at each step, so on-chain fees are at most a few wei **lower** than an idealized
+    ///         floating-point quote—bias slightly favors users, not the fee recipient.
+    /// @dev Pathological `amount` × oracle rate products can still overflow `uint256` and revert—operators should
+    ///      set deposit/withdraw limits accordingly.
     uint256 public constant FEE_DIVISOR = 1000000;
 
     /// @notice Maximum fee allowed (10% = 100,000 units)
@@ -224,8 +230,12 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     }
 
     /**
-     * @dev Overrides Ownable's transferOwnership to automatically grant roles to new owner
-     *      and revoke all existing operators to prevent hidden privileged actors.
+     * @notice Transfers `Ownable` ownership and resets `AccessControl` admins/operators in one step.
+     * @dev **Handover semantics:** Every address with `OPERATOR_ROLE` and every address with `DEFAULT_ADMIN_ROLE`
+     *      (including the current owner) is revoked before `Ownable` transfers to `newOwner`, who then receives
+     *      both `DEFAULT_ADMIN_ROLE` and `OPERATOR_ROLE`. Any prior operator-only keys lose privilege immediately;
+     *      plan key ceremonies and off-chain runbooks so no service relies on a revoked operator after transfer.
+     *      This prevents stale operators from coexisting with a new owner (hidden privileged actors).
      */
     function transferOwnership(address newOwner) public override onlyOwner {
         if (newOwner == address(0)) revert InvalidAddress();
@@ -250,8 +260,10 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     }
 
     /**
-     * @dev Disabled to prevent split-brain state between Ownable and AccessControl.
-     *      Use transferOwnership instead.
+     * @dev **Intentionally disabled** (reverts with a fixed message). `renounceOwnership` would leave `AccessControl`
+     *      roles and admins in place while clearing `Ownable.owner`, producing ambiguous governance (`onlyOwner`
+     *      vs `onlyRole`). Use {transferOwnership} to a burn/multisig address if governance must be vacated, after
+     *      revoking roles through the normal owner-controlled flows this contract expects.
      */
     function renounceOwnership() public override onlyOwner {
         revert("renounceOwnership disabled");
