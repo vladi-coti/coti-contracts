@@ -248,12 +248,14 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
     }
 
     /**
-     * @dev Emergency path when the bridge is {paused}: send native COTI to {rescueRecipient} (e.g. a
-     *      newly deployed bridge after a contract bug). Can move the **full** contract balance,
-     *      including balances that back user obligations and fee accounting, so operations can
-     *      migrate TVL off this deployment. Trust is on owner + pause governance (multisig/timelock recommended).
-     *      After a partial rescue, {accumulatedCotiFees} is capped to the remaining balance so fee
-     *      accounting cannot exceed what is still on the contract.
+     * @notice Move native COTI from this bridge to {rescueRecipient} while the bridge is paused.
+     * @dev Emergency / migration path: sends up to `amount` (typically the full {address(this).balance}) to
+     *      {rescueRecipient}. That balance can include all user-deposited native liquidity and unswept fee
+     *      float—there is no on-chain carve-out that keeps “user principal” behind. Intended for bug recovery
+     *      or handover to a new bridge; a malicious or compromised owner who has paused can drain TVL to
+     *      {rescueRecipient} in one or more calls. See {PrivacyBridge} contract-level @dev (3) for governance
+     *      mitigations (multisig, timelock, monitoring). After a partial rescue, {accumulatedCotiFees} is capped
+     *      to the remaining balance so fee accounting cannot exceed what is still on the contract.
      * @param amount Amount of native currency to send (often the full balance for migration).
      */
     function rescueNative(uint256 amount) external onlyOwner nonReentrant whenPaused {

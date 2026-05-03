@@ -262,9 +262,12 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
     }
 
     /**
-     * @dev Rescue ERC20 tokens sent to the contract (excluding private tokens) to {rescueRecipient}.
-     *      The bridge must be {paused} for **any** rescued token (live bridged token, airdrops, or
-     *      mistaken sends) so owner rescue cannot run alongside live deposits/withdrawals.
+     * @notice Move ERC20 from this contract to {rescueRecipient} while the bridge is paused.
+     * @dev Requires {whenPaused} for every `_token` so rescue never runs concurrently with user flows.
+     *      For the live public {token}, `amount` can be the full balance—including all TVL backing withdrawals.
+     *      Same governance risk as {PrivacyBridgeCotiNative.rescueNative}: owner + pause can send user funds
+     *      to {rescueRecipient}; see {PrivacyBridge} contract @dev (3). Private token cannot be rescued here
+     *      ({CannotRescueBridgeToken}).
      */
     function rescueERC20(
         address _token,
