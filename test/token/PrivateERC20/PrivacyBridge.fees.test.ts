@@ -8,7 +8,7 @@ import {
     PrivateERC20Mock,
 } from "../../../typechain-types"
 import { Wallet } from "@coti-io/coti-ethers"
-import { parseEther, parseUnits } from "ethers"
+import { parseEther, parseUnits, ZeroAddress } from "ethers"
 import { txOpts } from "../../utils/privateErc20Helpers"
 
 const GAS_LIMIT = 12000000
@@ -55,6 +55,13 @@ describe("PrivacyBridge Fees (dynamic native COTI)", function () {
         await privateToken.waitForDeployment()
         privateTokenAddress = await privateToken.getAddress()
 
+        const OracleFactory = await hre.ethers.getContractFactory("CotiPriceConsumerMock")
+        oracle = await OracleFactory.connect(owner).deploy(txOpts)
+        await oracle.waitForDeployment()
+        await (await oracle.setRate("COTI", parseEther("1"))).wait()
+        await (await oracle.setRate("USDC", parseEther("1"))).wait()
+        const oracleAddress = await oracle.getAddress()
+
         const BridgeFactory = await hre.ethers.getContractFactory("PrivacyBridgeERC20Mock")
         bridge = await BridgeFactory.connect(owner).deploy(
             publicTokenAddress,
@@ -62,18 +69,12 @@ describe("PrivacyBridge Fees (dynamic native COTI)", function () {
             "USDC",
             feeRecipient.address,
             feeRecipient.address,
+            oracleAddress,
             txOpts
         )
         await bridge.waitForDeployment()
         bridgeAddress = await bridge.getAddress()
 
-        const OracleFactory = await hre.ethers.getContractFactory("CotiPriceConsumerMock")
-        oracle = await OracleFactory.connect(owner).deploy(txOpts)
-        await oracle.waitForDeployment()
-        await (await oracle.setRate("COTI", parseEther("1"))).wait()
-        await (await oracle.setRate("USDC", parseEther("1"))).wait()
-
-        await (await bridge.setPriceOracle(await oracle.getAddress())).wait()
         await (await bridge.setMaxOracleAge(0)).wait()
 
         await publicToken.connect(owner).transfer(bridgeAddress, INITIAL_SUPPLY / 2n, { gasLimit: GAS_LIMIT })
@@ -93,23 +94,21 @@ describe("PrivacyBridge Fees (dynamic native COTI)", function () {
     })
 
     describe("Oracle and estimates", function () {
-        it("reverts estimate when oracle is not configured", async function () {
+        it("reverts deploy when price oracle is zero", async function () {
             const freshFactory = await hre.ethers.getContractFactory("PrivacyBridgeERC20Mock")
-            const fresh = await freshFactory
-                .connect(owner)
-                .deploy(
-                    publicTokenAddress,
-                    privateTokenAddress,
-                    "USDC",
-                    feeRecipient.address,
-                    feeRecipient.address,
-                    txOpts
-                )
-            await fresh.waitForDeployment()
-            await expect(fresh.estimateDepositFee(DEPOSIT_AMOUNT)).to.be.revertedWithCustomError(
-                fresh,
-                "PriceOracleNotSet"
-            )
+            await expect(
+                freshFactory
+                    .connect(owner)
+                    .deploy(
+                        publicTokenAddress,
+                        privateTokenAddress,
+                        "USDC",
+                        feeRecipient.address,
+                        feeRecipient.address,
+                        ZeroAddress,
+                        txOpts
+                    )
+            ).to.be.revertedWithCustomError(bridge, "InvalidAddress")
         })
 
         it("estimateDepositFee returns fee and timestamps", async function () {

@@ -19,8 +19,9 @@ contract PrivacyBridgeCotiNative is PrivacyBridge {
     /**
      * @notice Initialize the Native Bridge
      * @param _privateCoti Address of the PrivateCoti token contract
+     * @param _priceOracle Non-zero price oracle (see {PrivacyBridge}'s constructor)
      */
-    constructor(address _privateCoti, address _feeRecipient, address _rescueRecipient) PrivacyBridge(_feeRecipient, _rescueRecipient) {
+    constructor(address _privateCoti, address _feeRecipient, address _rescueRecipient, address _priceOracle) PrivacyBridge(_feeRecipient, _rescueRecipient, _priceOracle) {
         if (_privateCoti == address(0)) revert InvalidAddress();
         privateCoti = PrivateCOTI(_privateCoti);
     }

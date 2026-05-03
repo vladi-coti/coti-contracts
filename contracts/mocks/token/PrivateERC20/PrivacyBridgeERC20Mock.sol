@@ -12,6 +12,7 @@ contract PrivacyBridgeERC20Mock is PrivacyBridgeERC20 {
         address _privateToken,
         string memory _tokenSymbol,
         address _feeRecipient,
-        address _rescueRecipient
-    ) PrivacyBridgeERC20(_token, _privateToken, _tokenSymbol, _feeRecipient, _rescueRecipient) {}
+        address _rescueRecipient,
+        address _priceOracle
+    ) PrivacyBridgeERC20(_token, _privateToken, _tokenSymbol, _feeRecipient, _rescueRecipient, _priceOracle) {}
 }

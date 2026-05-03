@@ -91,7 +91,7 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
 
     // --- END OF DEFAULT FEES
 
-    /// @notice CotiPriceConsumer contract address
+    /// @notice CotiPriceConsumer contract address (non-zero at construction; owner may {setPriceOracle} to rotate)
     address public priceOracle;
 
     /// @notice Default max oracle age: nominal ~30 minute feed cadence plus a 5 minute buffer so slightly delayed
@@ -166,16 +166,25 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     /// @notice Emitted when accumulated fees are withdrawn
     event FeesWithdrawn(address indexed to, uint256 amount);
 
-    constructor(address _feeRecipient, address _rescueRecipient) Ownable() {
+    /**
+     * @param _feeRecipient   Non-zero recipient for swept native fees
+     * @param _rescueRecipient Non-zero recipient for emergency rescue paths
+     * @param _priceOracle     Non-zero {ICotiPriceConsumer} used for dynamic fees (owner may later {setPriceOracle})
+     */
+    constructor(address _feeRecipient, address _rescueRecipient, address _priceOracle) Ownable() {
         if (_feeRecipient == address(0)) revert InvalidAddress();
         if (_rescueRecipient == address(0)) revert InvalidAddress();
+        if (_priceOracle == address(0)) revert InvalidAddress();
         maxDepositAmount = type(uint256).max;
         maxWithdrawAmount = type(uint256).max;
         minDepositAmount = 1;
         minWithdrawAmount = 1;
         feeRecipient = _feeRecipient;
         rescueRecipient = _rescueRecipient;
+        priceOracle = _priceOracle;
         maxOracleAge = DEFAULT_MAX_ORACLE_AGE;
+
+        emit PriceOracleUpdated(address(0), _priceOracle);
 
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _grantRole(OPERATOR_ROLE, msg.sender);
