@@ -59,6 +59,9 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     ///         (native: net private minted; native withdraw: private burned; ERC20: public received in / amount out).
     ///         Intended for transparency so depositors and tooling can read how much liability the bridge tracks
     ///         in its own accounting. This does not attest to MPC correctness or encrypted token balances.
+    /// @dev Same scope as contract @dev (5): updates only follow this contract's mint/burn paths; if the private
+    ///      token or MPC layer misreports or mis-mints, this counter can diverge from economic reality. Do not
+    ///      treat it as a solvency proof or substitute for off-chain audits of the private ledger.
     uint256 public totalUserLiability;
 
     /// @notice Fee divisor (1,000,000). Fee math uses {Math.mulDiv}; pathological combinations of
