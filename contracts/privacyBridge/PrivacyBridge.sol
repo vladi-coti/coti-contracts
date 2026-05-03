@@ -23,15 +23,31 @@ import "../oracle/ICotiPriceConsumer.sol";
  *      (4) Oracle prices are trusted; {maxOracleAge} bounds staleness of `lastUpdated` (owner cannot set it to zero;
  *          use a large value only if a very lenient window is intended). Does not remove oracle trust.
  *      (5) {totalUserLiability} is bridge bookkeeping for transparency: it tracks net user obligations from mint/burn
- *          paths in this contract. It helps depositors/observers reason about exposure on-chain; it is not a
+ *          paths in this contract only. It helps depositors/observers reason about exposure; it is not a
  *          cryptographic proof of MPC/private-token balances and can diverge if the token layer misbehaves.
+ *          **Docs / integrators:** Compare this counter to collateral still held by *this* contract (ERC20:
+ *          {PrivacyBridgeERC20.token} balance; native: {address(this).balance}) for a liquidity snapshot. After
+ *          {rescueERC20}/{rescueNative}, collateral may sit at {rescueRecipient} while this counter is unchanged—
+ *          economic claims on outstanding private supply are not extinguished by rescue; do not treat the counter
+ *          as “assets on hand” post-migration. Forced native (e.g. `selfdestruct`) increases balance but **never**
+ *          mints private tokens and does **not** increase {totalUserLiability} (no user deposit path).
  *      (6) For COTI-operated deployments, residual trust in MPC/private-token behavior beyond (2) and (5), and in oracle
  *          *market* correctness beyond (4), is an accepted operational assumption; the on-chain mitigations above
  *          are the intended scope for those concerns in this module.
  *      (7) **Centralized control:** A single `Ownable` owner and any `OPERATOR_ROLE` grantees can configure pause,
- *          oracle rotation, deposit/withdraw limits, blacklist, rescue recipient, and fee parameters exposed in
- *          this module. The contracts are not upgradeable via delegatecall within this package. Operational
- *          mitigations are off-chain: multisig or timelock on ownership, least-privilege operators, and monitoring.
+ *          oracle rotation, deposit/withdraw limits, blacklist, and fee *parameters* (floors/caps/percentages) exposed
+ *          in this module. **Fee and rescue destinations are fixed at deployment**—there are no setters for
+ *          {feeRecipient} or {rescueRecipient}, so a compromised owner **cannot** redirect rescue or fee sweep
+ *          addresses to an attacker (trade-off: a wrong address at deploy or a reverting recipient must be handled
+ *          operationally / via migration). {transferOwnership} enumerates and revokes all role members, which can
+ *          become gas-heavy with many operators; that cost is accepted. The contracts are not upgradeable via
+ *          delegatecall within this package. Operational mitigations are off-chain: multisig or timelock on
+ *          ownership, least-privilege operators, and monitoring.
+ *      (8) **Oracle binding:** {_validateOracleTimestamps} requires exact equality to the user-supplied Band row
+ *          timestamps so the fee quote cannot change between estimate and execution without a revert. With a
+ *          typical ~30 minute feed cadence (plus {maxOracleAge} buffer), users have ample time to sign and submit
+ *          the same row; relaxing this binding is intentionally rejected to avoid showing one price and settling
+ *          at another.
  */
 abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessControlEnumerable {
     bytes32 public constant OPERATOR_ROLE = keccak256("OPERATOR_ROLE");
@@ -64,11 +80,13 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     ///         (native: net private minted; native withdraw: private burned; ERC20: public received in / amount out).
     ///         Intended for transparency so depositors and tooling can read how much liability the bridge tracks
     ///         in its own accounting. This does not attest to MPC correctness or encrypted token balances.
-    /// @dev Same scope as contract @dev (5): updates only follow this contract's mint/burn paths; if the private
+    /// @dev Same scope as contract-level @dev (5): updates only follow explicit mint/burn paths; unsolicited native
+    ///      (e.g. `selfdestruct`) does **not** increase this value and does not mint private tokens. If the private
     ///      token or MPC layer misreports or mis-mints, this counter can diverge from economic reality. Do not
     ///      treat it as a solvency proof or substitute for off-chain audits of the private ledger. Emergency
     ///      {rescueERC20}/{rescueNative} moves collateral out but does **not** change this counter—obligations
     ///      implied by outstanding private supply may then exceed assets held here until migration elsewhere.
+    ///      **Integrators:** compare to on-contract collateral (see contract @dev (5)).
     uint256 public totalUserLiability;
 
     /// @notice Fee divisor (1,000,000). Fee math uses {Math.mulDiv} (OpenZeppelin): integer division **rounds down**
@@ -119,10 +137,10 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     ///         owner may increase the window (e.g. for long test runs) but {setMaxOracleAge} rejects zero.
     uint256 public maxOracleAge;
 
-    /// @notice Address where collected fees are sent
+    /// @notice Address where collected fees are sent (fixed at deploy; no setter—see contract @dev (7))
     address public feeRecipient;
 
-    /// @notice Address where rescued funds are sent
+    /// @notice Address where rescued funds are sent (fixed at deploy; no setter—see contract @dev (7))
     address public rescueRecipient;
 
     error AmountZero();
@@ -187,8 +205,8 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     event FeesWithdrawn(address indexed to, uint256 amount);
 
     /**
-     * @param _feeRecipient   Non-zero recipient for swept native fees
-     * @param _rescueRecipient Non-zero recipient for emergency rescue paths
+     * @param _feeRecipient   Non-zero recipient for swept native fees (immutable for contract lifetime—no setter)
+     * @param _rescueRecipient Non-zero recipient for emergency rescue paths (immutable for contract lifetime—no setter)
      * @param _priceOracle     Non-zero {ICotiPriceConsumer} used for dynamic fees (owner may later {setPriceOracle})
      */
     constructor(address _feeRecipient, address _rescueRecipient, address _priceOracle) Ownable() {
@@ -294,7 +312,10 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
     }
 
     /**
-     * @dev Reverts if the caller is blacklisted.
+     * @dev Reverts if the caller is blacklisted. Applies to deposit, withdraw, and {claimRefundableNativeExcess}.
+     *      Blacklisted addresses are intentionally **not** exempted on claim: policy treats them as abusive;
+     *      credited {refundableNativeExcess} for that address remains until the owner removes the listing or
+     *      another agreed process applies.
      */
     modifier notBlacklisted() {
         if (blacklisted[msg.sender]) revert AddressBlacklisted(msg.sender);
@@ -408,7 +429,8 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
      * @dev Same push pattern as the original refund: `msg.sender.call{value: amount}`. If your wallet still
      *      rejects ETH, the call reverts with {EthTransferFailed} and your credit is restored so you can try
      *      again from an address that accepts native transfers (the protocol does not support forwarding to a
-     *      third-party payout address). Not gated by {whenPaused}; {notBlacklisted} applies ({AddressBlacklisted}).
+     *      third-party payout address). Not gated by {whenPaused}; {notBlacklisted} applies ({AddressBlacklisted})—
+     *      blacklisted callers cannot pull credits by design (see {notBlacklisted}).
      */
     function claimRefundableNativeExcess() external nonReentrant notBlacklisted {
         uint256 amount = refundableNativeExcess[msg.sender];
@@ -440,11 +462,14 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
      *      `expected*` values supplied by the client. That binds execution to the same Band row the user
      *      saw when calling the estimate view; if the feed publishes a newer row before inclusion, the check
      *      reverts with {OracleTimestampMismatch} so price cannot change under the user without a visible revert.
-     *      Failures are timing/race issues (mempool delay vs oracle refresh cadence, often ~30 minutes), not
-     *      third-party griefing. Integrators: call estimate immediately before building the tx; pass returned
-     *      timestamps unchanged into deposit/withdraw; on mismatch, re-estimate and resubmit; avoid submit
-     *      across a refresh boundary (COTI UI blocks ~10s before a scheduled tick—mirror that); simulate right
-     *      before broadcast. {_requireOracleFreshness} still enforces {maxOracleAge} on the matched row.
+     *      This strict binding is **intentional** (no relaxation): with a typical ~30 minute oracle cadence and
+     *      {maxOracleAge} buffer, users have a long window to sign and broadcast the same row; we avoid any path
+     *      where the UI shows one Band row and execution silently uses a newer price.
+     *      Failures are timing/race issues (mempool delay vs oracle refresh cadence), not third-party griefing.
+     *      Integrators: call estimate immediately before building the tx; pass returned timestamps unchanged into
+     *      deposit/withdraw; on mismatch, re-estimate and resubmit; avoid submit across a refresh boundary (COTI UI
+     *      blocks ~10s before a scheduled tick—mirror that); simulate right before broadcast. {_requireOracleFreshness}
+     *      still enforces {maxOracleAge} on the matched row.
      * @param expectedCotiTimestamp COTI `lastUpdated` from the user's latest estimate (must equal on-chain).
      * @param expectedTokenTimestamp Token `lastUpdated` from the user's latest estimate (must equal on-chain).
      * @param tokenSymbol The Band oracle symbol for the bridged token (native bridge uses `"COTI"` for both).

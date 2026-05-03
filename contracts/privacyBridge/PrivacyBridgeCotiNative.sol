@@ -12,6 +12,17 @@ import "../token/PrivateERC20/tokens/PrivateCOTI.sol";
  *      the canonical {IPrivateERC20} surface (`contracts/token/PrivateERC20/IPrivateERC20.sol`) while `privateCoti`
  *      remains the concrete {PrivateCOTI} type for mint/burn. Deploy `_privateCoti` as that implementation (or a
  *      fully ABI-compatible successor); do not point at arbitrary ERC-20s.
+ *
+ *      **Two native deposit paths (document for wallets / indexers):**
+ *      - {deposit(uint256,uint256)}: user passes `cotiOracleTimestamp` and `tokenOracleTimestamp` (same value
+ *        twice for `"COTI"`); {_validateOracleTimestamps} enforces they match the on-chain Band row—same quote row
+ *        as {estimateDepositFee}. Use this when you need binding between off-chain estimate and execution.
+ *      - {receive} / plain ETH send: uses {_directDeposit}; fee still uses {_computeCotiFee} with staleness
+ *        ({_requireOracleFreshness}) but **does not** require equality to estimate timestamps—no prior estimate row
+ *        is pinned. Prefer explicit {deposit} for predictable “what I quoted is what executes.”
+ *
+ *      **Unsolicited native:** balance can increase via `selfdestruct` or other forced transfers without invoking
+ *      {receive}; that ETH does not mint private tokens and does not update {PrivacyBridge.totalUserLiability}.
  */
 contract PrivacyBridgeCotiNative is PrivacyBridge {
     PrivateCOTI public privateCoti;

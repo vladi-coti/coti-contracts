@@ -164,6 +164,10 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
      * @param _privateToken Address of the private token
      * @param _tokenSymbol Band oracle symbol for the bridged token (e.g., "ETH", "WBTC") — required for Band Protocol compatibility check
      * @param _priceOracle Non-zero price oracle (same requirement as {PrivacyBridge}'s constructor)
+     * @dev **Decimals:** reads `decimals()` on both tokens at deploy; reverts {DecimalsMismatch} if they differ—so
+     *      mis-paired tokens fail **at construction**, not on first user tx. {bridgedTokenDecimals} is then cached
+     *      immutably for fee math. After deploy, a mismatch cannot appear unless token contracts were misconfigured
+     *      at deploy time or an upgradeable token later changes `decimals()` (exceptional external risk; not re-checked on-chain).
      */
     constructor(
         address _token,
