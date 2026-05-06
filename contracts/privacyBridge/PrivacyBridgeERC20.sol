@@ -54,6 +54,26 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
     error UnexpectedTransferBalance(uint256 expected, uint256 received);
     event ERC20Rescued(address indexed token, address indexed to, uint256 amount);
 
+    function _computeErc20Fee(
+        uint256 tokenAmount,
+        uint256 fixedFee,
+        uint256 percentageBps,
+        uint256 maxFee
+    ) internal view returns (uint256) {
+        return _computeErc20FeeAndMeta(tokenAmount, fixedFee, percentageBps, maxFee, tokenSymbol, bridgedTokenDecimals).fee;
+    }
+
+    function _computeErc20Fee(
+        uint256 tokenAmount,
+        uint256 fixedFee,
+        uint256 percentageBps,
+        uint256 maxFee,
+        string tokenSymbol,
+        uint8 tokenDecimals
+    ) public view returns (uint256) {
+        return _computeErc20FeeAndMeta(tokenAmount, fixedFee, percentageBps, maxFee, tokenSymbol, tokenDecimals).fee;
+    }
+
     /**
      * @dev ERC20 fee math + two {getPriceWithMeta} reads (token then COTI). Used by {_computeErc20Fee}
      *      and {estimateDepositFee}/{estimateWithdrawFee}. Each {Math.mulDiv} step truncates toward zero
@@ -65,6 +85,8 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
         uint256 fixedFee,
         uint256 percentageBps,
         uint256 maxFee
+        string tokenSymbol
+        uint8 tokenDecimals
     )
         internal
         view
@@ -78,7 +100,7 @@ abstract contract PrivacyBridgeERC20 is PrivacyBridge {
         _requirePositiveOracleRate(cotiUsdRate);
         _requireOracleFreshness(tokenLU);
         _requireOracleFreshness(cotiLU);
-        uint256 txValueUsd = Math.mulDiv(tokenAmount, tokenUsdRate, 10 ** uint256(bridgedTokenDecimals));
+        uint256 txValueUsd = Math.mulDiv(tokenAmount, tokenUsdRate, 10 ** uint256(tokenDecimals));
         uint256 percentageFeeUsd = Math.mulDiv(txValueUsd, percentageBps, FEE_DIVISOR);
         uint256 percentageFeeCoti = Math.mulDiv(percentageFeeUsd, 1e18, cotiUsdRate);
         fee = _calculateDynamicFee(percentageFeeCoti, fixedFee, maxFee);
