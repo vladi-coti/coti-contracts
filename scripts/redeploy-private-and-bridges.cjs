@@ -135,7 +135,7 @@ async function main() {
     // CotiPriceConsumer deployed addresses per network
     const PRICE_ORACLE = {
         7082400: "0xAC89a381E84fbd5B3B536a3b895eB2aDdaDC36A1", // testnet
-        2632500: "0x2D07EAE0E10d3B4753F7553Bba7e93C98A997077", // mainnet
+        2632500: "0x830c5112E677459648C1aa7Bc5Dd65A36d71Aa4D", // mainnet
     };
     const oracleAddr = PRICE_ORACLE[chainId];
     if (!oracleAddr) throw new Error(`No price oracle address configured for chainId ${chainId}`);
