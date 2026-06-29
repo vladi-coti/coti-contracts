@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 /**
  * @dev Callback for the **encrypted-amount** `transferAndCall(to, itUint256, data)` overload on {PrivateERC20}.

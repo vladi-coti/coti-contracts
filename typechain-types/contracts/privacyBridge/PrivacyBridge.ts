@@ -43,6 +43,7 @@ export interface PrivacyBridgeInterface extends Interface {
       | "getRoleAdmin"
       | "getRoleMember"
       | "getRoleMemberCount"
+      | "getRoleMembers"
       | "grantRole"
       | "hasRole"
       | "isDepositEnabled"
@@ -170,6 +171,10 @@ export interface PrivacyBridgeInterface extends Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "getRoleMemberCount",
+    values: [BytesLike]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "getRoleMembers",
     values: [BytesLike]
   ): string;
   encodeFunctionData(
@@ -363,6 +368,10 @@ export interface PrivacyBridgeInterface extends Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "getRoleMemberCount",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "getRoleMembers",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "grantRole", data: BytesLike): Result;
@@ -897,6 +906,8 @@ export interface PrivacyBridge extends BaseContract {
 
   getRoleMemberCount: TypedContractMethod<[role: BytesLike], [bigint], "view">;
 
+  getRoleMembers: TypedContractMethod<[role: BytesLike], [string[]], "view">;
+
   grantRole: TypedContractMethod<
     [role: BytesLike, account: AddressLike],
     [void],
@@ -952,7 +963,7 @@ export interface PrivacyBridge extends BaseContract {
   renounceOwnership: TypedContractMethod<[], [void], "nonpayable">;
 
   renounceRole: TypedContractMethod<
-    [role: BytesLike, account: AddressLike],
+    [role: BytesLike, callerConfirmation: AddressLike],
     [void],
     "nonpayable"
   >;
@@ -1102,6 +1113,9 @@ export interface PrivacyBridge extends BaseContract {
     nameOrSignature: "getRoleMemberCount"
   ): TypedContractMethod<[role: BytesLike], [bigint], "view">;
   getFunction(
+    nameOrSignature: "getRoleMembers"
+  ): TypedContractMethod<[role: BytesLike], [string[]], "view">;
+  getFunction(
     nameOrSignature: "grantRole"
   ): TypedContractMethod<
     [role: BytesLike, account: AddressLike],
@@ -1163,7 +1177,7 @@ export interface PrivacyBridge extends BaseContract {
   getFunction(
     nameOrSignature: "renounceRole"
   ): TypedContractMethod<
-    [role: BytesLike, account: AddressLike],
+    [role: BytesLike, callerConfirmation: AddressLike],
     [void],
     "nonpayable"
   >;

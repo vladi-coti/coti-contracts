@@ -4,7 +4,7 @@ pragma solidity ^0.8.20;
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
@@ -76,12 +76,10 @@ contract FixedRatioCoinDisperserUnlimitedWindow is ReentrancyGuard, Ownable {
      * @param _pointsToken Address of the ERC20 points token that can be redeemed
      * @param _owner Address that will have admin privileges (can pause, finalize, etc.)
      */
-    constructor(address _pointsToken, address _owner) {
+    constructor(address _pointsToken, address _owner) Ownable(_owner) {
         if (_pointsToken == address(0)) revert TokenZeroAddress();
-        if (_owner == address(0)) revert OwnerZeroAddress();
 
         POINTS_TOKEN = IERC20(_pointsToken);
-        _transferOwnership(_owner);
     }
 
     // --- Admin ---

@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/security/Pausable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/access/AccessControlEnumerable.sol";
+import "@openzeppelin/contracts/access/extensions/AccessControlEnumerable.sol";
 import "../oracle/ICotiPriceConsumer.sol";
 
 /**
@@ -209,7 +209,7 @@ abstract contract PrivacyBridge is ReentrancyGuard, Pausable, Ownable, AccessCon
      * @param _rescueRecipient Non-zero recipient for emergency rescue paths (immutable for contract lifetime—no setter)
      * @param _priceOracle     Non-zero {ICotiPriceConsumer} used for dynamic fees (owner may later {setPriceOracle})
      */
-    constructor(address _feeRecipient, address _rescueRecipient, address _priceOracle) Ownable() {
+    constructor(address _feeRecipient, address _rescueRecipient, address _priceOracle) Ownable(msg.sender) {
         if (_feeRecipient == address(0)) revert InvalidAddress();
         if (_rescueRecipient == address(0)) revert InvalidAddress();
         if (_priceOracle == address(0)) revert InvalidAddress();

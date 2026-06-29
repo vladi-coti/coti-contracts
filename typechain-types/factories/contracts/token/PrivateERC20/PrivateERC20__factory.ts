@@ -10,6 +10,27 @@ import type {
 
 const _abi = [
   {
+    inputs: [],
+    name: "AccessControlBadConfirmation",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "neededRole",
+        type: "bytes32",
+      },
+    ],
+    name: "AccessControlUnauthorizedAccount",
+    type: "error",
+  },
+  {
     inputs: [
       {
         internalType: "address",
@@ -77,6 +98,11 @@ const _abi = [
   {
     inputs: [],
     name: "PublicAmountsDisabled",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "ReentrancyGuardReentrantCall",
     type: "error",
   },
   {
@@ -1024,7 +1050,7 @@ const _abi = [
       },
       {
         internalType: "address",
-        name: "account",
+        name: "callerConfirmation",
         type: "address",
       },
     ],

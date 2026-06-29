@@ -10,6 +10,27 @@ import type {
 
 const _abi = [
   {
+    inputs: [],
+    name: "AccessControlBadConfirmation",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+      {
+        internalType: "bytes32",
+        name: "neededRole",
+        type: "bytes32",
+      },
+    ],
+    name: "AccessControlUnauthorizedAccount",
+    type: "error",
+  },
+  {
     inputs: [
       {
         internalType: "address",
@@ -67,7 +88,17 @@ const _abi = [
   },
   {
     inputs: [],
+    name: "EnforcedPause",
+    type: "error",
+  },
+  {
+    inputs: [],
     name: "EthTransferFailed",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "ExpectedPause",
     type: "error",
   },
   {
@@ -199,8 +230,46 @@ const _abi = [
     type: "error",
   },
   {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+    ],
+    name: "OwnableInvalidOwner",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "account",
+        type: "address",
+      },
+    ],
+    name: "OwnableUnauthorizedAccount",
+    type: "error",
+  },
+  {
     inputs: [],
     name: "PriceOracleNotSet",
+    type: "error",
+  },
+  {
+    inputs: [],
+    name: "ReentrancyGuardReentrantCall",
+    type: "error",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "token",
+        type: "address",
+      },
+    ],
+    name: "SafeERC20FailedOperation",
     type: "error",
   },
   {
@@ -1086,6 +1155,25 @@ const _abi = [
         name: "role",
         type: "bytes32",
       },
+    ],
+    name: "getRoleMembers",
+    outputs: [
+      {
+        internalType: "address[]",
+        name: "",
+        type: "address[]",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "bytes32",
+        name: "role",
+        type: "bytes32",
+      },
       {
         internalType: "address",
         name: "account",
@@ -1338,7 +1426,7 @@ const _abi = [
       },
       {
         internalType: "address",
-        name: "account",
+        name: "callerConfirmation",
         type: "address",
       },
     ],

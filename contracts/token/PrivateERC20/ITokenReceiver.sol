@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 /**
  * @dev Interface for receiving Private ERC-20 tokens via `transferAndCall` with a **public** `uint256` amount.

@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 /**
  * @title CotiNodeRewards
@@ -59,7 +59,7 @@ contract CotiNodeRewards is Ownable, ReentrancyGuard {
     error AlreadyRewardedInEpoch(address wallet, uint256 epoch);
     error InvalidEpoch(uint256 epoch);
 
-    constructor() Ownable() {
+    constructor() Ownable(msg.sender) {
         eligibilityRules[RULE_PLATFORM_COTI_AMOUNT] = 100_000 * 10**DECIMALS_COTI;   // 100k COTI
         eligibilityRules[RULE_PLATFORM_USDC_AMOUNT] = 50_000 * 10**DECIMALS_USDC;    // 50k USDC
         eligibilityRules[RULE_FULL_NODE_UPTIME_PERCENTAGE_THRESHOLD] = 98;          // 98%

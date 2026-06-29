@@ -121,8 +121,7 @@ contract SoulboundNodeNFT is ERC721, Ownable, IERC5192 {
         string memory name_,
         string memory symbol_,
         address initialOwner
-    ) ERC721(name_, symbol_) {
-        _transferOwnership(initialOwner);
+    ) ERC721(name_, symbol_) Ownable(initialOwner) {
         mintPaused = false;
     }
 

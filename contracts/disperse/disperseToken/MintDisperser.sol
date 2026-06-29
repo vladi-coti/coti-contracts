@@ -26,9 +26,7 @@ contract MintDisperser is Ownable {
      * @param initialOwner Address that will have owner privileges to execute minting operations
      * @dev Sets the initial owner of the contract using OpenZeppelin's Ownable pattern
      */
-    constructor(address initialOwner) {
-        _transferOwnership(initialOwner);
-    }
+    constructor(address initialOwner) Ownable(initialOwner) {}
 
     /**
      * @notice Mint the same amount of tokens to multiple recipients

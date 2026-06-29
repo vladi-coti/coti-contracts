@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import "../../../token/PrivateERC20/PrivateERC20.sol";
 import "../../../utils/mpc/MpcCore.sol";

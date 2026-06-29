@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.19;
+pragma solidity ^0.8.20;
 
 import {PrivateERC721} from "../../../token/PrivateERC721/PrivateERC721.sol";
 import {PrivateERC721URIStorage} from "../../../token/PrivateERC721/extensions/PrivateERC721URIStorage.sol";
