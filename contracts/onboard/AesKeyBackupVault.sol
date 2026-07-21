@@ -5,10 +5,15 @@ pragma solidity ^0.8.20;
 /// @title AesKeyBackupVault
 /// @notice Stores per-wallet EIP-712-wrapped AES-GCM backup blobs for cross-device restore.
 /// @dev Ciphertext is public on-chain; decryption requires the wallet holder's signature off-chain.
+///      Client v2 wraps a 32-byte AES key with AES-256-GCM (ciphertext = 32 + 16-byte tag = 48 bytes)
+///      and a 12-byte IV. Address and chainId are NOT stored — the client recomputes AES-GCM AAD
+///      from restore context (queried user + connected COTI chain).
 contract AesKeyBackupVault {
-    uint8 internal constant SUPPORTED_VERSION = 1;
+    uint8 internal constant SUPPORTED_VERSION = 2;
     uint256 internal constant IV_LENGTH = 12;
+    /// @dev Floor covers AES-GCM tag alone; v2 plaintext+tag is 48 bytes.
     uint256 internal constant MIN_CIPHERTEXT_LENGTH = 32;
+    /// @dev Headroom above v2's 48-byte ciphertext for minor format growth without redeploy.
     uint256 internal constant MAX_CIPHERTEXT_LENGTH = 128;
 
     struct Backup {
@@ -23,7 +28,7 @@ contract AesKeyBackupVault {
     event BackupSet(address indexed user, uint8 version, uint64 updatedAt);
 
     /// @notice Write or overwrite the caller's encrypted AES backup.
-    /// @param version Backup format version (must be 1).
+    /// @param version Backup format version (must be 2).
     /// @param iv AES-GCM nonce (exactly 12 bytes).
     /// @param ciphertext AES-GCM ciphertext including authentication tag.
     function setBackup(uint8 version, bytes calldata iv, bytes calldata ciphertext) external {

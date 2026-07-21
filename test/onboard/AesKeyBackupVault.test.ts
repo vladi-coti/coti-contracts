@@ -2,7 +2,7 @@ import { expect } from "chai";
 import hre from "hardhat";
 import { ethers } from "hardhat";
 
-const VERSION = 1;
+const VERSION = 2;
 const IV = ethers.hexlify(ethers.randomBytes(12));
 const CIPHERTEXT = ethers.hexlify(ethers.randomBytes(48));
 
@@ -64,7 +64,7 @@ describe("AesKeyBackupVault", function () {
 
   it("rejects unsupported versions", async function () {
     const { vault, owner } = await deployVault();
-    await expect(vault.connect(owner).setBackup(2, IV, CIPHERTEXT)).to.be.revertedWith(
+    await expect(vault.connect(owner).setBackup(1, IV, CIPHERTEXT)).to.be.revertedWith(
       "unsupported version",
     );
   });

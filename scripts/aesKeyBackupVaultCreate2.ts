@@ -7,7 +7,7 @@ export const DETERMINISTIC_DEPLOYMENT_PROXY =
   "0x4e59b44847b379578588920cA78FbF26c0B4956C";
 
 /** Documented salt label; do not change after first deploy. */
-export const AES_KEY_BACKUP_VAULT_SALT_LABEL = "coti.io:AesKeyBackupVault:v1";
+export const AES_KEY_BACKUP_VAULT_SALT_LABEL = "coti.io:AesKeyBackupVault:v2";
 
 export const AES_KEY_BACKUP_VAULT_SALT = keccak256(
   toUtf8Bytes(AES_KEY_BACKUP_VAULT_SALT_LABEL),
